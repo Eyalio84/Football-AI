@@ -1,0 +1,176 @@
+{
+  "metadata": {
+    "domain": "nba",
+    "version": "1.0",
+    "description": "NBA 3-Team Demo - Proving domain-agnostic architecture",
+    "teams": ["Lakers", "Celtics", "Warriors"],
+    "created": "2024-12-21"
+  },
+  "modules": {
+    "main": {
+      "file": "main.py",
+      "what": "FastAPI application entry point for NBA-AI",
+      "depends_on": ["database", "rag", "ai_response"]
+    },
+    "database": {
+      "file": "database.py",
+      "what": "SQLite + FTS5 for NBA knowledge base",
+      "tables": ["teams", "players", "games", "player_stats", "trivia_questions"],
+      "depends_on": []
+    },
+    "rag": {
+      "file": "rag.py",
+      "what": "RAG retrieval for NBA context",
+      "depends_on": ["database"]
+    },
+    "ai_response": {
+      "file": "ai_response.py",
+      "what": "Haiku API integration with NBA personas",
+      "depends_on": ["rag"]
+    },
+    "predictor_api": {
+      "file": "predictor_api.py",
+      "what": "Game upset prediction integration",
+      "depends_on": ["prediction_engine"]
+    }
+  },
+  "endpoints": {
+    "chat": {
+      "method": "POST",
+      "path": "/api/v1/chat",
+      "what": "NBA fan chat with team persona",
+      "modules": ["rag", "ai_response"]
+    },
+    "trivia": {
+      "method": "POST",
+      "path": "/api/v1/trivia",
+      "what": "NBA trivia game per team",
+      "modules": ["database"]
+    },
+    "predictions": {
+      "method": "GET",
+      "path": "/api/v1/predictions/today",
+      "what": "Today's NBA game predictions",
+      "modules": ["predictor_api"]
+    }
+  },
+  "personas": {
+    "lakers": {
+      "team": "Los Angeles Lakers",
+      "snap_back": "16-time NBA Champions, Showtime legacy",
+      "mood_influence": 0.8,
+      "legends": ["Magic Johnson", "Kobe Bryant", "Kareem Abdul-Jabbar", "Shaq"],
+      "rivals": ["Celtics", "Clippers"]
+    },
+    "celtics": {
+      "team": "Boston Celtics",
+      "snap_back": "18 championships, most in NBA history",
+      "mood_influence": 0.85,
+      "legends": ["Bill Russell", "Larry Bird", "Paul Pierce", "Kevin Garnett"],
+      "rivals": ["Lakers", "76ers"]
+    },
+    "warriors": {
+      "team": "Golden State Warriors",
+      "snap_back": "Dynasty era, Splash Brothers",
+      "mood_influence": 0.75,
+      "legends": ["Stephen Curry", "Klay Thompson", "Draymond Green", "Kevin Durant"],
+      "rivals": ["Cavaliers", "Rockets"]
+    }
+  },
+  "legends": {
+    "magic_johnson": {
+      "team": "lakers",
+      "name": "Magic Johnson",
+      "era": "1979-1991",
+      "position": "Point Guard",
+      "achievements": "5x NBA Champion, 3x MVP",
+      "fan_nickname": "Magic"
+    },
+    "larry_bird": {
+      "team": "celtics",
+      "name": "Larry Bird",
+      "era": "1979-1992",
+      "position": "Small Forward",
+      "achievements": "3x NBA Champion, 3x MVP",
+      "fan_nickname": "Larry Legend"
+    },
+    "stephen_curry": {
+      "team": "warriors",
+      "name": "Stephen Curry",
+      "era": "2009-present",
+      "position": "Point Guard",
+      "achievements": "4x NBA Champion, 2x MVP",
+      "fan_nickname": "Chef Curry"
+    },
+    "kobe_bryant": {
+      "team": "lakers",
+      "name": "Kobe Bryant",
+      "era": "1996-2016",
+      "position": "Shooting Guard",
+      "achievements": "5x NBA Champion, 1x MVP",
+      "fan_nickname": "Mamba"
+    }
+  },
+  "rivalries": {
+    "lakers_celtics": {
+      "teams": ["Lakers", "Celtics"],
+      "type": "historic",
+      "intensity": 10,
+      "description": "Greatest rivalry in NBA history, 12 Finals meetings"
+    },
+    "warriors_cavaliers": {
+      "teams": ["Warriors", "Cavaliers"],
+      "type": "modern",
+      "intensity": 8,
+      "description": "4 consecutive Finals matchups 2015-2018"
+    }
+  },
+  "predictor": {
+    "factors_a": {
+      "NBA_FAT": {
+        "name": "Fatigue",
+        "description": "Back-to-back games or 4 games in 5 nights",
+        "weight": 0.10
+      },
+      "NBA_INJ": {
+        "name": "Star Player Injury",
+        "description": "Top 2 players missing",
+        "weight": 0.12
+      },
+      "NBA_TRV": {
+        "name": "Travel",
+        "description": "Cross-country back-to-back",
+        "weight": 0.06
+      },
+      "NBA_RST": {
+        "name": "Rest Disadvantage",
+        "description": "Opponent has 2+ more rest days",
+        "weight": 0.05
+      }
+    },
+    "factors_b": {
+      "NBA_HME": {
+        "name": "Home Court",
+        "description": "Playing at home",
+        "weight": 0.08
+      },
+      "NBA_MOT": {
+        "name": "Motivation",
+        "description": "Playoff implications or rivalry game",
+        "weight": 0.07
+      },
+      "NBA_HOT": {
+        "name": "Hot Streak",
+        "description": "Won 5+ of last 7 games",
+        "weight": 0.06
+      }
+    },
+    "patterns": {
+      "back_to_back_revenge": {
+        "trigger": ["NBA_FAT", "NBA_MOT"],
+        "bonus": 0.08,
+        "description": "Tired favorite vs motivated underdog"
+      }
+    }
+  }
+}

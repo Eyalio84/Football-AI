@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Soccer-AI - Premier League Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>⚽ Premier League Dashboard</h1>
+        <p class="subtitle">Select your team from the dropdown above, then head to Chat!</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Standings Card -->
+        <div class="dashboard-card standings-card">
+            <h2>📊 League Table</h2>
+            <div id="standings-mini" class="standings-mini">
+                <div class="loading">Loading standings...</div>
+            </div>
+            <a href="/standings" class="card-link">View Full Table →</a>
+        </div>
+
+        <!-- Recent Results Card -->
+        <div class="dashboard-card results-card">
+            <h2>⚡ Recent Results</h2>
+            <div id="recent-results" class="results-list">
+                <div class="loading">Loading results...</div>
+            </div>
+        </div>
+
+        <!-- Quick Chat Card -->
+        <div class="dashboard-card chat-card">
+            <h2>💬 Quick Chat</h2>
+            <p id="chat-prompt">Select a team above to start chatting with a passionate fan persona!</p>
+            <a href="/chat" class="btn-primary" id="chat-btn">Open Chat</a>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="dashboard-card stats-card">
+            <h2>📈 AI Stats</h2>
+            <div class="stats-grid">
+                <div class="stat">
+                    <span class="stat-value">608</span>
+                    <span class="stat-label">KG Nodes</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">681</span>
+                    <span class="stat-label">Facts</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">230K</span>
+                    <span class="stat-label">Matches</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">18</span>
+                    <span class="stat-label">Fan Personas</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Fetch LIVE standings from football-data.org
+    async function loadStandings() {
+        try {
+            const response = await fetch('http://localhost:8000/api/v1/live/standings');
+            const data = await response.json();
+
+            const container = document.getElementById('standings-mini');
+            if (data.data && data.data.standings && data.data.standings.length > 0) {
+                let html = `<div class="matchday-badge">MD ${data.data.matchday}</div>`;
+                html += '<table class="mini-table"><thead><tr><th>#</th><th>Team</th><th>P</th><th>Pts</th></tr></thead><tbody>';
+                data.data.standings.slice(0, 6).forEach((team) => {
+                    const shortName = team.team.replace(' FC', '').replace(' AFC', '');
+                    html += `<tr><td>${team.position}</td><td>${shortName}</td><td>${team.played}</td><td>${team.points}</td></tr>`;
+                });
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<p>Standings not available</p>';
+            }
+        } catch (err) {
+            document.getElementById('standings-mini').innerHTML = '<p>Could not load standings</p>';
+        }
+    }
+
+    // Fetch LIVE results from football-data.org
+    async function loadResults() {
+        const container = document.getElementById('recent-results');
+        try {
+            const response = await fetch('http://localhost:8000/api/v1/live/results?days=7');
+            const data = await response.json();
+
+            if (data.data && data.data.length > 0) {
+                let html = '';
+                data.data.slice(0, 5).forEach((match, idx) => {
+                    const homeShort = match.home_team.replace(' FC', '').replace(' AFC', '');
+                    const awayShort = match.away_team.replace(' FC', '').replace(' AFC', '');
+                    const highlight = idx === 0 ? ' highlight' : '';
+                    html += `<div class="result-item${highlight}">${homeShort} ${match.home_score}-${match.away_score} ${awayShort}</div>`;
+                });
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<div class="result-item">No recent results</div>';
+            }
+        } catch (err) {
+            container.innerHTML = '<div class="result-item">Could not load results</div>';
+        }
+    }
+
+    // Update chat prompt based on selected team
+    function updateChatPrompt() {
+        const team = getSelectedTeam();
+        const prompt = document.getElementById('chat-prompt');
+        const btn = document.getElementById('chat-btn');
+
+        if (team) {
+            const teamNames = {
+                'arsenal': 'Arsenal', 'chelsea': 'Chelsea', 'manchester_united': 'Man United',
+                'liverpool': 'Liverpool', 'manchester_city': 'Man City', 'tottenham': 'Spurs',
+                'newcastle': 'Newcastle', 'west_ham': 'West Ham', 'everton': 'Everton',
+                'brighton': 'Brighton', 'aston_villa': 'Aston Villa', 'wolves': 'Wolves',
+                'crystal_palace': 'Crystal Palace', 'fulham': 'Fulham',
+                'nottingham_forest': "Nott'm Forest", 'brentford': 'Brentford',
+                'bournemouth': 'Bournemouth', 'leicester': 'Leicester'
+            };
+            prompt.textContent = `Ready to chat as a ${teamNames[team] || team} fan!`;
+            btn.textContent = `Chat as ${teamNames[team] || team} Fan`;
+            btn.classList.add('ready');
+        }
+    }
+
+    // Listen for team changes
+    window.addEventListener('teamChanged', updateChatPrompt);
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+        loadStandings();
+        loadResults();
+        updateChatPrompt();
+    });
+</script>
+{% endblock %}

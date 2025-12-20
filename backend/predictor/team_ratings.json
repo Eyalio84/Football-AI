@@ -1,0 +1,303 @@
+{
+  "last_updated": "2025-12-21T17:09:14.705127",
+  "ratings": {
+    "manchester_city": {
+      "team_id": "manchester_city",
+      "team_name": "Manchester City",
+      "elo": 1766.334016281052,
+      "matches_played": 1,
+      "last_updated": "2024-09-15",
+      "form_last_5": [
+        "W"
+      ],
+      "home_elo": 1766.334016281052,
+      "away_elo": 1750,
+      "power_rating": 94.38900271350867,
+      "form_score": 1.0
+    },
+    "arsenal": {
+      "team_id": "arsenal",
+      "team_name": "Arsenal",
+      "elo": 1683.665983718948,
+      "matches_played": 1,
+      "last_updated": "2024-09-15",
+      "form_last_5": [
+        "L"
+      ],
+      "home_elo": 1700,
+      "away_elo": 1683.665983718948,
+      "power_rating": 80.61099728649133,
+      "form_score": 0.0
+    },
+    "liverpool": {
+      "team_id": "liverpool",
+      "team_name": "Liverpool",
+      "elo": 1694.527436227687,
+      "matches_played": 1,
+      "last_updated": "2024-09-16",
+      "form_last_5": [
+        "W"
+      ],
+      "home_elo": 1694.527436227687,
+      "away_elo": 1680,
+      "power_rating": 82.42123937128117,
+      "form_score": 1.0
+    },
+    "chelsea": {
+      "team_id": "chelsea",
+      "team_name": "Chelsea",
+      "elo": 1585.472563772313,
+      "matches_played": 1,
+      "last_updated": "2024-09-16",
+      "form_last_5": [
+        "L"
+      ],
+      "home_elo": 1600,
+      "away_elo": 1585.472563772313,
+      "power_rating": 64.24542729538548,
+      "form_score": 0.0
+    },
+    "tottenham": {
+      "team_id": "tottenham",
+      "team_name": "Tottenham",
+      "elo": 1573.5964303965839,
+      "matches_played": 1,
+      "last_updated": "2024-09-18",
+      "form_last_5": [
+        "D"
+      ],
+      "home_elo": 1573.5964303965839,
+      "away_elo": 1580,
+      "power_rating": 62.266071732763976,
+      "form_score": 0.5
+    },
+    "manchester_united": {
+      "team_id": "manchester_united",
+      "team_name": "Manchester United",
+      "elo": 1537.723964493365,
+      "matches_played": 1,
+      "last_updated": "2024-09-17",
+      "form_last_5": [
+        "L"
+      ],
+      "home_elo": 1560,
+      "away_elo": 1537.723964493365,
+      "power_rating": 56.28732741556083,
+      "form_score": 0.0
+    },
+    "newcastle": {
+      "team_id": "newcastle",
+      "team_name": "Newcastle",
+      "elo": 1556.4035696034161,
+      "matches_played": 1,
+      "last_updated": "2024-09-18",
+      "form_last_5": [
+        "D"
+      ],
+      "home_elo": 1550,
+      "away_elo": 1556.4035696034161,
+      "power_rating": 59.400594933902696,
+      "form_score": 0.5
+    },
+    "aston_villa": {
+      "team_id": "aston_villa",
+      "team_name": "Aston Villa",
+      "elo": 1540,
+      "matches_played": 0,
+      "last_updated": "2025-12-21T17:09:14.704794",
+      "form_last_5": [],
+      "home_elo": 1540,
+      "away_elo": 1540,
+      "power_rating": 56.666666666666664,
+      "form_score": 0.5
+    },
+    "brighton": {
+      "team_id": "brighton",
+      "team_name": "Brighton",
+      "elo": 1542.276035506635,
+      "matches_played": 1,
+      "last_updated": "2024-09-17",
+      "form_last_5": [
+        "W"
+      ],
+      "home_elo": 1542.276035506635,
+      "away_elo": 1520,
+      "power_rating": 57.046005917772504,
+      "form_score": 1.0
+    },
+    "west_ham": {
+      "team_id": "west_ham",
+      "team_name": "West Ham",
+      "elo": 1500,
+      "matches_played": 0,
+      "last_updated": "2025-12-21T17:09:14.704799",
+      "form_last_5": [],
+      "home_elo": 1500,
+      "away_elo": 1500,
+      "power_rating": 50.0,
+      "form_score": 0.5
+    },
+    "brentford": {
+      "team_id": "brentford",
+      "team_name": "Brentford",
+      "elo": 1480,
+      "matches_played": 0,
+      "last_updated": "2025-12-21T17:09:14.704802",
+      "form_last_5": [],
+      "home_elo": 1480,
+      "away_elo": 1480,
+      "power_rating": 46.666666666666664,
+      "form_score": 0.5
+    },
+    "fulham": {
+      "team_id": "fulham",
+      "team_name": "Fulham",
+      "elo": 1470,
+      "matches_played": 0,
+      "last_updated": "2025-12-21T17:09:14.704806",
+      "form_last_5": [],
+      "home_elo": 1470,
+      "away_elo": 1470,
+      "power_rating": 45.0,
+      "form_score": 0.5
+    },
+    "crystal_palace": {
+      "team_id": "crystal_palace",
+      "team_name": "Crystal Palace",
+      "elo": 1460,
+      "matches_played": 0,
+      "last_updated": "2025-12-21T17:09:14.704809",
+      "form_last_5": [],
+      "home_elo": 1460,
+      "away_elo": 1460,
+      "power_rating": 43.333333333333336,
+      "form_score": 0.5
+    },
+    "wolves": {
+      "team_id": "wolves",
+      "team_name": "Wolves",
+      "elo": 1450,
+      "matches_played": 0,
+      "last_updated": "2025-12-21T17:09:14.704812",
+      "form_last_5": [],
+      "home_elo": 1450,
+      "away_elo": 1450,
+      "power_rating": 41.66666666666667,
+      "form_score": 0.5
+    },
+    "bournemouth": {
+      "team_id": "bournemouth",
+      "team_name": "Bournemouth",
+      "elo": 1440,
+      "matches_played": 0,
+      "last_updated": "2025-12-21T17:09:14.704815",
+      "form_last_5": [],
+      "home_elo": 1440,
+      "away_elo": 1440,
+      "power_rating": 40.0,
+      "form_score": 0.5
+    },
+    "nottingham_forest": {
+      "team_id": "nottingham_forest",
+      "team_name": "Nottingham Forest",
+      "elo": 1430,
+      "matches_played": 0,
+      "last_updated": "2025-12-21T17:09:14.704818",
+      "form_last_5": [],
+      "home_elo": 1430,
+      "away_elo": 1430,
+      "power_rating": 38.333333333333336,
+      "form_score": 0.5
+    },
+    "everton": {
+      "team_id": "everton",
+      "team_name": "Everton",
+      "elo": 1420,
+      "matches_played": 0,
+      "last_updated": "2025-12-21T17:09:14.704820",
+      "form_last_5": [],
+      "home_elo": 1420,
+      "away_elo": 1420,
+      "power_rating": 36.666666666666664,
+      "form_score": 0.5
+    },
+    "leicester": {
+      "team_id": "leicester",
+      "team_name": "Leicester City",
+      "elo": 1410,
+      "matches_played": 0,
+      "last_updated": "2025-12-21T17:09:14.704823",
+      "form_last_5": [],
+      "home_elo": 1410,
+      "away_elo": 1410,
+      "power_rating": 35.0,
+      "form_score": 0.5
+    },
+    "ipswich": {
+      "team_id": "ipswich",
+      "team_name": "Ipswich Town",
+      "elo": 1380,
+      "matches_played": 0,
+      "last_updated": "2025-12-21T17:09:14.704826",
+      "form_last_5": [],
+      "home_elo": 1380,
+      "away_elo": 1380,
+      "power_rating": 30.0,
+      "form_score": 0.5
+    },
+    "southampton": {
+      "team_id": "southampton",
+      "team_name": "Southampton",
+      "elo": 1380,
+      "matches_played": 0,
+      "last_updated": "2025-12-21T17:09:14.704829",
+      "form_last_5": [],
+      "home_elo": 1380,
+      "away_elo": 1380,
+      "power_rating": 30.0,
+      "form_score": 0.5
+    }
+  },
+  "match_history": [
+    {
+      "match": "manchester_city vs arsenal",
+      "score": "2-1",
+      "date": "2024-09-15",
+      "home_elo_change": 16.3,
+      "away_elo_change": -16.3,
+      "home_new_elo": 1766.3,
+      "away_new_elo": 1683.7,
+      "expected_home_win": 66.0
+    },
+    {
+      "match": "liverpool vs chelsea",
+      "score": "3-0",
+      "date": "2024-09-16",
+      "home_elo_change": 14.5,
+      "away_elo_change": -14.5,
+      "home_new_elo": 1694.5,
+      "away_new_elo": 1585.5,
+      "expected_home_win": 69.7
+    },
+    {
+      "match": "brighton vs manchester_united",
+      "score": "2-1",
+      "date": "2024-09-17",
+      "home_elo_change": 22.3,
+      "away_elo_change": -22.3,
+      "home_new_elo": 1542.3,
+      "away_new_elo": 1537.7,
+      "expected_home_win": 53.6
+    },
+    {
+      "match": "tottenham vs newcastle",
+      "score": "1-1",
+      "date": "2024-09-18",
+      "home_elo_change": -6.4,
+      "away_elo_change": 6.4,
+      "home_new_elo": 1573.6,
+      "away_new_elo": 1556.4,
+      "expected_home_win": 63.3
+    }
+  ]
+}

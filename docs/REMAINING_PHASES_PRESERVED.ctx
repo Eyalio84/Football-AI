@@ -1,0 +1,92 @@
+---
+file_type: plan_preservation
+created: 2025-12-20
+status: preserved_for_later
+reason: Pivoting to KG-RAG upgrade - documenting original phases to not lose them
+---
+
+# Remaining Phases - Preserved Plan
+
+## Context
+We completed Phases 1-3 and 5. Phase 4 is paused (frontend sync needed).
+Now pivoting to KG-RAG upgrade as the differentiating feature for Ariel demo.
+These phases are preserved for post-KG-RAG implementation.
+
+---
+
+## Phase 4: UI Polish (PAUSED)
+**Status**: Waiting for frontend sync from PC
+**Blocker**: Frontend is on PC, need to transfer via rsync/scp
+
+**Pre-Implementation Ideas**:
+- Mobile responsive design
+- Dark mode (football at night!)
+- Club-specific color themes
+- Loading states with club badges
+
+**Commands to sync** (when ready):
+```bash
+# From PC to Termux
+rsync -avz --progress frontend.tar.gz 192.168.x.x:/storage/emulated/0/Download/synthesis-rules/soccer-AI/
+
+# Or via scp
+scp frontend.tar.gz user@termux-ip:/storage/emulated/0/Download/synthesis-rules/soccer-AI/
+```
+
+---
+
+## Phase 6: RAG Improvements
+**Status**: Pending (may be superseded by KG-RAG upgrade)
+
+**Original Ideas**:
+- Query expansion using synonyms
+- Freshness scoring (recent data weighted higher)
+- Hybrid search (FTS5 + semantic)
+- Context window optimization
+
+**Note**: KG-RAG upgrade will likely incorporate and exceed these improvements.
+
+---
+
+## Phase 7: Future Documentation
+**Status**: Pending
+
+**Original Ideas**:
+- FUTURE_EXPANSION_IDEAS.ctx
+- Technical debt log
+- Feature request backlog
+
+**Note**: FOOTBALL_AI_EXPANSION_ROADMAP.ctx already captures most of this.
+
+---
+
+## Phase 8: Security Escalation
+**Status**: Post-demo implementation
+
+**Design Doc**: SECURITY_ESCALATION_DESIGN.ctx
+
+**Key Features**:
+- Session state machine (NORMAL → WARNED → CAUTIOUS → ESCALATED)
+- SecurityFanPersona that breaks character
+- Rate limiting for flagged sessions
+- De-escalation path after 5 clean queries
+- Logging without IP bans
+
+---
+
+## Summary
+
+| Phase | Status | Notes |
+|-------|--------|-------|
+| 1 | DONE | Backend on Termux |
+| 2 | DONE | Security hardening |
+| 3 | DONE | Database enhancement |
+| 4 | PAUSED | Frontend sync needed |
+| 5 | DONE | Legends backend |
+| 6 | SUPERSEDED | KG-RAG upgrade covers this |
+| 7 | PARTIAL | Roadmap doc exists |
+| 8 | POST-DEMO | Security escalation |
+
+---
+
+*This document preserves the original plan while we focus on KG-RAG upgrade.*

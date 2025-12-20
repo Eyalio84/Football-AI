@@ -1,0 +1,306 @@
+---
+file_type: frontend_upgrade_plan
+created: 2025-12-20
+status: PLANNING
+author: Eyal Nof + Claude
+depends_on: "CP8 Backend Complete"
+---
+
+# Soccer-AI Frontend Upgrade Plan
+## Integrate New Backend Features into React App
+
+---
+
+## CURRENT STATE ANALYSIS
+
+### Existing Frontend Structure
+```
+frontend/src/
+├── pages/           # Dashboard, Standings, Teams, TeamDetail, Chat
+├── components/
+│   ├── Chat/        # ChatContainer, ChatInput, ChatMessage, SmartSuggestions
+│   ├── Games/       # GameCard, GamesList
+│   ├── Standings/   # StandingsTable
+│   ├── Teams/       # TeamCard, TeamGrid, TeamDetail
+│   ├── Layout/      # AppLayout, Navigation
+│   └── ui/          # button, card, table, badge, tabs, etc.
+├── hooks/           # useTeams, useGames, useChat, useStandings
+├── services/        # api.ts
+├── types/           # index.ts
+└── config/          # theme.ts
+```
+
+### Stack
+- React 19 + TypeScript
+- Vite (build tool)
+- React Router 7
+- Tailwind CSS + Radix UI
+- Lucide icons
+
+---
+
+## NEW BACKEND FEATURES TO INTEGRATE
+
+| Feature | Endpoint | Frontend Need |
+|---------|----------|---------------|
+| Legends | `/api/v1/legends`, `/teams/{id}/legends` | LegendsGrid component |
+| Rivalries | `/teams/{id}/rivalries` | RivalryDisplay component |
+| Moments | `/teams/{id}/moments` | MomentsTimeline component |
+| Mood | `/teams/{id}/mood` | MoodIndicator component |
+| Full Personality | `/teams/{id}/personality` | Enhanced TeamDetail |
+| KG Graph | `/api/v1/graph`, `/graph/team/{id}` | KnowledgeGraph embed |
+| Analytics | `/api/v1/analytics` | AdminDashboard (optional) |
+| KG Viewer | `/kg-viewer` | Route or iframe |
+
+---
+
+## UPGRADE PHASES
+
+### Phase 1: Types & API (FE1-FE2)
+
+**New Types to Add:**
+```typescript
+// types/index.ts additions
+
+export interface Legend {
+  id: number
+  name: string
+  team_id: number
+  position?: string
+  era?: string
+  goals?: number
+  appearances?: number
+  achievements?: string
+}
+
+export interface Rivalry {
+  id: number
+  team_id: number
+  rival_team_id: number
+  intensity: number  // 1-10
+  derby_name?: string
+  historical_context?: string
+}
+
+export interface Moment {
+  id: number
+  team_id: number
+  title: string
+  date?: string
+  opponent?: string
+  competition?: string
+  result?: string
+  significance?: string
+  emotion?: string  // triumph, heartbreak, joy, etc.
+}
+
+export interface TeamMood {
+  current_mood: string
+  mood_intensity: number
+  last_result?: string
+  mood_factors?: string[]
+}
+
+export interface TeamPersonality {
+  team: Team
+  identity?: TeamIdentity
+  mood?: TeamMood
+  rivalries: Rivalry[]
+  moments: Moment[]
+  legends: Legend[]
+}
+
+export interface KGNode {
+  id: number | string
+  label: string
+  group: 'team' | 'legend' | 'moment'
+  color: string
+  size?: number
+}
+
+export interface KGEdge {
+  from: number | string
+  to: number | string
+  label: string
+  color?: string
+}
+
+export interface KGGraph {
+  nodes: KGNode[]
+  edges: KGEdge[]
+  stats: {
+    total_nodes: number
+    total_edges: number
+    by_type: Record<string, number>
+  }
+}
+```
+
+**New API Functions:**
+```typescript
+// services/api.ts additions
+
+export async function getLegends(teamId?: number): Promise<Legend[]>
+export async function getTeamLegends(teamId: number): Promise<Legend[]>
+export async function getTeamRivalries(teamId: number): Promise<Rivalry[]>
+export async function getTeamMoments(teamId: number): Promise<Moment[]>
+export async function getTeamMood(teamId: number): Promise<TeamMood>
+export async function getTeamPersonality(teamId: number): Promise<TeamPersonality>
+export async function getKGGraph(): Promise<KGGraph>
+export async function getTeamKGGraph(teamId: number, depth?: number): Promise<KGGraph>
+```
+
+---
+
+### Phase 2: New Components (FE3-FE5)
+
+**LegendsGrid Component:**
+```
+┌─────────────────────────────────────────────────────┐
+│ Club Legends                                        │
+├─────────────────────────────────────────────────────┤
+│ ┌────────────┐ ┌────────────┐ ┌────────────┐       │
+│ │ ⭐ Henry   │ │ ⭐ Bergkamp│ │ ⭐ Vieira  │       │
+│ │ Forward    │ │ Forward    │ │ Midfielder │       │
+│ │ 1999-2007  │ │ 1995-2006  │ │ 1996-2005  │       │
+│ │ 228 goals  │ │ 120 goals  │ │ 31 goals   │       │
+│ └────────────┘ └────────────┘ └────────────┘       │
+└─────────────────────────────────────────────────────┘
+```
+
+**RivalryDisplay Component:**
+```
+┌─────────────────────────────────────────────────────┐
+│ Rivalries                                           │
+├─────────────────────────────────────────────────────┤
+│ 🔥 North London Derby                               │
+│    vs Tottenham                                     │
+│    Intensity: ██████████ 10/10                      │
+│                                                     │
+│ ⚔️ Historic Rivalry                                 │
+│    vs Manchester United                             │
+│    Intensity: ████████░░ 8/10                       │
+│                                                     │
+│ ⚔️ London Derby                                     │
+│    vs Chelsea                                       │
+│    Intensity: ███████░░░ 7/10                       │
+└─────────────────────────────────────────────────────┘
+```
+
+**MomentsTimeline Component:**
+```
+┌─────────────────────────────────────────────────────┐
+│ Memorable Moments                                   │
+├─────────────────────────────────────────────────────┤
+│ 🏆 2003-04 │ The Invincibles                        │
+│            │ Unbeaten entire season                 │
+│            │ Emotion: Triumph                       │
+│                                                     │
+│ ⚽ 2002    │ Henry vs Tottenham                     │
+│            │ 3-0 at Highbury                        │
+│            │ Emotion: Joy                           │
+│                                                     │
+│ 💔 2006    │ Champions League Final                 │
+│            │ Lost to Barcelona                      │
+│            │ Emotion: Heartbreak                    │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+### Phase 3: Enhanced TeamDetail (FE6)
+
+**Upgraded TeamDetail Page:**
+```
+┌─────────────────────────────────────────────────────┐
+│ Arsenal                                    😊 Happy │
+│ The Gunners                               ──────    │
+├─────────────────────────────────────────────────────┤
+│ [Overview] [Legends] [Rivalries] [Moments] [Graph]  │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│ [Tab Content based on selection]                    │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+### Phase 4: KG Viewer Integration (FE7)
+
+**Options:**
+
+1. **Iframe embed** (simplest)
+   - Add `/knowledge-graph` route
+   - Embed `/kg-viewer` in iframe
+   - Pass team filter via URL params
+
+2. **vis.js direct integration** (more work, more control)
+   - Add vis-network to package.json
+   - Create KnowledgeGraph React component
+   - Use /api/v1/graph data directly
+
+3. **Link out** (simplest but less integrated)
+   - Add "View Knowledge Graph" button
+   - Opens /kg-viewer in new tab
+
+**Recommendation**: Start with option 3 (link out), upgrade to option 1 (iframe) if time permits.
+
+---
+
+## IMPLEMENTATION ORDER
+
+| Step | Task | Estimated Effort |
+|------|------|------------------|
+| FE1 | Add types to types/index.ts | Small |
+| FE2 | Add API functions to api.ts | Small |
+| FE3 | Create LegendsGrid component | Medium |
+| FE4 | Create RivalryDisplay component | Medium |
+| FE5 | Create MomentsTimeline component | Medium |
+| FE6 | Enhance TeamDetail with tabs | Medium |
+| FE7 | Add KG viewer link/route | Small |
+
+---
+
+## FILE CHANGES SUMMARY
+
+| File | Change Type |
+|------|-------------|
+| `types/index.ts` | Add new interfaces |
+| `services/api.ts` | Add new API functions |
+| `components/Teams/LegendsGrid.tsx` | NEW |
+| `components/Teams/RivalryDisplay.tsx` | NEW |
+| `components/Teams/MomentsTimeline.tsx` | NEW |
+| `components/Teams/MoodIndicator.tsx` | NEW |
+| `pages/TeamDetail.tsx` | MODIFY - add tabs |
+| `routes/index.tsx` | ADD - /knowledge-graph route (optional) |
+
+---
+
+## DEMO SCRIPT FOR ARIEL (FRONTEND)
+
+```
+"Now let me show you the frontend.
+
+[Opens app]
+This is the dashboard - live games, standings.
+
+[Clicks on Arsenal]
+Here's the team page. Notice the tabs:
+- Legends: Henry, Bergkamp, Vieira
+- Rivalries: See the intensity bars
+- Moments: Timeline of historic events
+
+[Opens chat]
+Now ask about the North London Derby...
+Watch how it combines KG data with AI response.
+
+[Opens KG Viewer]
+And here's the actual Knowledge Graph.
+62 nodes, 68 edges. The AI navigates this
+for every query."
+```
+
+---
+
+*Frontend upgrade extends CP8 into full-stack production.*

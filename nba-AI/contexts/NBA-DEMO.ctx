@@ -1,0 +1,255 @@
+---
+title: NBA-AI 3-Team Demo
+domain: nba
+component: domain-proof
+status: working
+last_updated: 2024-12-21
+resumption_context: true
+---
+
+# NBA-AI: Domain-Agnostic Architecture Proof
+
+## Purpose
+Prove that Soccer-AI's NLKE-compliant architecture works for ANY domain by creating a working NBA demo with 3 teams.
+
+---
+
+## The Proof
+
+### What Changed (Domain-Specific)
+```
+soccer_ai_kg.json → nba_kg.json
+source_kg = "soccer-ai" → source_kg = "nba"
+personas = teams (Arsenal, Chelsea...) → personas = teams (Lakers, Celtics, Warriors)
+```
+
+### What Stayed The Same (Domain-Agnostic)
+```
+- NLKE schema (nodes, edges, embeddings, FTS5)
+- Migration pattern (JSON → SQLite two-pass)
+- Query interface (search, traverse, cross-domain)
+- Predictor factors (FA_*, FB_* → NBA_*, NBA_*)
+```
+
+---
+
+## Migration Results
+
+```
+NBA-AI Knowledge Graph:
+├── Nodes: 25
+│   ├── module: 5 (main, database, rag, ai_response, predictor_api)
+│   ├── endpoint: 3 (chat, trivia, predictions)
+│   ├── persona: 3 (Lakers, Celtics, Warriors)
+│   ├── legend: 4 (Magic, Bird, Curry, Kobe)
+│   ├── rivalry: 2 (Lakers-Celtics, Warriors-Cavaliers)
+│   ├── factor_a: 4 (NBA_FAT, NBA_INJ, NBA_TRV, NBA_RST)
+│   ├── factor_b: 3 (NBA_HME, NBA_MOT, NBA_HOT)
+│   └── pattern: 1 (back_to_back_revenge)
+└── Edges: 15
+    ├── depends_on: module dependencies
+    ├── routes_to: endpoint → module
+    ├── plays_for: legend → persona
+    ├── rivals_with: persona ↔ persona
+    └── combines_with: pattern → factors
+```
+
+---
+
+## Files Created
+
+```
+soccer-AI/nba-AI/
+├── nba_kg.json                  # Domain-specific data
+├── backend/
+│   ├── nba_ai_kg.db             # SQLite database (generated)
+│   └── kg/
+│       ├── __init__.py
+│       └── nba_migration.py     # Reuses Soccer-AI pattern
+└── contexts/
+    └── NBA-DEMO.ctx             # This file
+```
+
+---
+
+## Teams (Personas)
+
+### Los Angeles Lakers
+```json
+{
+  "team": "Los Angeles Lakers",
+  "snap_back": "16-time NBA Champions, Showtime legacy",
+  "mood_influence": 0.8,
+  "legends": ["Magic Johnson", "Kobe Bryant", "Kareem Abdul-Jabbar", "Shaq"],
+  "rivals": ["Celtics", "Clippers"]
+}
+```
+
+### Boston Celtics
+```json
+{
+  "team": "Boston Celtics",
+  "snap_back": "18 championships, most in NBA history",
+  "mood_influence": 0.85,
+  "legends": ["Bill Russell", "Larry Bird", "Paul Pierce", "Kevin Garnett"],
+  "rivals": ["Lakers", "76ers"]
+}
+```
+
+### Golden State Warriors
+```json
+{
+  "team": "Golden State Warriors",
+  "snap_back": "Dynasty era, Splash Brothers",
+  "mood_influence": 0.75,
+  "legends": ["Stephen Curry", "Klay Thompson", "Draymond Green", "Kevin Durant"],
+  "rivals": ["Cavaliers", "Rockets"]
+}
+```
+
+---
+
+## Predictor Factors (NBA-Specific)
+
+### Side A (Favorite Weakness)
+| Factor | Name | Weight | Description |
+|--------|------|--------|-------------|
+| NBA_FAT | Fatigue | 0.10 | Back-to-back games or 4 games in 5 nights |
+| NBA_INJ | Star Injury | 0.12 | Top 2 players missing |
+| NBA_TRV | Travel | 0.06 | Cross-country back-to-back |
+| NBA_RST | Rest Disadvantage | 0.05 | Opponent has 2+ more rest days |
+
+### Side B (Underdog Strength)
+| Factor | Name | Weight | Description |
+|--------|------|--------|-------------|
+| NBA_HME | Home Court | 0.08 | Playing at home |
+| NBA_MOT | Motivation | 0.07 | Playoff implications or rivalry game |
+| NBA_HOT | Hot Streak | 0.06 | Won 5+ of last 7 games |
+
+### Pattern (Third Knowledge)
+```
+back_to_back_revenge:
+  trigger: [NBA_FAT, NBA_MOT]
+  bonus: 0.08
+  description: "Tired favorite vs motivated underdog"
+```
+
+---
+
+## API Endpoints (Same as Soccer-AI)
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/v1/chat` | POST | NBA fan chat with team persona |
+| `/api/v1/trivia` | POST | NBA trivia game per team |
+| `/api/v1/predictions/today` | GET | Today's NBA game predictions |
+
+---
+
+## FTS5 Search Examples
+
+```python
+# Search "Lakers"
+>>> search_nba("Lakers")
+[
+    {"name": "Lakers vs Celtics", "type": "rivalry"},
+    {"name": "Los Angeles Lakers", "type": "persona"},
+    {"name": "Magic Johnson", "type": "legend"}
+]
+
+# Search "Curry"
+>>> search_nba("Curry")
+[
+    {"name": "Stephen Curry", "type": "legend"},
+    {"name": "Golden State Warriors", "type": "persona"}  # Chef Curry nickname
+]
+
+# Search "fatigue"
+>>> search_nba("fatigue")
+[
+    {"name": "Fatigue", "type": "factor_a"}
+]
+```
+
+---
+
+## Extending to Other Domains
+
+### UFC-AI (Future)
+```json
+{
+  "source_kg": "ufc",
+  "personas": {
+    "mcgregor_fans": {"fighter": "Conor McGregor", ...},
+    "khabib_fans": {"fighter": "Khabib Nurmagomedov", ...}
+  },
+  "predictor": {
+    "factors_a": {"UFC_LAY": "Layoff", "UFC_CUT": "Weight Cut", ...},
+    "factors_b": {"UFC_HME": "Home Crowd", "UFC_GRP": "Grappling Advantage", ...}
+  }
+}
+```
+
+### Cinema-AI (Future)
+```json
+{
+  "source_kg": "cinema",
+  "personas": {
+    "marvel_fans": {"franchise": "Marvel", ...},
+    "dc_fans": {"franchise": "DC", ...}
+  },
+  "predictor": {
+    "factors_a": {"CIN_OVR": "Oversaturation", "CIN_DIR": "Director Change", ...},
+    "factors_b": {"CIN_SEQ": "Sequel Power", "CIN_CAM": "Cast Appeal", ...}
+  }
+}
+```
+
+---
+
+## Running the Demo
+
+```bash
+# Navigate to NBA-AI
+cd soccer-AI/nba-AI/backend/kg
+
+# Run migration (creates nba_ai_kg.db)
+python3 nba_migration.py
+
+# Expected output:
+# Nodes: 25
+# Edges: 15
+# FTS5 search working
+```
+
+---
+
+## Key Insight
+
+> **The only domain-specific code is the JSON data file.**
+>
+> The migration script, schema, query interface, and API endpoints
+> are 100% reusable across domains.
+
+This proves the architecture is truly domain-agnostic.
+
+---
+
+## Next Steps (If Expanding NBA)
+
+1. [ ] Add all 30 NBA teams
+2. [ ] Add current roster players
+3. [ ] Connect to NBA API for live data
+4. [ ] Add historical game data for trivia
+5. [ ] Implement prediction testing against real outcomes
+
+---
+
+## Resumption Instructions
+
+To continue work on NBA-AI:
+1. Read this file
+2. Review `nba_kg.json` for data structure
+3. Run `python3 nba_migration.py` to verify database
+4. Extend teams/players as needed
+5. Reuse Soccer-AI backend patterns

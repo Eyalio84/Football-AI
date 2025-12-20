@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Teams - Soccer-AI{% endblock %}
+
+{% block content %}
+<div class="teams-page">
+    <h1>Teams</h1>
+    <p class="subtitle">Explore club details, legends, rivalries, and historic moments</p>
+
+    <div class="team-grid" id="team-grid">
+        <div class="loading">Loading teams...</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const teamGrid = document.getElementById('team-grid');
+
+    // Default teams to show
+    const defaultTeams = [
+        { name: 'Arsenal', league: 'Premier League', id: 'arsenal' },
+        { name: 'Chelsea', league: 'Premier League', id: 'chelsea' },
+        { name: 'Manchester United', league: 'Premier League', id: 'manchester_united' }
+    ];
+
+    function renderTeams(teams) {
+        // Clear grid safely
+        while (teamGrid.firstChild) {
+            teamGrid.removeChild(teamGrid.firstChild);
+        }
+
+        teams.forEach(team => {
+            const card = document.createElement('div');
+            card.className = 'team-card';
+            card.addEventListener('click', () => showTeamDetail(team.id || team.name.toLowerCase().replace(' ', '_')));
+
+            const h3 = document.createElement('h3');
+            h3.textContent = team.name;
+            card.appendChild(h3);
+
+            const p = document.createElement('p');
+            p.textContent = team.league || 'Premier League';
+            card.appendChild(p);
+
+            teamGrid.appendChild(card);
+        });
+    }
+
+    async function loadTeams() {
+        try {
+            const response = await fetch('http://localhost:8000/api/v1/teams');
+            const data = await response.json();
+
+            if (data.teams && data.teams.length > 0) {
+                renderTeams(data.teams);
+            } else {
+                renderTeams(defaultTeams);
+            }
+        } catch (err) {
+            renderTeams(defaultTeams);
+        }
+    }
+
+    function showTeamDetail(teamName) {
+        window.location.href = '/chat?club=' + encodeURIComponent(teamName);
+    }
+
+    loadTeams();
+</script>
+{% endblock %}

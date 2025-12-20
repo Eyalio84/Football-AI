@@ -1,0 +1,13 @@
+/* 
+  Tailwind is loaded via CDN in index.html for this setup. 
+  This file remains for any custom global overrides if needed.
+*/
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-slate-800/50 backdrop-blur-md border border-slate-700/50;
+  }
+}

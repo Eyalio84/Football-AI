@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Fixtures & Results - Soccer-AI{% endblock %}
+
+{% block content %}
+<div class="fixtures-container">
+    <h1>📅 Fixtures & Results</h1>
+    <p class="subtitle">Premier League matches</p>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="upcoming">Upcoming</button>
+        <button class="tab-btn" data-tab="results">Results</button>
+    </div>
+
+    <div id="loading" class="loading-state">
+        Loading fixtures...
+    </div>
+
+    <div id="upcoming-tab" class="tab-content active">
+        <h2>Upcoming Fixtures</h2>
+        <div id="upcoming-list" class="fixtures-list">
+            <!-- Populated by JavaScript -->
+        </div>
+    </div>
+
+    <div id="results-tab" class="tab-content">
+        <h2>Recent Results</h2>
+        <div id="results-list" class="fixtures-list">
+            <!-- Populated by JavaScript -->
+        </div>
+    </div>
+
+    <div id="error" class="error-state" style="display:none;">
+        Failed to load fixtures. Is the backend running?
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+
+        // Update buttons
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Update content
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById(`${tab}-tab`).classList.add('active');
+    });
+});
+
+async function loadFixtures() {
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
+    const upcomingList = document.getElementById('upcoming-list');
+    const resultsList = document.getElementById('results-list');
+
+    try {
+        // Fetch upcoming games
+        const upcomingResp = await fetch('http://localhost:8000/api/v1/games/upcoming?limit=10');
+        const upcomingData = await upcomingResp.json();
+        const upcoming = upcomingData.data || [];
+
+        // Fetch recent results
+        const resultsResp = await fetch('http://localhost:8000/api/v1/games?status=finished&limit=10');
+        const resultsData = await resultsResp.json();
+        const results = resultsData.data || [];
+
+        // Clear lists
+        while (upcomingList.firstChild) upcomingList.removeChild(upcomingList.firstChild);
+        while (resultsList.firstChild) resultsList.removeChild(resultsList.firstChild);
+
+        // Populate upcoming
+        if (upcoming.length === 0) {
+            const emptyMsg = document.createElement('p');
+            emptyMsg.textContent = 'No upcoming fixtures scheduled.';
+            emptyMsg.className = 'empty-message';
+            upcomingList.appendChild(emptyMsg);
+        } else {
+            upcoming.forEach(game => {
+                upcomingList.appendChild(createFixtureCard(game, false));
+            });
+        }
+
+        // Populate results
+        if (results.length === 0) {
+            const emptyMsg = document.createElement('p');
+            emptyMsg.textContent = 'No recent results available.';
+            emptyMsg.className = 'empty-message';
+            resultsList.appendChild(emptyMsg);
+        } else {
+            results.forEach(game => {
+                resultsList.appendChild(createFixtureCard(game, true));
+            });
+        }
+
+        loading.style.display = 'none';
+
+    } catch (err) {
+        console.error('Failed to load fixtures:', err);
+        loading.style.display = 'none';
+        error.style.display = 'block';
+    }
+}
+
+function createFixtureCard(game, isResult) {
+    const card = document.createElement('div');
+    card.className = 'fixture-card';
+
+    const dateDiv = document.createElement('div');
+    dateDiv.className = 'fixture-date';
+    dateDiv.textContent = game.date || 'TBD';
+
+    const matchDiv = document.createElement('div');
+    matchDiv.className = 'fixture-match';
+
+    const homeDiv = document.createElement('div');
+    homeDiv.className = 'fixture-team home';
+    homeDiv.textContent = game.home_team_name || 'Home Team';
+
+    const scoreDiv = document.createElement('div');
+    scoreDiv.className = 'fixture-score';
+
+    if (isResult && game.home_score !== null && game.away_score !== null) {
+        const homeScore = document.createElement('span');
+        homeScore.textContent = game.home_score;
+        homeScore.className = 'score-num';
+
+        const separator = document.createElement('span');
+        separator.textContent = ' - ';
+
+        const awayScore = document.createElement('span');
+        awayScore.textContent = game.away_score;
+        awayScore.className = 'score-num';
+
+        scoreDiv.appendChild(homeScore);
+        scoreDiv.appendChild(separator);
+        scoreDiv.appendChild(awayScore);
+    } else {
+        scoreDiv.textContent = 'vs';
+    }
+
+    const awayDiv = document.createElement('div');
+    awayDiv.className = 'fixture-team away';
+    awayDiv.textContent = game.away_team_name || 'Away Team';
+
+    matchDiv.appendChild(homeDiv);
+    matchDiv.appendChild(scoreDiv);
+    matchDiv.appendChild(awayDiv);
+
+    card.appendChild(dateDiv);
+    card.appendChild(matchDiv);
+
+    if (game.status) {
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'fixture-status';
+        statusDiv.textContent = game.status;
+        card.appendChild(statusDiv);
+    }
+
+    return card;
+}
+
+// Load on page load
+loadFixtures();
+</script>
+{% endblock %}

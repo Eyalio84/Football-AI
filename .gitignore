@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Environment & Secrets
+.env
+.env.local
+.env.production
+.venv/
+venv/
+ENV/
+claude-api.txt
+football-data.txt
+.football_api_token
+*.key
+
+# Private/personal directories
+Ariel/
+robert/
+4d_persona_architecture/
+
+# Claude Code local settings
+.claude/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Databases (large files — provide setup scripts instead)
+*.db
+backend/*.db
+backend/unified_soccer_ai_kg.db
+soccer_ai_architecture_kg.db
+
+# Node/Frontend
+node_modules/
+.npm
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Images and archives (not source)
+*.jpg
+*.png
+*.zip

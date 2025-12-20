@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Match Predictor - Soccer-AI{% endblock %}
+
+{% block content %}
+<div class="predictions-container">
+    <h1>🔮 Tri-Lens Predictor</h1>
+    <p class="subtitle">Poisson + Oracle + Upset Detection • 53.2% Accuracy</p>
+
+    <div class="predictor-form">
+        <h2>Predict a Match</h2>
+        <select id="home-team" class="team-select">
+            <option value="">Select Home Team...</option>
+        </select>
+
+        <div class="vs-divider">VS</div>
+
+        <select id="away-team" class="team-select">
+            <option value="">Select Away Team...</option>
+        </select>
+
+        <button id="predict-btn" class="predict-btn" disabled>Predict Result</button>
+    </div>
+
+    <div id="prediction-result" style="display:none;">
+        <h2>Prediction</h2>
+        <div id="prediction-content"></div>
+    </div>
+
+    <div id="patterns-info" class="patterns-section">
+        <h2>Three Lenses of Prediction</h2>
+        <p class="patterns-subtitle">Best of three worlds: accuracy, calibration, and draw detection</p>
+        <div id="patterns-list">
+            <div class="pattern-card">
+                <div class="pattern-name">Poisson (55%)</div>
+                <div class="pattern-desc">xG-based goal model with best Brier score</div>
+            </div>
+            <div class="pattern-card">
+                <div class="pattern-name">Oracle (45%)</div>
+                <div class="pattern-desc">ELO ratings + 230K historical patterns</div>
+            </div>
+            <div class="pattern-card">
+                <div class="pattern-name">Upset Detector</div>
+                <div class="pattern-desc">Conditional draw boost when signals align</div>
+            </div>
+            <div class="pattern-card">
+                <div class="pattern-name">Lens Agreement</div>
+                <div class="pattern-desc">Higher confidence when all lenses agree</div>
+            </div>
+            <div class="pattern-card">
+                <div class="pattern-name">Likely Scores</div>
+                <div class="pattern-desc">Top 5 most probable scorelines</div>
+            </div>
+            <div class="pattern-card">
+                <div class="pattern-name">17.3% Draw Detection</div>
+                <div class="pattern-desc">Best draw accuracy vs other models</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const homeSelect = document.getElementById('home-team');
+const awaySelect = document.getElementById('away-team');
+const predictBtn = document.getElementById('predict-btn');
+const resultDiv = document.getElementById('prediction-result');
+const contentDiv = document.getElementById('prediction-content');
+
+let teams = [];
+
+// Load teams
+async function loadTeams() {
+    try {
+        const response = await fetch('http://localhost:8000/api/v1/teams?limit=20');
+        const data = await response.json();
+        teams = data.data || [];
+
+        teams.forEach(team => {
+            const homeOpt = document.createElement('option');
+            homeOpt.value = team.name;
+            homeOpt.textContent = team.name;
+            homeSelect.appendChild(homeOpt);
+
+            const awayOpt = document.createElement('option');
+            awayOpt.value = team.name;
+            awayOpt.textContent = team.name;
+            awaySelect.appendChild(awayOpt);
+        });
+    } catch (err) {
+        console.error('Failed to load teams:', err);
+    }
+}
+
+// Enable predict button when both teams selected
+function updatePredictBtn() {
+    predictBtn.disabled = !homeSelect.value || !awaySelect.value || homeSelect.value === awaySelect.value;
+}
+
+homeSelect.addEventListener('change', updatePredictBtn);
+awaySelect.addEventListener('change', updatePredictBtn);
+
+// Predict match
+predictBtn.addEventListener('click', async () => {
+    const homeTeam = homeSelect.value;
+    const awayTeam = awaySelect.value;
+
+    if (!homeTeam || !awayTeam || homeTeam === awayTeam) return;
+
+    predictBtn.disabled = true;
+    predictBtn.textContent = 'Predicting...';
+
+    // Clear previous result
+    while (contentDiv.firstChild) {
+        contentDiv.removeChild(contentDiv.firstChild);
+    }
+
+    try {
+        const response = await fetch('http://localhost:8000/api/v1/tri-lens/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                home_team: homeTeam,
+                away_team: awayTeam
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.data) {
+            displayPrediction(data.data);
+        } else {
+            throw new Error('No prediction returned');
+        }
+
+    } catch (err) {
+        console.error('Prediction failed:', err);
+        const errMsg = document.createElement('p');
+        errMsg.className = 'error-message';
+        errMsg.textContent = 'Failed to get prediction. Backend may not be running.';
+        contentDiv.appendChild(errMsg);
+    } finally {
+        predictBtn.disabled = false;
+        predictBtn.textContent = 'Predict Result';
+        resultDiv.style.display = 'block';
+    }
+});
+
+function displayPrediction(pred) {
+    // Main prediction
+    const mainDiv = document.createElement('div');
+    mainDiv.className = 'prediction-main';
+
+    const resultText = document.createElement('h3');
+    resultText.className = 'prediction-result';
+    const predText = pred.prediction.replace('_', ' ').toUpperCase();
+    resultText.textContent = predText;
+    mainDiv.appendChild(resultText);
+
+    const confidenceText = document.createElement('p');
+    confidenceText.className = 'prediction-confidence';
+    confidenceText.textContent = `Confidence: ${pred.confidence.toUpperCase()} (${pred.lens_agreement}/3 lenses agree)`;
+    mainDiv.appendChild(confidenceText);
+
+    contentDiv.appendChild(mainDiv);
+
+    // Expected Goals
+    if (pred.expected_goals) {
+        const xgDiv = document.createElement('div');
+        xgDiv.className = 'xg-section';
+
+        const xgTitle = document.createElement('h4');
+        xgTitle.textContent = 'Expected Goals (xG):';
+        xgDiv.appendChild(xgTitle);
+
+        const xgText = document.createElement('p');
+        xgText.className = 'xg-value';
+        xgText.textContent = `${pred.home_team}: ${pred.expected_goals.home} - ${pred.expected_goals.away} :${pred.away_team}`;
+        xgDiv.appendChild(xgText);
+
+        contentDiv.appendChild(xgDiv);
+    }
+
+    // Probabilities
+    if (pred.probabilities) {
+        const probDiv = document.createElement('div');
+        probDiv.className = 'probabilities';
+
+        const probTitle = document.createElement('h4');
+        probTitle.textContent = 'Win/Draw/Loss Probabilities:';
+        probDiv.appendChild(probTitle);
+
+        const outcomes = [
+            { key: 'home_win', label: `${pred.home_team} Win` },
+            { key: 'draw', label: 'Draw' },
+            { key: 'away_win', label: `${pred.away_team} Win` }
+        ];
+
+        outcomes.forEach(({ key, label }) => {
+            const probItem = document.createElement('div');
+            probItem.className = 'prob-item';
+
+            const labelSpan = document.createElement('span');
+            labelSpan.textContent = label + ': ';
+
+            const value = document.createElement('span');
+            value.className = 'prob-value';
+            const pct = (pred.probabilities[key] * 100).toFixed(1);
+            value.textContent = pct + '%';
+
+            // Highlight the predicted outcome
+            if ((key === 'home_win' && pred.prediction === 'home_win') ||
+                (key === 'draw' && pred.prediction === 'draw') ||
+                (key === 'away_win' && pred.prediction === 'away_win')) {
+                probItem.style.fontWeight = 'bold';
+                probItem.style.color = '#2ecc71';
+            }
+
+            probItem.appendChild(labelSpan);
+            probItem.appendChild(value);
+            probDiv.appendChild(probItem);
+        });
+
+        contentDiv.appendChild(probDiv);
+    }
+
+    // Likely Scores
+    if (pred.likely_scores && pred.likely_scores.length > 0) {
+        const scoresDiv = document.createElement('div');
+        scoresDiv.className = 'likely-scores';
+
+        const scoresTitle = document.createElement('h4');
+        scoresTitle.textContent = 'Most Likely Scorelines:';
+        scoresDiv.appendChild(scoresTitle);
+
+        const scoresList = document.createElement('div');
+        scoresList.className = 'scores-list';
+
+        pred.likely_scores.forEach((item, idx) => {
+            const scoreItem = document.createElement('span');
+            scoreItem.className = 'score-item';
+            const pct = (item.probability * 100).toFixed(1);
+            scoreItem.textContent = `${item.score} (${pct}%)`;
+            if (idx < pred.likely_scores.length - 1) {
+                scoreItem.textContent += ' | ';
+            }
+            scoresList.appendChild(scoreItem);
+        });
+
+        scoresDiv.appendChild(scoresList);
+        contentDiv.appendChild(scoresDiv);
+    }
+
+    // Upset Analysis
+    if (pred.upset_analysis) {
+        const upsetDiv = document.createElement('div');
+        upsetDiv.className = 'upset-analysis';
+
+        const upsetTitle = document.createElement('h4');
+        upsetTitle.textContent = 'Upset Analysis:';
+        upsetDiv.appendChild(upsetTitle);
+
+        const riskText = document.createElement('p');
+        const riskPct = (pred.upset_analysis.risk * 100).toFixed(0);
+        riskText.textContent = `Upset Risk: ${riskPct}%`;
+        if (pred.upset_analysis.draw_boost_applied) {
+            riskText.textContent += ' (Draw Boost Applied!)';
+            riskText.style.color = '#f39c12';
+        }
+        upsetDiv.appendChild(riskText);
+
+        if (pred.upset_analysis.patterns && pred.upset_analysis.patterns.length > 0) {
+            const patternsList = document.createElement('ul');
+            pred.upset_analysis.patterns.forEach(pattern => {
+                const li = document.createElement('li');
+                li.textContent = pattern;
+                patternsList.appendChild(li);
+            });
+            upsetDiv.appendChild(patternsList);
+        }
+
+        contentDiv.appendChild(upsetDiv);
+    }
+
+    // Model info
+    const modelDiv = document.createElement('div');
+    modelDiv.className = 'model-info';
+    modelDiv.textContent = pred.model || 'Tri-Lens Predictor v1.0';
+    contentDiv.appendChild(modelDiv);
+}
+
+// Load teams on page load
+loadTeams();
+</script>
+{% endblock %}

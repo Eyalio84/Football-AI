@@ -1,0 +1,698 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - Soccer-AI{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-header">
+        <div class="chat-header-main">
+            <h2 id="chat-title">Fan Chat</h2>
+            <p id="chat-status" class="chat-status">Use the dropdown in the navbar to select your team</p>
+        </div>
+        <div class="mood-display" id="mood-display" style="display: none;">
+            <div class="mood-badge" id="mood-badge">
+                <span class="mood-emoji" id="mood-emoji">😐</span>
+                <span class="mood-text" id="mood-text">Neutral</span>
+            </div>
+            <div class="mood-form" id="mood-form" title="Recent form">
+                <span id="form-badges"></span>
+            </div>
+        </div>
+        <!-- 4D Position Indicator (shows when 4D is enabled) -->
+        <div class="position-4d" id="position-4d" style="display: none;" title="4D Persona Position">
+            <div class="axis-indicator" id="axis-x" title="Emotional (X)">
+                <span class="axis-label">X</span>
+                <span class="axis-value" id="x-value">-</span>
+            </div>
+            <div class="axis-indicator" id="axis-y" title="Relational (Y)">
+                <span class="axis-label">Y</span>
+                <span class="axis-value" id="y-value">-</span>
+            </div>
+            <div class="axis-indicator" id="axis-z" title="Linguistic (Z)">
+                <span class="axis-label">Z</span>
+                <span class="axis-value" id="z-value">-</span>
+            </div>
+            <div class="axis-indicator" id="axis-t" title="Temporal (T)">
+                <span class="axis-label">T</span>
+                <span class="axis-value" id="t-value">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rivalry Alert Banner (hidden by default) -->
+    <div class="rivalry-alert" id="rivalry-alert" style="display: none;">
+        <span class="rivalry-icon">⚔️</span>
+        <span class="rivalry-text" id="rivalry-text">Rivalry detected!</span>
+    </div>
+
+    <div class="chat-messages" id="messages">
+        <div class="message system" id="welcome-msg">
+            Select a club from the dropdown above to start chatting!
+        </div>
+    </div>
+
+    <form class="chat-input-form" id="chat-form">
+        <input type="text" id="user-input" placeholder="Ask about your club..." disabled>
+        <button type="submit" id="send-btn" disabled>Send</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // API URL - configurable for remote access
+    // Priority: 1) URL param ?api=  2) window.SOCCER_AI_API  3) localhost default
+    const urlParams = new URLSearchParams(window.location.search);
+    const API_URL = urlParams.get('api') || window.SOCCER_AI_API || 'http://localhost:8000';
+    if (urlParams.get('api')) {
+        console.log('Using API URL from param:', API_URL);
+    }
+
+    let selectedClub = null;
+    let triviaMode = false;
+    let currentQuestion = null;
+    let triviaScore = { correct: 0, total: 0 };
+
+    const messagesDiv = document.getElementById('messages');
+    const chatForm = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const chatTitle = document.getElementById('chat-title');
+    const chatStatus = document.getElementById('chat-status');
+
+    // Team name mappings
+    const clubNames = {
+        'arsenal': 'Arsenal Fan',
+        'chelsea': 'Chelsea Fan',
+        'manchester_united': 'Man United Fan',
+        'liverpool': 'Liverpool Fan',
+        'manchester_city': 'Man City Fan',
+        'tottenham': 'Spurs Fan',
+        'newcastle': 'Newcastle Fan',
+        'west_ham': 'West Ham Fan',
+        'everton': 'Everton Fan',
+        'brighton': 'Brighton Fan',
+        'aston_villa': 'Aston Villa Fan',
+        'wolves': 'Wolves Fan',
+        'crystal_palace': 'Crystal Palace Fan',
+        'fulham': 'Fulham Fan',
+        'nottingham_forest': 'Nottingham Forest Fan',
+        'brentford': 'Brentford Fan',
+        'bournemouth': 'Bournemouth Fan',
+        'leicester': 'Leicester City Fan'
+    };
+
+    // Team ID mapping for trivia
+    const teamIds = {
+        'arsenal': 3, 'chelsea': 4, 'manchester_united': 5, 'liverpool': 2,
+        'manchester_city': 1, 'tottenham': 6, 'newcastle': 7, 'west_ham': 10,
+        'everton': 16, 'brighton': 11, 'aston_villa': 12, 'wolves': 13,
+        'crystal_palace': 14, 'fulham': 15, 'nottingham_forest': 17,
+        'brentford': 18, 'bournemouth': 19, 'leicester': 20
+    };
+
+    // Initialize from localStorage or URL param
+    function initChat() {
+        // Check URL params first (for backward compatibility)
+        const urlParams = new URLSearchParams(window.location.search);
+        const clubParam = urlParams.get('club');
+
+        if (clubParam) {
+            localStorage.setItem('selectedTeam', clubParam);
+            activateClub(clubParam);
+        } else {
+            // Use navbar selection from localStorage
+            const savedTeam = getSelectedTeam();
+            if (savedTeam) {
+                activateClub(savedTeam);
+            }
+        }
+    }
+
+    // Mood display elements
+    const moodDisplay = document.getElementById('mood-display');
+    const moodEmoji = document.getElementById('mood-emoji');
+    const moodText = document.getElementById('mood-text');
+    const formBadges = document.getElementById('form-badges');
+    const rivalryAlert = document.getElementById('rivalry-alert');
+    const rivalryText = document.getElementById('rivalry-text');
+
+    // 4D Position display elements
+    const position4d = document.getElementById('position-4d');
+    const xValue = document.getElementById('x-value');
+    const yValue = document.getElementById('y-value');
+    const zValue = document.getElementById('z-value');
+    const tValue = document.getElementById('t-value');
+
+    // Mood emoji mapping
+    const moodEmojis = {
+        'euphoric': '🎉',
+        'confident': '😊',
+        'neutral': '😐',
+        'nervous': '😰',
+        'anxious': '😬',
+        'frustrated': '😤',
+        'devastated': '😢',
+        'happy': '😄',
+        'unknown': '🤔'
+    };
+
+    // Fetch and display mood for selected club (legacy)
+    async function fetchMood(club) {
+        try {
+            const response = await fetch(`${API_URL}/api/v1/fan/${club}/mood`);
+            if (!response.ok) return null;
+            const data = await response.json();
+            return data;
+        } catch (e) {
+            console.warn('Could not fetch mood:', e);
+            return null;
+        }
+    }
+
+    // Fetch 4D persona state (preferred when available)
+    async function fetch4DState(club) {
+        try {
+            const response = await fetch(`${API_URL}/api/v1/fan/${club}/4d-state`);
+            if (!response.ok) return null;
+            const data = await response.json();
+            return data;
+        } catch (e) {
+            console.warn('Could not fetch 4D state:', e);
+            return null;
+        }
+    }
+
+    // Update 4D position display using safe DOM methods
+    function update4DDisplay(data) {
+        if (!data || !data.enabled || !data.position_4d) {
+            position4d.style.display = 'none';
+            return;
+        }
+
+        const pos = data.position_4d;
+        position4d.style.display = 'flex';
+
+        // X-axis (Emotional)
+        if (pos.x) {
+            const moodState = pos.x.mood || 'neutral';
+            const emoji = moodEmojis[moodState] || '😐';
+            xValue.textContent = emoji + ' ' + moodState;
+            xValue.title = pos.x.reason || 'Emotional state';
+        }
+
+        // Y-axis (Relational)
+        if (pos.y) {
+            if (pos.y.activated) {
+                yValue.textContent = '⚔️ ' + pos.y.target;
+                yValue.title = pos.y.relation_type + ' (intensity: ' + pos.y.intensity + ')';
+                document.getElementById('axis-y').classList.add('active');
+            } else {
+                yValue.textContent = '—';
+                yValue.title = 'No relationship active';
+                document.getElementById('axis-y').classList.remove('active');
+            }
+        }
+
+        // Z-axis (Linguistic)
+        if (pos.z) {
+            const dialectEmojis = {
+                'scouse': '🔴',
+                'mancunian': '🔵',
+                'geordie': '⬛',
+                'cockney': '⚪',
+                'midlands': '🟣',
+                'neutral': '🏴󠁧󠁢󠁥󠁮󠁧󠁿'
+            };
+            const dialectEmoji = dialectEmojis[pos.z.dialect] || '🏴󠁧󠁢󠁥󠁮󠁧󠁿';
+            zValue.textContent = dialectEmoji + ' ' + pos.z.dialect;
+            zValue.title = 'Distinctiveness: ' + pos.z.distinctiveness;
+        }
+
+        // T-axis (Temporal)
+        if (pos.t) {
+            const momentumEmojis = {
+                'rising': '📈',
+                'falling': '📉',
+                'stable': '➡️'
+            };
+            const momentumEmoji = momentumEmojis[pos.t.momentum] || '➡️';
+            tValue.textContent = momentumEmoji + ' turn ' + pos.t.step;
+            tValue.title = 'Momentum: ' + pos.t.momentum;
+        }
+
+        // Also update mood display from 4D data
+        if (pos.x) {
+            moodDisplay.style.display = 'flex';
+            const moodState = pos.x.mood || 'neutral';
+            moodEmoji.textContent = moodEmojis[moodState] || '😐';
+            moodText.textContent = moodState.charAt(0).toUpperCase() + moodState.slice(1);
+            const moodBadge = document.getElementById('mood-badge');
+            moodBadge.className = 'mood-badge mood-' + moodState;
+        }
+
+        // Update form badges from 4D data using safe DOM methods
+        if (data.form_string) {
+            formBadges.textContent = '';
+            data.form_string.split('').forEach(function(r) {
+                const span = document.createElement('span');
+                span.className = 'form-badge ' + (r === 'W' ? 'win' : r === 'D' ? 'draw' : 'loss');
+                span.textContent = r;
+                formBadges.appendChild(span);
+            });
+        }
+    }
+
+    // Check message for rivalry mentions
+    async function checkRivalry(club, message) {
+        try {
+            const response = await fetch(`${API_URL}/api/v1/fan/${club}/check-rivalry`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+            if (!response.ok) return null;
+            const data = await response.json();
+            if (data.rivalry_detected && data.rivalry) {
+                showRivalryAlert(data.rivalry);
+            }
+            return data;
+        } catch (e) {
+            console.warn('Could not check rivalry:', e);
+            return null;
+        }
+    }
+
+    // Update mood display
+    function updateMoodDisplay(moodData) {
+        if (!moodData || !moodData.mood) {
+            moodDisplay.style.display = 'none';
+            return;
+        }
+
+        const mood = moodData.mood;
+        moodDisplay.style.display = 'flex';
+
+        // Set emoji and text
+        const moodState = mood.mood || 'neutral';
+        moodEmoji.textContent = moodEmojis[moodState] || '😐';
+        moodText.textContent = moodState.charAt(0).toUpperCase() + moodState.slice(1);
+
+        // Set form badges (W/D/L)
+        if (mood.form_string) {
+            formBadges.innerHTML = mood.form_string.split('').map(r => {
+                const cls = r === 'W' ? 'win' : r === 'D' ? 'draw' : 'loss';
+                return `<span class="form-badge ${cls}">${r}</span>`;
+            }).join('');
+        }
+
+        // Set mood badge color
+        const moodBadge = document.getElementById('mood-badge');
+        moodBadge.className = 'mood-badge mood-' + moodState;
+    }
+
+    // Show rivalry alert
+    function showRivalryAlert(rivalry) {
+        if (!rivalry) {
+            rivalryAlert.style.display = 'none';
+            return;
+        }
+        rivalryText.textContent = `⚔️ ${rivalry.derby_name || 'Rivalry'} detected! ${rivalry.banter ? rivalry.banter[0] : ''}`;
+        rivalryAlert.style.display = 'flex';
+        rivalryAlert.classList.add('animate-in');
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            rivalryAlert.classList.remove('animate-in');
+            rivalryAlert.style.display = 'none';
+        }, 5000);
+    }
+
+    // Activate chat for a club
+    async function activateClub(club) {
+        selectedClub = club;
+
+        // Update header
+        chatTitle.textContent = 'Chatting with ' + (clubNames[club] || club);
+        chatStatus.textContent = 'Type /trivia to play a quiz game';
+        chatStatus.classList.add('active');
+
+        // Enable input
+        userInput.disabled = false;
+        sendBtn.disabled = false;
+        userInput.placeholder = 'Ask anything about ' + (clubNames[club] || club).replace(' Fan', '') + '...';
+        userInput.focus();
+
+        // Clear messages
+        while (messagesDiv.firstChild) {
+            messagesDiv.removeChild(messagesDiv.firstChild);
+        }
+
+        // Reset state
+        triviaMode = false;
+        currentQuestion = null;
+        triviaScore = { correct: 0, total: 0 };
+        conversationId = null;
+
+        // Try 4D state first, fallback to legacy mood
+        const state4d = await fetch4DState(club);
+        if (state4d && state4d.enabled && state4d.position_4d) {
+            update4DDisplay(state4d);
+            console.log('[4D] Using 4D persona state:', state4d.position_4d);
+        } else {
+            // Fallback to legacy mood
+            const moodData = await fetchMood(club);
+            updateMoodDisplay(moodData);
+            position4d.style.display = 'none';
+        }
+
+        addMessage('system', 'You are now chatting with a passionate ' + clubNames[club] + '. Ask anything about the club!');
+    }
+
+    // Listen for team changes from navbar dropdown
+    window.addEventListener('teamChanged', (e) => {
+        activateClub(e.detail);
+    });
+
+    // Init on page load
+    document.addEventListener('DOMContentLoaded', initChat);
+
+    // ==========================================
+    // TRIVIA SYSTEM
+    // ==========================================
+
+    async function startTrivia() {
+        triviaMode = true;
+        triviaScore = { correct: 0, total: 0 };
+        addMessage('assistant', "🎮 Alright, let's test your knowledge! I'll ask you questions about our beloved club. Ready? Here we go!");
+        await fetchNextQuestion();
+    }
+
+    async function fetchNextQuestion() {
+        const teamId = teamIds[selectedClub];
+        if (!teamId) {
+            addMessage('assistant', "Sorry, trivia isn't available for this club yet.");
+            triviaMode = false;
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/api/v1/trivia?team_id=${teamId}`);
+            const data = await response.json();
+
+            if (data.data) {
+                currentQuestion = data.data;
+                displayQuestion(currentQuestion);
+            } else {
+                addMessage('assistant', "No more questions available! Your final score: " + triviaScore.correct + "/" + triviaScore.total);
+                triviaMode = false;
+            }
+        } catch (err) {
+            addMessage('error', 'Failed to load trivia question. Is the backend running?');
+            triviaMode = false;
+        }
+    }
+
+    function displayQuestion(q) {
+        // Create question message
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'message assistant trivia-question';
+
+        const questionText = document.createElement('div');
+        questionText.className = 'trivia-text';
+        questionText.textContent = "📋 " + q.question;
+        questionDiv.appendChild(questionText);
+
+        // Shuffle answers
+        const answers = [...q.wrong_answers, q.correct_answer];
+        shuffleArray(answers);
+
+        // Create answer buttons
+        const answersDiv = document.createElement('div');
+        answersDiv.className = 'trivia-answers';
+
+        answers.forEach((answer, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'trivia-btn';
+            btn.textContent = String.fromCharCode(65 + idx) + ") " + answer;
+            btn.onclick = () => checkAnswer(answer, q.correct_answer, q.explanation);
+            answersDiv.appendChild(btn);
+        });
+
+        questionDiv.appendChild(answersDiv);
+        messagesDiv.appendChild(questionDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function checkAnswer(selected, correct, explanation) {
+        // Disable all trivia buttons
+        document.querySelectorAll('.trivia-btn').forEach(btn => {
+            btn.disabled = true;
+            if (btn.textContent.includes(correct)) {
+                btn.classList.add('correct');
+            } else if (btn.textContent.includes(selected)) {
+                btn.classList.add('wrong');
+            }
+        });
+
+        triviaScore.total++;
+
+        if (selected === correct) {
+            triviaScore.correct++;
+            addMessage('assistant', "✅ YES! That's right! " + (explanation || '') + "\n\nScore: " + triviaScore.correct + "/" + triviaScore.total);
+        } else {
+            addMessage('assistant', "❌ Not quite! The answer was: " + correct + "\n\n" + (explanation || '') + "\n\nScore: " + triviaScore.correct + "/" + triviaScore.total);
+        }
+
+        // Ask if they want another question
+        setTimeout(() => {
+            addTriviaControls();
+        }, 500);
+    }
+
+    function addTriviaControls() {
+        const controlsDiv = document.createElement('div');
+        controlsDiv.className = 'message assistant trivia-controls';
+
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'trivia-btn next';
+        nextBtn.textContent = '➡️ Next Question';
+        nextBtn.onclick = async () => {
+            controlsDiv.remove();
+            await fetchNextQuestion();
+        };
+
+        const quitBtn = document.createElement('button');
+        quitBtn.className = 'trivia-btn quit';
+        quitBtn.textContent = '🛑 End Trivia';
+        quitBtn.onclick = () => {
+            controlsDiv.remove();
+            triviaMode = false;
+            addMessage('assistant', "Good game! Final score: " + triviaScore.correct + "/" + triviaScore.total + ". Back to regular chat - ask me anything!");
+        };
+
+        controlsDiv.appendChild(nextBtn);
+        controlsDiv.appendChild(quitBtn);
+        messagesDiv.appendChild(controlsDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // Conversation ID tracking for compound intelligence
+    let conversationId = null;
+
+    // Streaming mode toggle (default: on)
+    let useStreaming = true;
+
+    // Send message
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!selectedClub || !userInput.value.trim()) return;
+
+        const message = userInput.value.trim();
+        userInput.value = '';
+
+        // Check for /trivia command
+        if (message.toLowerCase() === '/trivia') {
+            addMessage('user', message);
+            await startTrivia();
+            return;
+        }
+
+        // Toggle streaming with /stream command
+        if (message.toLowerCase() === '/stream') {
+            useStreaming = !useStreaming;
+            addMessage('system', 'Streaming mode: ' + (useStreaming ? 'ON ✅' : 'OFF'));
+            return;
+        }
+
+        addMessage('user', message);
+
+        // Check for rivalry mentions in user message
+        checkRivalry(selectedClub, message);
+
+        // Create streaming message container
+        const streamDiv = document.createElement('div');
+        streamDiv.className = 'message assistant streaming';
+        streamDiv.innerHTML = '<span class="cursor">▌</span>';
+        messagesDiv.appendChild(streamDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        const payload = {
+            message: message,
+            club: selectedClub
+        };
+
+        if (conversationId) {
+            payload.conversation_id = conversationId;
+        }
+
+        if (useStreaming) {
+            // STREAMING MODE
+            await streamResponse(payload, streamDiv);
+        } else {
+            // NON-STREAMING MODE (fallback)
+            await fetchResponse(payload, streamDiv);
+        }
+    });
+
+    // Streaming fetch with SSE
+    async function streamResponse(payload, streamDiv) {
+        try {
+            const response = await fetch(`${API_URL}/api/v1/chat/stream`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error('Stream request failed');
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = '';
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+
+                // Process SSE events
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';  // Keep incomplete line in buffer
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6);  // Remove 'data: ' prefix
+
+                        try {
+                            const parsed = JSON.parse(data);
+
+                            if (parsed.text) {
+                                fullText += parsed.text;
+                                streamDiv.innerHTML = formatMessage(fullText) + '<span class="cursor">▌</span>';
+                                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                            }
+
+                            if (parsed.error) {
+                                streamDiv.className = 'message error';
+                                streamDiv.textContent = 'Error: ' + parsed.error;
+                                return;
+                            }
+
+                            if (parsed.done) {
+                                // Remove cursor, finalize message
+                                streamDiv.innerHTML = formatMessage(fullText);
+                                streamDiv.className = 'message assistant';
+
+                                if (parsed.conversation_id) {
+                                    conversationId = parsed.conversation_id;
+                                }
+                            }
+                        } catch (e) {
+                            // Skip malformed JSON
+                        }
+                    }
+                }
+            }
+
+            // Finalize if not already done
+            if (streamDiv.querySelector('.cursor')) {
+                streamDiv.innerHTML = formatMessage(fullText);
+                streamDiv.className = 'message assistant';
+            }
+
+        } catch (err) {
+            streamDiv.className = 'message error';
+            streamDiv.textContent = 'Failed to connect to backend. Is it running on port 8000?';
+        }
+    }
+
+    // Non-streaming fallback
+    async function fetchResponse(payload, streamDiv) {
+        try {
+            const response = await fetch(`${API_URL}/api/v1/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (data.conversation_id) {
+                conversationId = data.conversation_id;
+            }
+
+            if (data.response) {
+                streamDiv.innerHTML = formatMessage(data.response);
+                streamDiv.className = 'message assistant';
+            } else if (data.error) {
+                streamDiv.className = 'message error';
+                streamDiv.textContent = 'Error: ' + data.error;
+            }
+        } catch (err) {
+            streamDiv.className = 'message error';
+            streamDiv.textContent = 'Failed to connect to backend. Is it running on port 8000?';
+        }
+    }
+
+    // Format message with basic markdown support
+    function formatMessage(text) {
+        // Escape HTML
+        let html = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        // Bold: **text** or __text__
+        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
+
+        // Italic: *text* or _text_
+        html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+        // Line breaks
+        html = html.replace(/\n/g, '<br>');
+
+        return html;
+    }
+
+    function addMessage(type, text, isLoading) {
+        const div = document.createElement('div');
+        div.className = 'message ' + type + (isLoading ? ' loading' : '');
+        div.innerHTML = formatMessage(text);
+        messagesDiv.appendChild(div);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+</script>
+{% endblock %}

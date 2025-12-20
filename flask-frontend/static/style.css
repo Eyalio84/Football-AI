@@ -1,0 +1,1520 @@
+/* Soccer-AI Flask Frontend Styles */
+
+:root {
+    --arsenal-red: #EF0107;
+    --chelsea-blue: #034694;
+    --manutd-red: #DA291C;
+    --liverpool-red: #C8102E;
+    --mancity-blue: #6CABDD;
+    --spurs-navy: #132257;
+    --newcastle-black: #241F20;
+    --westham-claret: #7C2C3B;
+    --everton-blue: #003399;
+    --brighton-blue: #0057B8;
+    --villa-claret: #670E36;
+    --wolves-gold: #FDB913;
+    --palace-red: #1B458F;
+    --palace-blue: #C4122E;
+    --fulham-white: #000000;
+    --forest-red: #DD0000;
+    --brentford-red: #E30613;
+    --bournemouth-red: #DA291C;
+    --leicester-blue: #003090;
+    --bg-dark: #1a1a2e;
+    --bg-card: #16213e;
+    --text-primary: #eee;
+    --text-secondary: #aaa;
+    --accent: #0f3460;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--accent);
+}
+
+.nav-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    margin-left: 1.5rem;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    color: var(--text-primary);
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Hero */
+.hero {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+/* Fan Cards */
+.fan-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.fan-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 2rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid transparent;
+}
+
+.fan-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.fan-card.arsenal { border-color: var(--arsenal-red); }
+.fan-card.chelsea { border-color: var(--chelsea-blue); }
+.fan-card.manutd { border-color: var(--manutd-red); }
+.fan-card.liverpool { border-color: var(--liverpool-red); }
+.fan-card.mancity { border-color: var(--mancity-blue); }
+.fan-card.spurs { border-color: var(--spurs-navy); }
+.fan-card.newcastle { border-color: var(--newcastle-black); }
+.fan-card.westham { border-color: var(--westham-claret); }
+.fan-card.everton { border-color: var(--everton-blue); }
+.fan-card.brighton { border-color: var(--brighton-blue); }
+.fan-card.villa { border-color: var(--villa-claret); }
+.fan-card.wolves { border-color: var(--wolves-gold); }
+.fan-card.palace { border-color: var(--palace-blue); }
+.fan-card.fulham { border-color: var(--fulham-white); }
+.fan-card.forest { border-color: var(--forest-red); }
+.fan-card.brentford { border-color: var(--brentford-red); }
+.fan-card.bournemouth { border-color: var(--bournemouth-red); }
+.fan-card.leicester { border-color: var(--leicester-blue); }
+
+.fan-card.arsenal:hover { box-shadow: 0 8px 24px rgba(239,1,7,0.3); }
+.fan-card.chelsea:hover { box-shadow: 0 8px 24px rgba(3,70,148,0.3); }
+.fan-card.manutd:hover { box-shadow: 0 8px 24px rgba(218,41,28,0.3); }
+.fan-card.liverpool:hover { box-shadow: 0 8px 24px rgba(200,16,46,0.3); }
+.fan-card.mancity:hover { box-shadow: 0 8px 24px rgba(108,171,221,0.3); }
+.fan-card.spurs:hover { box-shadow: 0 8px 24px rgba(19,34,87,0.3); }
+.fan-card.newcastle:hover { box-shadow: 0 8px 24px rgba(36,31,32,0.5); }
+.fan-card.westham:hover { box-shadow: 0 8px 24px rgba(124,44,59,0.3); }
+.fan-card.everton:hover { box-shadow: 0 8px 24px rgba(0,51,153,0.3); }
+.fan-card.brighton:hover { box-shadow: 0 8px 24px rgba(0,87,184,0.3); }
+.fan-card.villa:hover { box-shadow: 0 8px 24px rgba(103,14,54,0.3); }
+.fan-card.wolves:hover { box-shadow: 0 8px 24px rgba(253,185,19,0.3); }
+.fan-card.palace:hover { box-shadow: 0 8px 24px rgba(27,69,143,0.3); }
+.fan-card.fulham:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+.fan-card.forest:hover { box-shadow: 0 8px 24px rgba(221,0,0,0.3); }
+.fan-card.brentford:hover { box-shadow: 0 8px 24px rgba(227,6,19,0.3); }
+.fan-card.bournemouth:hover { box-shadow: 0 8px 24px rgba(218,41,28,0.3); }
+.fan-card.leicester:hover { box-shadow: 0 8px 24px rgba(0,48,144,0.3); }
+
+.club-badge {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0 auto 1rem;
+}
+
+.arsenal .club-badge { background: var(--arsenal-red); }
+.chelsea .club-badge { background: var(--chelsea-blue); }
+.manutd .club-badge { background: var(--manutd-red); }
+.liverpool .club-badge { background: var(--liverpool-red); }
+.mancity .club-badge { background: var(--mancity-blue); }
+.spurs .club-badge { background: var(--spurs-navy); }
+.newcastle .club-badge { background: var(--newcastle-black); }
+.westham .club-badge { background: var(--westham-claret); }
+.everton .club-badge { background: var(--everton-blue); }
+.brighton .club-badge { background: var(--brighton-blue); }
+.villa .club-badge { background: var(--villa-claret); }
+.wolves .club-badge { background: var(--wolves-gold); color: #000; }
+.palace .club-badge { background: var(--palace-blue); }
+.fulham .club-badge { background: var(--fulham-white); }
+.forest .club-badge { background: var(--forest-red); }
+.brentford .club-badge { background: var(--brentford-red); }
+.bournemouth .club-badge { background: var(--bournemouth-red); }
+.leicester .club-badge { background: var(--leicester-blue); }
+
+.fan-card h3 {
+    margin-bottom: 0.5rem;
+}
+
+.fan-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Features */
+.features {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: var(--bg-card);
+    border-radius: 12px;
+}
+
+.features h2 {
+    margin-bottom: 1rem;
+}
+
+.features ul {
+    list-style: none;
+}
+
+.features li {
+    padding: 0.5rem 0;
+    color: var(--text-secondary);
+}
+
+.features li::before {
+    content: "✓ ";
+    color: #4ade80;
+}
+
+/* Chat Page */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.chat-header {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-card);
+    border-radius: 12px 12px 0 0;
+}
+
+.chat-header h2 {
+    margin-bottom: 1rem;
+}
+
+.club-selector {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-height: 300px;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+/* Collapse selector when club is selected */
+.club-selector.collapsed {
+    max-height: 50px;
+    overflow: hidden;
+}
+
+.club-selector.collapsed .club-btn:not(.active) {
+    display: none;
+}
+
+/* Toggle button to expand/collapse */
+.selector-toggle {
+    background: transparent;
+    border: 1px dashed var(--accent);
+    color: var(--text-secondary);
+    padding: 0.25rem 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+.selector-toggle:hover {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
+.club-btn {
+    padding: 0.5rem 1.5rem;
+    border: 2px solid var(--accent);
+    background: transparent;
+    color: var(--text-primary);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.club-btn:hover {
+    background: var(--accent);
+}
+
+.club-btn.arsenal.active { background: var(--arsenal-red); border-color: var(--arsenal-red); }
+.club-btn.chelsea.active { background: var(--chelsea-blue); border-color: var(--chelsea-blue); }
+.club-btn.manutd.active { background: var(--manutd-red); border-color: var(--manutd-red); }
+.club-btn.liverpool.active { background: var(--liverpool-red); border-color: var(--liverpool-red); }
+.club-btn.mancity.active { background: var(--mancity-blue); border-color: var(--mancity-blue); }
+.club-btn.spurs.active { background: var(--spurs-navy); border-color: var(--spurs-navy); }
+.club-btn.newcastle.active { background: var(--newcastle-black); border-color: var(--newcastle-black); }
+.club-btn.westham.active { background: var(--westham-claret); border-color: var(--westham-claret); }
+.club-btn.everton.active { background: var(--everton-blue); border-color: var(--everton-blue); }
+.club-btn.brighton.active { background: var(--brighton-blue); border-color: var(--brighton-blue); }
+.club-btn.villa.active { background: var(--villa-claret); border-color: var(--villa-claret); }
+.club-btn.wolves.active { background: var(--wolves-gold); border-color: var(--wolves-gold); color: #000; }
+.club-btn.palace.active { background: var(--palace-blue); border-color: var(--palace-red); }
+.club-btn.fulham.active { background: var(--fulham-white); border-color: var(--fulham-white); }
+.club-btn.forest.active { background: var(--forest-red); border-color: var(--forest-red); }
+.club-btn.brentford.active { background: var(--brentford-red); border-color: var(--brentford-red); }
+.club-btn.bournemouth.active { background: var(--bournemouth-red); border-color: var(--bournemouth-red); }
+.club-btn.leicester.active { background: var(--leicester-blue); border-color: var(--leicester-blue); }
+
+/* Messages */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    background: var(--bg-card);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.message {
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    max-width: 80%;
+    word-wrap: break-word;
+}
+
+.message.user {
+    background: var(--accent);
+    align-self: flex-end;
+}
+
+.message.assistant {
+    background: #2a2a4a;
+    align-self: flex-start;
+}
+
+.message.system {
+    background: transparent;
+    color: var(--text-secondary);
+    text-align: center;
+    align-self: center;
+    font-style: italic;
+}
+
+.message.error {
+    background: #4a1a1a;
+    color: #ff6b6b;
+    align-self: center;
+}
+
+.message.loading {
+    opacity: 0.6;
+}
+
+/* Streaming cursor animation */
+.message.streaming {
+    min-height: 24px;
+}
+
+.message.streaming .cursor {
+    display: inline-block;
+    animation: blink 0.8s infinite;
+    color: #4ade80;
+    font-weight: bold;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* Chat Input */
+.chat-input-form {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: var(--bg-card);
+    border-radius: 0 0 12px 12px;
+}
+
+.chat-input-form input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.chat-input-form input:disabled {
+    opacity: 0.5;
+}
+
+.chat-input-form input:focus {
+    outline: none;
+    border-color: #4ade80;
+}
+
+.chat-input-form button {
+    padding: 0.75rem 1.5rem;
+    background: #4ade80;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.chat-input-form button:hover:not(:disabled) {
+    background: #22c55e;
+}
+
+.chat-input-form button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Teams Page */
+.teams-page {
+    text-align: center;
+}
+
+.teams-page h1 {
+    margin-bottom: 0.5rem;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.team-card {
+    background: var(--bg-card);
+    padding: 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid var(--accent);
+}
+
+.team-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.team-card h3 {
+    margin-bottom: 0.25rem;
+}
+
+.team-card p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.loading {
+    color: var(--text-secondary);
+    padding: 2rem;
+}
+
+/* Trivia System */
+.trivia-question {
+    max-width: 90%;
+}
+
+.trivia-text {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.trivia-answers {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.trivia-btn {
+    padding: 0.75rem 1rem;
+    background: var(--accent);
+    color: var(--text-primary);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.trivia-btn:hover:not(:disabled) {
+    background: #1a4a7a;
+    border-color: #4ade80;
+}
+
+.trivia-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.trivia-btn.correct {
+    background: #166534;
+    border-color: #4ade80;
+}
+
+.trivia-btn.wrong {
+    background: #7f1d1d;
+    border-color: #ef4444;
+}
+
+.trivia-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.trivia-btn.next {
+    background: #4ade80;
+    color: #000;
+    border-color: #4ade80;
+}
+
+.trivia-btn.next:hover {
+    background: #22c55e;
+}
+
+.trivia-btn.quit {
+    background: #6b7280;
+    border-color: #6b7280;
+}
+
+.trivia-btn.quit:hover {
+    background: #4b5563;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .container {
+        padding: 1rem;
+    }
+
+    .navbar {
+        padding: 1rem;
+    }
+
+    .nav-links a {
+        margin-left: 1rem;
+    }
+
+    .trivia-controls {
+        flex-direction: column;
+    }
+
+    /* Mobile chat improvements */
+    .chat-container {
+        height: calc(100vh - 80px);
+    }
+
+    .chat-header {
+        padding: 0.75rem;
+    }
+
+    .chat-header h2 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .club-selector {
+        max-height: 200px;
+        gap: 0.3rem;
+    }
+
+    .club-selector.collapsed {
+        max-height: 40px;
+    }
+
+    .club-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .chat-messages {
+        flex: 1;
+        min-height: 200px;
+    }
+
+    .message {
+        max-width: 90%;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.95rem;
+    }
+
+    .chat-input-form {
+        padding: 0.75rem;
+    }
+
+    .chat-input-form input {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.95rem;
+    }
+
+    .chat-input-form button {
+        padding: 0.6rem 1rem;
+    }
+}
+
+/* ========================================
+   STANDINGS PAGE
+   ======================================== */
+.standings-container h1 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.standings-container .subtitle {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.standings {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-card);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.standings th,
+.standings td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--accent);
+}
+
+.standings th {
+    background: var(--accent);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+}
+
+.standings .pos {
+    width: 50px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.standings .team-name {
+    min-width: 200px;
+}
+
+.standings .points {
+    font-size: 1.1rem;
+}
+
+.standings .form span {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 3px;
+    margin-right: 2px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.form-w {
+    background: #10b981;
+    color: white;
+}
+
+.form-d {
+    background: #6b7280;
+    color: white;
+}
+
+.form-l {
+    background: #ef4444;
+    color: white;
+}
+
+.standings tr.champions-league {
+    border-left: 4px solid #10b981;
+}
+
+.standings tr.europa-league {
+    border-left: 4px solid #f59e0b;
+}
+
+.standings tr.relegation {
+    border-left: 4px solid #ef4444;
+}
+
+.positive {
+    color: #10b981;
+}
+
+.negative {
+    color: #ef4444;
+}
+
+/* ========================================
+   FIXTURES PAGE
+   ======================================== */
+.fixtures-container h1 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.fixtures-container .subtitle {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    border-color: var(--mancity-blue);
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    background: var(--mancity-blue);
+    border-color: var(--mancity-blue);
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.fixtures-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.fixture-card {
+    background: var(--bg-card);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--mancity-blue);
+}
+
+.fixture-date {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.fixture-match {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.fixture-team {
+    flex: 1;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.fixture-team.home {
+    text-align: right;
+}
+
+.fixture-score {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--mancity-blue);
+    min-width: 80px;
+    text-align: center;
+}
+
+.score-num {
+    color: var(--text-primary);
+}
+
+.fixture-status {
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    text-transform: capitalize;
+}
+
+.empty-message {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+}
+
+/* ========================================
+   PREDICTIONS PAGE
+   ======================================== */
+.predictions-container h1 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.predictions-container .subtitle {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.predictor-form {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.predictor-form h2 {
+    margin-bottom: 1rem;
+}
+
+.team-select {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.75rem;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.vs-divider {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-secondary);
+    margin: 0.5rem 0;
+}
+
+.predict-btn {
+    padding: 1rem 2rem;
+    background: var(--mancity-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.predict-btn:hover:not(:disabled) {
+    background: #5a9bc9;
+    transform: translateY(-2px);
+}
+
+.predict-btn:disabled {
+    background: #4b5563;
+    cursor: not-allowed;
+}
+
+#prediction-result {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.prediction-main {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.prediction-result {
+    font-size: 2rem;
+    color: var(--mancity-blue);
+    margin-bottom: 0.5rem;
+}
+
+.prediction-confidence {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.probabilities {
+    margin: 2rem 0;
+}
+
+.probabilities h4 {
+    margin-bottom: 1rem;
+}
+
+.prob-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--accent);
+}
+
+.prob-value {
+    font-weight: bold;
+    color: var(--mancity-blue);
+}
+
+.detected-patterns {
+    margin: 2rem 0;
+}
+
+.detected-patterns h4 {
+    margin-bottom: 1rem;
+}
+
+.detected-patterns ul {
+    list-style: none;
+    padding: 0;
+}
+
+.detected-patterns li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.detected-patterns li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #10b981;
+    font-weight: bold;
+}
+
+.prediction-reasoning {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--accent);
+}
+
+.prediction-reasoning h4 {
+    margin-bottom: 1rem;
+}
+
+.prediction-reasoning p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.patterns-section {
+    margin-top: 3rem;
+}
+
+.patterns-section h2 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.patterns-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.patterns-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.pattern-card {
+    background: var(--bg-card);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--mancity-blue);
+}
+
+.pattern-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--mancity-blue);
+}
+
+.pattern-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* ========================================
+   LOADING & ERROR STATES
+   ======================================== */
+.loading-state,
+.error-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+
+.error-state {
+    color: #ef4444;
+}
+
+.error-message {
+    color: #ef4444;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* ========================================
+   RESPONSIVE UPDATES
+   ======================================== */
+@media (max-width: 768px) {
+    .standings {
+        font-size: 0.875rem;
+    }
+
+    .standings th,
+    .standings td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .fixture-match {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .fixture-team.home {
+        text-align: center;
+    }
+
+    .nav-links a {
+        font-size: 0.875rem;
+        margin-left: 0.75rem;
+    }
+}
+
+/* ========================================
+   NAVBAR TEAM DROPDOWN
+   ======================================== */
+.team-selector-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.team-selector-nav label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+#team-dropdown {
+    padding: 0.5rem 1rem;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    min-width: 140px;
+}
+
+#team-dropdown:hover {
+    border-color: var(--mancity-blue);
+}
+
+#team-dropdown:focus {
+    outline: none;
+    border-color: #4ade80;
+}
+
+/* ========================================
+   DASHBOARD
+   ======================================== */
+.dashboard {
+    padding: 1rem 0;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.dashboard-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--accent);
+}
+
+.dashboard-card h2 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.card-link {
+    display: inline-block;
+    margin-top: 1rem;
+    color: var(--mancity-blue);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.card-link:hover {
+    text-decoration: underline;
+}
+
+/* Matchday Badge */
+.matchday-badge {
+    display: inline-block;
+    background: var(--mancity-blue);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+/* Mini Standings Table */
+.mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.mini-table th,
+.mini-table td {
+    padding: 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--accent);
+}
+
+.mini-table th {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* Results List */
+.results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.result-item {
+    padding: 0.5rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.result-item.highlight {
+    border-left: 3px solid var(--mancity-blue);
+    background: rgba(108, 171, 221, 0.1);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.stat {
+    text-align: center;
+    padding: 0.75rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--mancity-blue);
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* Chat Card */
+.chat-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-card p {
+    flex: 1;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.btn-primary {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: var(--accent);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background: var(--mancity-blue);
+}
+
+.btn-primary.ready {
+    background: #4ade80;
+    color: #000;
+}
+
+/* Chat Status */
+.chat-status {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.chat-status.active {
+    color: #4ade80;
+}
+
+/* Mobile Dashboard */
+@media (max-width: 600px) {
+    .navbar {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .team-selector-nav {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--accent);
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ========================================
+   FAN MOOD DISPLAY
+   ======================================== */
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.chat-header-main {
+    flex: 1;
+}
+
+.mood-display {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+}
+
+.mood-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.mood-emoji {
+    font-size: 1.1rem;
+}
+
+/* Mood colors */
+.mood-badge.mood-euphoric {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+}
+
+.mood-badge.mood-confident {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+}
+
+.mood-badge.mood-neutral {
+    background: rgba(156, 163, 175, 0.2);
+    color: #9ca3af;
+}
+
+.mood-badge.mood-nervous {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+}
+
+.mood-badge.mood-anxious {
+    background: rgba(249, 115, 22, 0.2);
+    color: #fb923c;
+}
+
+.mood-badge.mood-frustrated {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+/* Form badges (W/D/L) */
+.mood-form {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.form-badge {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.form-badge.win {
+    background: #10b981;
+    color: white;
+}
+
+.form-badge.draw {
+    background: #6b7280;
+    color: white;
+}
+
+.form-badge.loss {
+    background: #ef4444;
+    color: white;
+}
+
+/* ========================================
+   RIVALRY ALERT
+   ======================================== */
+.rivalry-alert {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.15) 0%, rgba(249, 115, 22, 0.15) 100%);
+    border-left: 4px solid #ef4444;
+    border-right: 4px solid #f97316;
+    color: #fbbf24;
+    font-weight: 600;
+    font-size: 0.95rem;
+    animation: rivalryPulse 2s ease-in-out infinite;
+}
+
+.rivalry-icon {
+    font-size: 1.2rem;
+}
+
+.rivalry-alert.animate-in {
+    animation: slideDown 0.3s ease-out, rivalryPulse 2s ease-in-out infinite 0.3s;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rivalryPulse {
+    0%, 100% {
+        background: linear-gradient(90deg, rgba(239, 68, 68, 0.15) 0%, rgba(249, 115, 22, 0.15) 100%);
+    }
+    50% {
+        background: linear-gradient(90deg, rgba(239, 68, 68, 0.25) 0%, rgba(249, 115, 22, 0.25) 100%);
+    }
+}
+
+/* Mobile mood display */
+@media (max-width: 600px) {
+    .chat-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .mood-display {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .rivalry-alert {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .position-4d {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+}
+
+/* ========================================
+   4D PERSONA POSITION INDICATOR
+   ======================================== */
+.position-4d {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+    border-radius: 8px;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    margin-left: auto;
+}
+
+.axis-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    background: var(--bg-card);
+    border-radius: 6px;
+    min-width: 60px;
+    transition: all 0.3s ease;
+}
+
+.axis-indicator:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.axis-indicator.active {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(249, 115, 22, 0.2) 100%);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+.axis-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.axis-value {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+}
+
+/* Axis-specific colors */
+#axis-x .axis-label { color: #f59e0b; }
+#axis-y .axis-label { color: #ef4444; }
+#axis-z .axis-label { color: #10b981; }
+#axis-t .axis-label { color: #3b82f6; }

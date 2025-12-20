@@ -1,0 +1,287 @@
+---
+title: Predictor - Live Game Predictions
+domain: predictor
+component: game-predictions
+status: ready-for-implementation
+last_updated: 2024-12-21
+resumption_context: true
+---
+
+# Predictor Games Context Packet
+
+## Purpose
+Generate upset probability predictions for today's and tomorrow's soccer matches using Side A / Side B factor analysis.
+
+---
+
+## Current State
+
+### KG Nodes (75 total, 34 predictor)
+```
+predictor_module_prediction_engine     ← Core engine
+predictor_module_side_a_calculator     ← FA_* factors
+predictor_module_side_b_calculator     ← FB_* factors
+predictor_factor_a_fa_fat              ← Fatigue
+predictor_factor_a_fa_inj              ← Injuries
+predictor_factor_a_fa_sus              ← Suspensions
+predictor_factor_b_fb_rst              ← Rest advantage
+predictor_factor_b_fb_hme              ← Home advantage
+predictor_pattern_fatigue_x_rest       ← Third Knowledge
+```
+
+### The Formula (from predictor_kg.json)
+```
+P(upset) = Base + Σ(Side_A_factors) + Σ(Side_B_factors) + Third_Knowledge_Bonus
+
+Where:
+- Base = 0.15 (historical upset rate)
+- Side A factors = Favorite weakness (FA_FAT, FA_INJ, FA_SUS, etc.)
+- Side B factors = Underdog strength (FB_RST, FB_HME, FB_MOT, etc.)
+- Third Knowledge = Pattern bonuses when factors combine
+```
+
+---
+
+## Files Structure
+
+```
+backend/predictor/
+├── predictor_kg.json          ← Factor definitions (EXISTS)
+├── prediction_engine.py       ← TO CREATE
+├── side_a_calculator.py       ← TO CREATE
+├── side_b_calculator.py       ← TO CREATE
+├── game_fetcher.py            ← TO CREATE (API for today's games)
+└── patterns.py                ← TO CREATE (Third Knowledge)
+```
+
+---
+
+## Today's/Tomorrow's Games Implementation
+
+### 1. Game Fetcher (External API)
+```python
+# predictor/game_fetcher.py
+
+import aiohttp
+from datetime import date, timedelta
+from typing import List, Dict
+
+# Free API options:
+# - football-data.org (free tier: 10 req/min)
+# - api-football.com (free tier: 100 req/day)
+
+FOOTBALL_DATA_API = "https://api.football-data.org/v4"
+
+async def get_todays_games(competition: str = "PL") -> List[Dict]:
+    """Fetch today's Premier League matches."""
+    today = date.today().isoformat()
+
+    async with aiohttp.ClientSession() as session:
+        headers = {"X-Auth-Token": "YOUR_API_KEY"}
+        url = f"{FOOTBALL_DATA_API}/competitions/{competition}/matches"
+        params = {"dateFrom": today, "dateTo": today}
+
+        async with session.get(url, headers=headers, params=params) as resp:
+            data = await resp.json()
+            return data.get("matches", [])
+
+async def get_tomorrows_games(competition: str = "PL") -> List[Dict]:
+    """Fetch tomorrow's matches."""
+    tomorrow = (date.today() + timedelta(days=1)).isoformat()
+    # Same pattern as above
+```
+
+### 2. Factor Calculator
+```python
+# predictor/side_a_calculator.py
+
+from typing import Dict
+from kg import KnowledgeGraphDB
+
+# Factor weights from KG
+FACTOR_WEIGHTS = {
+    "FA_FAT": 0.08,   # Fatigue (3 games in 7 days)
+    "FA_INJ": 0.10,   # Key player injured
+    "FA_SUS": 0.06,   # Suspension
+    "FA_TRV": 0.04,   # Travel (away in Europe midweek)
+    "FA_COM": 0.05,   # Complacency (already qualified)
+    "FA_FRM": 0.07,   # Poor form (0 wins in 5)
+    "FA_PSY": 0.06,   # Psychological (bad record vs opponent)
+}
+
+def calculate_side_a(favorite_data: Dict) -> float:
+    """
+    Calculate Side A (favorite weakness) score.
+
+    Args:
+        favorite_data: {
+            "games_last_7_days": 3,
+            "key_injuries": ["Salah"],
+            "suspended": [],
+            "european_away_midweek": True,
+            "form_last_5": "WDLLD",
+            ...
+        }
+
+    Returns:
+        Float 0.0 - 0.5 (sum of applicable factors)
+    """
+    score = 0.0
+
+    if favorite_data.get("games_last_7_days", 0) >= 3:
+        score += FACTOR_WEIGHTS["FA_FAT"]
+
+    if favorite_data.get("key_injuries"):
+        score += FACTOR_WEIGHTS["FA_INJ"] * min(len(favorite_data["key_injuries"]), 2)
+
+    # ... calculate other factors
+
+    return min(score, 0.5)  # Cap at 0.5
+```
+
+### 3. Prediction Engine
+```python
+# predictor/prediction_engine.py
+
+from typing import Dict, List
+from .side_a_calculator import calculate_side_a
+from .side_b_calculator import calculate_side_b
+from .patterns import apply_third_knowledge
+
+BASE_UPSET_PROBABILITY = 0.15
+
+def predict_upset(match: Dict) -> Dict:
+    """
+    Generate upset prediction for a match.
+
+    Returns:
+        {
+            "match": "Liverpool vs Bournemouth",
+            "favorite": "Liverpool",
+            "underdog": "Bournemouth",
+            "upset_probability": 0.28,
+            "confidence": "medium",
+            "factors": {
+                "side_a": ["FA_FAT: 3 games in 7 days", "FA_INJ: Salah doubtful"],
+                "side_b": ["FB_RST: 7 days rest", "FB_HME: Home advantage"],
+                "patterns": ["Fatigue × Rest = +5%"]
+            }
+        }
+    """
+    favorite = match["favorite"]
+    underdog = match["underdog"]
+
+    side_a_score = calculate_side_a(match["favorite_data"])
+    side_b_score = calculate_side_b(match["underdog_data"])
+    pattern_bonus = apply_third_knowledge(match)
+
+    upset_prob = BASE_UPSET_PROBABILITY + side_a_score + side_b_score + pattern_bonus
+    upset_prob = min(max(upset_prob, 0.05), 0.85)  # Clamp 5%-85%
+
+    # Confidence based on data quality
+    confidence = "high" if upset_prob > 0.4 else "medium" if upset_prob > 0.25 else "low"
+
+    return {
+        "match": f"{favorite['name']} vs {underdog['name']}",
+        "favorite": favorite["name"],
+        "underdog": underdog["name"],
+        "upset_probability": round(upset_prob, 2),
+        "confidence": confidence,
+        "factors": {
+            "side_a": [],  # Fill with triggered factors
+            "side_b": [],
+            "patterns": []
+        }
+    }
+```
+
+---
+
+## API Endpoint
+
+```python
+# routers/predictions.py
+
+from fastapi import APIRouter
+from predictor.game_fetcher import get_todays_games, get_tomorrows_games
+from predictor.prediction_engine import predict_upset
+
+router = APIRouter(prefix="/api/v1/predictions", tags=["predictions"])
+
+@router.get("/today")
+async def todays_predictions():
+    """Get upset predictions for today's matches."""
+    games = await get_todays_games()
+    predictions = [predict_upset(game) for game in games]
+    return {"date": "today", "predictions": predictions}
+
+@router.get("/tomorrow")
+async def tomorrows_predictions():
+    """Get upset predictions for tomorrow's matches."""
+    games = await get_tomorrows_games()
+    predictions = [predict_upset(game) for game in games]
+    return {"date": "tomorrow", "predictions": predictions}
+```
+
+---
+
+## Third Knowledge Patterns (from KG)
+
+| Pattern | Trigger | Bonus |
+|---------|---------|-------|
+| Fatigue × Rest | FA_FAT + FB_RST | +5% |
+| Injury Crisis × Motivation | FA_INJ(2+) + FB_MOT | +7% |
+| Complacency × Desperation | FA_COM + FB_DES | +8% |
+| Bad Record × Home | FA_PSY + FB_HME | +4% |
+| Travel × Fresh | FA_TRV + FB_RST | +6% |
+
+---
+
+## Data Sources Needed
+
+| Data | Source | Update Frequency |
+|------|--------|------------------|
+| Fixtures | football-data.org | Daily |
+| Injuries | Transfermarkt / manual | Before each match |
+| Form | football-data.org | After each match |
+| Rest days | Calculated from fixtures | Automatic |
+
+---
+
+## Next Steps
+
+1. [ ] Get football-data.org API key (free tier)
+2. [ ] Create `predictor/game_fetcher.py`
+3. [ ] Create `predictor/side_a_calculator.py`
+4. [ ] Create `predictor/side_b_calculator.py`
+5. [ ] Create `predictor/patterns.py` (Third Knowledge)
+6. [ ] Create `predictor/prediction_engine.py`
+7. [ ] Create `routers/predictions.py`
+8. [ ] Test with today's Premier League games
+
+---
+
+## KG Query for Factors
+
+```python
+from kg import KnowledgeGraphDB
+
+# Get all Side A factors
+factors_a = KnowledgeGraphDB.get_nodes_by_type("factor_a", source_kg="predictor")
+# Returns: [FA_FAT, FA_INJ, FA_SUS, ...]
+
+# Get all patterns
+patterns = KnowledgeGraphDB.get_nodes_by_type("pattern", source_kg="predictor")
+# Returns: [fatigue_x_rest, injury_x_motivation, ...]
+```
+
+---
+
+## Resumption Instructions
+
+To continue work on predictions:
+1. Read this file
+2. Get API key from football-data.org
+3. Create files in `backend/predictor/`
+4. Test with `GET /api/v1/predictions/today`
+5. Validate against actual match results

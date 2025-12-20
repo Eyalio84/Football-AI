@@ -1,0 +1,258 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-12-21",
+    "domain": "predictor",
+    "description": "Knowledge graph for The Analyst upset prediction system with Side A/B analysis",
+    "total_modules": 7,
+    "total_factors": 22,
+    "total_patterns": 5,
+    "philosophy": "The question isn't who SHOULD win. The question is: what would make the SHOULD not happen?"
+  },
+  "modules": {
+    "prediction_engine": {
+      "file": "prediction_engine.py",
+      "what": "Core prediction engine combining Side A + Side B + Third Knowledge",
+      "how": "Analyzes favorite weakness (A) and underdog strength (B), discovers hidden patterns",
+      "when": "Match prediction requests",
+      "depends_on": ["side_a_calculator", "side_b_calculator", "data_ingestion"],
+      "output": "Prediction dataclass with upset probability and confidence",
+      "capabilities": ["analyze_match", "combine_scores", "third_knowledge_discovery"]
+    },
+    "side_a_calculator": {
+      "file": "side_a_calculator.py",
+      "what": "Favorite weakness analyzer - what could go wrong?",
+      "how": "Calculates weighted factors: fatigue, injuries, form, pressure, style vulnerabilities",
+      "when": "Part of match analysis",
+      "depends_on": [],
+      "factors": 12,
+      "capabilities": ["fatigue_factor", "injury_impact", "form_momentum", "pressure_factor", "style_vulnerability"]
+    },
+    "side_b_calculator": {
+      "file": "side_b_calculator.py",
+      "what": "Underdog strength analyzer - what advantages exist?",
+      "how": "Calculates weighted factors: rest, home fortress, style mismatch, motivation, tactical edge",
+      "when": "Part of match analysis",
+      "depends_on": [],
+      "factors": 10,
+      "capabilities": ["rest_advantage", "home_fortress", "style_mismatch", "motivation_boost", "tactical_edge"]
+    },
+    "analyst_persona": {
+      "file": "analyst_persona.py",
+      "what": "TheAnalyst personality - neutral, data-driven, probabilistic",
+      "how": "Formats predictions as analyst commentary, generates insights",
+      "when": "Response generation after prediction",
+      "depends_on": ["prediction_engine"],
+      "capabilities": ["generate_response", "format_insight", "confidence_statement"]
+    },
+    "api": {
+      "file": "api.py",
+      "what": "Predictor API endpoints",
+      "how": "Exposes prediction and team profile endpoints",
+      "when": "API requests to predictor",
+      "depends_on": ["prediction_engine", "analyst_persona", "predictor_db"],
+      "capabilities": ["predict", "get_team_profile", "get_recent_predictions"]
+    },
+    "data_ingestion": {
+      "file": "data_ingestion.py",
+      "what": "External data fetcher for match stats",
+      "how": "Fetches from football-data.org, ESPN, odds providers",
+      "when": "Match data needed for prediction",
+      "depends_on": [],
+      "external_apis": ["football-data.org", "ESPN"],
+      "capabilities": ["fetch_match_data", "get_team_form", "get_injuries"]
+    },
+    "predictor_db": {
+      "file": "predictor_db.py",
+      "what": "Predictor database layer",
+      "how": "Stores predictions, patterns, team profiles, validation results",
+      "when": "Data persistence, pattern validation",
+      "depends_on": [],
+      "tables": ["predictions", "validated_patterns", "team_profiles"],
+      "capabilities": ["save_prediction", "get_validated_patterns", "get_upset_rate"]
+    }
+  },
+  "factors": {
+    "side_a": {
+      "fatigue": {
+        "code": "FA_FAT",
+        "description": "Physical fatigue from fixture congestion",
+        "inputs": ["rest_days", "recent_games", "squad_depth"],
+        "weight": 0.20
+      },
+      "injuries": {
+        "code": "FA_INJ",
+        "description": "Key player availability impact",
+        "inputs": ["injured_players", "position_coverage"],
+        "weight": 0.18
+      },
+      "form": {
+        "code": "FA_FRM",
+        "description": "Recent results and momentum",
+        "inputs": ["last_5_results", "goals_scored", "goals_conceded"],
+        "weight": 0.15
+      },
+      "pressure": {
+        "code": "FA_PRS",
+        "description": "External pressure factors",
+        "inputs": ["table_position", "title_race", "manager_pressure"],
+        "weight": 0.15
+      },
+      "style_vulnerability": {
+        "code": "FA_STY",
+        "description": "Tactical mismatches against underdog style",
+        "inputs": ["counter_attack_conceded", "set_piece_conceded"],
+        "weight": 0.12
+      },
+      "european_hangover": {
+        "code": "FA_EUR",
+        "description": "Impact of midweek European games",
+        "inputs": ["days_since_european", "travel_distance"],
+        "weight": 0.10
+      },
+      "away_form": {
+        "code": "FA_AWY",
+        "description": "Away performance decline",
+        "inputs": ["away_results", "away_goals"],
+        "weight": 0.10
+      }
+    },
+    "side_b": {
+      "rest_advantage": {
+        "code": "FB_RST",
+        "description": "Extra recovery time vs opponent",
+        "inputs": ["rest_days_diff", "no_midweek_game"],
+        "weight": 0.18
+      },
+      "home_fortress": {
+        "code": "FB_HME",
+        "description": "Home ground advantage",
+        "inputs": ["home_unbeaten", "home_win_rate", "crowd_factor"],
+        "weight": 0.17
+      },
+      "style_mismatch": {
+        "code": "FB_STY",
+        "description": "Tactical advantages in matchup",
+        "inputs": ["counter_attack_goals", "set_piece_goals"],
+        "weight": 0.15
+      },
+      "motivation": {
+        "code": "FB_MOT",
+        "description": "Extra motivation factors",
+        "inputs": ["relegation_fight", "derby_match", "nothing_to_lose"],
+        "weight": 0.15
+      },
+      "goalkeeper_form": {
+        "code": "FB_GKP",
+        "description": "Goalkeeper in hot form",
+        "inputs": ["save_percentage", "clean_sheets"],
+        "weight": 0.12
+      },
+      "manager_bounce": {
+        "code": "FB_MGR",
+        "description": "New manager effect",
+        "inputs": ["games_since_appointment", "initial_results"],
+        "weight": 0.10
+      },
+      "weather": {
+        "code": "FB_WTH",
+        "description": "Weather advantage for physical style",
+        "inputs": ["rain", "wind", "pitch_condition"],
+        "weight": 0.08
+      },
+      "underestimation": {
+        "code": "FB_UND",
+        "description": "Big team complacency factor",
+        "inputs": ["position_gap", "recent_h2h"],
+        "weight": 0.05
+      }
+    }
+  },
+  "third_knowledge_patterns": {
+    "fatigue_x_rest": {
+      "description": "Tired favorite vs well-rested underdog",
+      "factor_a_code": "FA_FAT",
+      "factor_b_code": "FB_RST",
+      "interaction_type": "multiplicative",
+      "multiplier_range": [1.3, 1.8],
+      "confidence": 0.85,
+      "trigger": "A.rest_days < 3 AND B.rest_days > 6"
+    },
+    "pressure_x_freedom": {
+      "description": "Stressed favorite vs carefree underdog",
+      "factor_a_code": "FA_PRS",
+      "factor_b_code": "FB_MOT",
+      "interaction_type": "synergy",
+      "multiplier_range": [1.2, 1.5],
+      "confidence": 0.75,
+      "trigger": "A.must_win == True AND B.nothing_to_lose == True"
+    },
+    "weather_x_style": {
+      "description": "Bad weather negates technical advantage",
+      "factor_a_code": "FA_STY",
+      "factor_b_code": "FB_WTH",
+      "interaction_type": "threshold",
+      "multiplier_range": [1.1, 1.4],
+      "confidence": 0.70,
+      "trigger": "weather == 'rain' AND A.style == 'possession'"
+    },
+    "european_x_domestic": {
+      "description": "European hangover in domestic fixture",
+      "factor_a_code": "FA_EUR",
+      "factor_b_code": "FB_RST",
+      "interaction_type": "multiplicative",
+      "multiplier_range": [1.2, 1.6],
+      "confidence": 0.80,
+      "trigger": "A.days_since_european < 4 AND B.no_european == True"
+    },
+    "manager_x_motivation": {
+      "description": "New manager energy compounds motivation",
+      "factor_a_code": "FA_FRM",
+      "factor_b_code": "FB_MGR",
+      "interaction_type": "additive",
+      "multiplier_range": [1.1, 1.3],
+      "confidence": 0.65,
+      "trigger": "B.games_since_manager_change < 5"
+    }
+  },
+  "equations": {
+    "naive_upset_probability": {
+      "formula": "(side_a_score + side_b_score) / 2",
+      "description": "Simple average of weakness and strength scores",
+      "range": [0, 1]
+    },
+    "interaction_boost": {
+      "formula": "sum(pattern.multiplier * pattern.confidence for pattern in triggered_patterns)",
+      "description": "Combined boost from all triggered third knowledge patterns"
+    },
+    "adjusted_probability": {
+      "formula": "naive_prob * (1 + interaction_boost)",
+      "description": "Final upset probability with pattern adjustments",
+      "clamped": [0, 0.95]
+    },
+    "confidence_score": {
+      "formula": "0.25*data_quality + 0.25*historical_accuracy + 0.30*pattern_confidence + 0.20*market_alignment",
+      "description": "Weighted confidence calculation"
+    }
+  },
+  "confidence_levels": {
+    "low": {"range": [0, 0.5], "meaning": "Limited data or uncertain patterns"},
+    "medium": {"range": [0.5, 0.7], "meaning": "Reasonable data, some uncertainty"},
+    "high": {"range": [0.7, 1.0], "meaning": "Strong data, validated patterns"}
+  },
+  "integration": {
+    "soccer_ai": {
+      "route": "/api/v1/chat?club=analyst",
+      "data_exchange": ["mood_intensity → engine", "predictions → chat", "match_results → mood"],
+      "type": "closed_loop"
+    }
+  },
+  "stats": {
+    "side_a_factors": 12,
+    "side_b_factors": 10,
+    "third_knowledge_patterns": 5,
+    "confidence_levels": 3,
+    "modules": 7,
+    "lines_of_code": 3500
+  }
+}

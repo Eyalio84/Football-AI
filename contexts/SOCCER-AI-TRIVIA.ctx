@@ -1,0 +1,232 @@
+---
+title: Soccer-AI Trivia System
+domain: soccer-ai
+component: trivia
+status: ready-for-implementation
+last_updated: 2024-12-21
+resumption_context: true
+---
+
+# Soccer-AI Trivia Context Packet
+
+## Purpose
+Enable fans to play team-specific trivia games via `/trivia` command in chat.
+
+---
+
+## Current State
+
+### Database Tables (EXIST in soccer_ai.db)
+```sql
+-- Already created via init_trivia_table()
+CREATE TABLE trivia_questions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    team_id INTEGER REFERENCES teams(id),
+    category TEXT,                    -- history, players, matches, legends
+    difficulty TEXT DEFAULT 'medium', -- easy, medium, hard
+    question TEXT NOT NULL,
+    correct_answer TEXT NOT NULL,
+    wrong_answers TEXT,               -- JSON array
+    explanation TEXT,
+    times_asked INTEGER DEFAULT 0,
+    times_correct INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Existing Functions (in database.py)
+| Function | Purpose |
+|----------|---------|
+| `init_trivia_table()` | Create table if not exists |
+| `add_trivia_question()` | Add new question |
+| `get_trivia_question(team_id, category, difficulty)` | Get random question |
+| `check_trivia_answer(question_id, answer)` | Validate answer |
+| `get_trivia_stats(team_id)` | Get stats by team |
+
+---
+
+## /trivia Command Implementation
+
+### User Flow
+```
+User (in Arsenal chat): /trivia
+Bot: Here's your Arsenal trivia question!
+
+    Category: History | Difficulty: Medium
+
+    Q: Who scored Arsenal's fastest Premier League goal?
+
+    A) Thierry Henry
+    B) Theo Walcott
+    C) Ian Wright
+    D) Alexis Sanchez
+
+User: B
+Bot: Correct! Theo Walcott scored in 20.1 seconds vs Leicester (2013).
+     Your score: 7/10 this session
+```
+
+### Backend Endpoint Needed
+```python
+# routers/trivia.py
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import Optional
+import database
+
+router = APIRouter(prefix="/api/v1/trivia", tags=["trivia"])
+
+class TriviaRequest(BaseModel):
+    team_id: int
+    category: Optional[str] = None
+    difficulty: Optional[str] = None
+
+class AnswerRequest(BaseModel):
+    question_id: int
+    answer: str
+
+@router.post("/question")
+async def get_question(request: TriviaRequest):
+    """Get a trivia question for a team."""
+    question = database.get_trivia_question(
+        team_id=request.team_id,
+        category=request.category,
+        difficulty=request.difficulty
+    )
+    if not question:
+        raise HTTPException(404, "No questions found for this team")
+
+    # Shuffle answers
+    import random
+    all_answers = [question['correct_answer']] + question['wrong_answers']
+    random.shuffle(all_answers)
+
+    return {
+        "question_id": question['id'],
+        "question": question['question'],
+        "answers": all_answers,
+        "category": question['category'],
+        "difficulty": question['difficulty']
+    }
+
+@router.post("/answer")
+async def check_answer(request: AnswerRequest):
+    """Check if answer is correct."""
+    result = database.check_trivia_answer(request.question_id, request.answer)
+    return result
+
+@router.get("/stats/{team_id}")
+async def get_stats(team_id: int):
+    """Get trivia stats for a team."""
+    return database.get_trivia_stats(team_id)
+```
+
+---
+
+## Fan Team IDs
+| Fan Persona | team_id | Node ID (KG) |
+|-------------|---------|--------------|
+| Arsenal | 3 | soccer-ai_persona_arsenal |
+| Chelsea | 4 | soccer-ai_persona_chelsea |
+| Liverpool | 2 | soccer-ai_persona_liverpool |
+| Manchester United | 5 | soccer-ai_persona_manchester_united |
+| Manchester City | 1 | soccer-ai_persona_manchester_city |
+| Tottenham | 6 | soccer-ai_persona_tottenham |
+
+---
+
+## Sample Questions to Seed
+
+### Arsenal (team_id=3)
+```python
+questions = [
+    {
+        "question": "Who scored Arsenal's fastest Premier League goal?",
+        "correct_answer": "Theo Walcott",
+        "wrong_answers": ["Thierry Henry", "Ian Wright", "Alexis Sanchez"],
+        "category": "history",
+        "difficulty": "hard",
+        "explanation": "20.1 seconds vs Leicester City in 2013"
+    },
+    {
+        "question": "Which stadium did Arsenal play at before the Emirates?",
+        "correct_answer": "Highbury",
+        "wrong_answers": ["Wembley", "White Hart Lane", "Stamford Bridge"],
+        "category": "history",
+        "difficulty": "easy",
+        "explanation": "Arsenal played at Highbury from 1913-2006"
+    },
+    {
+        "question": "Who is Arsenal's all-time top scorer?",
+        "correct_answer": "Thierry Henry",
+        "wrong_answers": ["Ian Wright", "Dennis Bergkamp", "Robin van Persie"],
+        "category": "legends",
+        "difficulty": "medium",
+        "explanation": "228 goals in all competitions (1999-2007, 2012)"
+    }
+]
+```
+
+---
+
+## Integration with Chat
+
+### In ai_response.py or rag.py
+```python
+def detect_trivia_command(message: str, persona: str) -> bool:
+    """Check if user wants to play trivia."""
+    return message.strip().lower() in ['/trivia', 'trivia', 'quiz me']
+
+def get_team_id_from_persona(persona: str) -> int:
+    """Map persona to team_id."""
+    mapping = {
+        'arsenal': 3,
+        'chelsea': 4,
+        'liverpool': 2,
+        'manchester_united': 5,
+        'manchester_city': 1,
+        'tottenham': 6,
+        # ... add all 19
+    }
+    return mapping.get(persona.lower())
+```
+
+---
+
+## Next Steps
+
+1. [ ] Create `routers/trivia.py` with endpoints
+2. [ ] Add router to `main.py`
+3. [ ] Seed 5+ questions per Top 6 team (30 minimum)
+4. [ ] Add `/trivia` detection in chat flow
+5. [ ] Add session-based scoring
+6. [ ] Test with Arsenal persona
+
+---
+
+## KG Integration
+
+The trivia system connects to KG:
+```
+soccer-ai_module_trivia ──depends_on──> soccer-ai_module_database
+soccer-ai_endpoint_trivia_get ──routes_to──> soccer-ai_module_trivia
+soccer-ai_endpoint_trivia_check ──routes_to──> soccer-ai_module_trivia
+```
+
+Query trivia questions via KG:
+```python
+from kg import NLKEBridge
+NLKEBridge.hybrid_search("trivia", scope="soccer-ai")
+```
+
+---
+
+## Resumption Instructions
+
+To continue work on trivia:
+1. Read this file
+2. Check `database.py` for existing functions
+3. Create `routers/trivia.py`
+4. Seed questions
+5. Test `/trivia` command

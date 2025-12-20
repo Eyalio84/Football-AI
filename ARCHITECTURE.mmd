@@ -1,0 +1,159 @@
+%% Soccer-AI Complete Architecture
+%% Generated: 2025-12-28
+%% Checkpoint #2
+
+graph TB
+    subgraph "User Interface Layer"
+        BROWSER[Web Browser<br/>localhost:5000]
+        style BROWSER fill:#4CAF50,color:#fff
+    end
+
+    subgraph "Flask Frontend [:5000]"
+        direction TB
+        APP_PY[app.py<br/>Flask App]
+
+        subgraph "Templates"
+            INDEX[index.html<br/>20 Club Personas]
+            CHAT[chat.html<br/>Fan Chat]
+            PRED[predictions.html<br/>Tri-Lens Predictor]
+            STAND[standings.html<br/>League Tables]
+            FIX[fixtures.html<br/>Games Schedule]
+            TEAMS[teams.html<br/>Team Details]
+        end
+
+        subgraph "Static Assets"
+            JS[app.js]
+            CSS[style.css]
+        end
+    end
+
+    subgraph "FastAPI Backend [:8000]"
+        direction TB
+        MAIN[main.py<br/>FastAPI App]
+        MODELS[models.py<br/>Pydantic Schemas]
+
+        subgraph "Core Services"
+            DB[database.py<br/>SQLite + FTS5]
+            RAG_MOD[rag.py<br/>Context Retrieval]
+            AI_RESP[ai_response.py<br/>LLM Integration]
+            CONV_INT[conversation_intelligence.py<br/>Fluent Memory]
+            SEC[security_session.py<br/>Session Security]
+        end
+
+        subgraph "Knowledge Graph Layer"
+            KG_DB[kg/kg_database.py<br/>NLKE Compliant]
+            KG_TYPES[kg/kg_types.py<br/>Type Definitions]
+            KG_SCHEMA[kg/schema.py<br/>Graph Schema]
+            KG_BRIDGE[kg/nlke_bridge.py<br/>NLKE Integration]
+            KG_COMPAT[kg/kg_compat.py<br/>Compatibility]
+        end
+    end
+
+    subgraph "Predictor Module"
+        direction TB
+
+        subgraph "Tri-Lens System"
+            TRI[tri_lens_predictor.py<br/>55% Poisson + 45% Oracle]
+            POISSON[poisson_predictor.py<br/>xG-Based P(goals)]
+            ORACLE[hybrid_oracle.py<br/>ELO + Patterns]
+        end
+
+        subgraph "Supporting Components"
+            PRED_ENG[prediction_engine.py<br/>Two-Sided Logic]
+            TEAM_RAT[team_ratings.py<br/>ELO System]
+            DRAW_DET[draw_detector.py<br/>Draw Analysis]
+            STAT[statistical_predictor.py<br/>Stats Engine]
+            ANALYST[analyst_persona.py<br/>The Analyst Voice]
+        end
+
+        subgraph "Calculators"
+            SIDE_A[side_a_calculator.py<br/>Favorite Weakness]
+            SIDE_B[side_b_calculator.py<br/>Underdog Strength]
+        end
+
+        subgraph "Data & APIs"
+            PRED_DB[predictor_db.py<br/>Facts DB]
+            DATA_ING[data_ingestion.py<br/>Data Pipeline]
+            PRED_API[api.py<br/>Predictor Endpoints]
+        end
+
+        subgraph "Testing"
+            TEST_TRI[test_tri_lens.py<br/>35 Tests]
+        end
+    end
+
+    subgraph "Databases"
+        direction LR
+        SOCCER_DB[(soccer_ai.db<br/>Main KB)]
+        PRED_FACTS[(predictor_facts.db<br/>Predictor Facts)]
+        KG_SQLDB[(soccer_ai_kg.db<br/>Knowledge Graph)]
+        ARCH_KG[(soccer_ai_architecture_kg.db<br/>Architecture KG)]
+    end
+
+    subgraph "External Services"
+        GEMINI[Gemini API<br/>LLM Provider]
+        FOOTBALL[Football-Data API<br/>Live Data]
+    end
+
+    %% User Flow
+    BROWSER --> APP_PY
+
+    %% Flask Routes
+    APP_PY --> INDEX
+    APP_PY --> CHAT
+    APP_PY --> PRED
+    APP_PY --> STAND
+    APP_PY --> FIX
+    APP_PY --> TEAMS
+
+    %% Frontend -> Backend API Calls
+    CHAT -->|POST /api/v1/chat| MAIN
+    PRED -->|POST /api/v1/tri-lens/predict| MAIN
+    STAND -->|GET /api/v1/standings| MAIN
+    FIX -->|GET /api/v1/fixtures| MAIN
+    TEAMS -->|GET /api/v1/teams| MAIN
+
+    %% Backend Internal
+    MAIN --> DB
+    MAIN --> RAG_MOD
+    MAIN --> AI_RESP
+    MAIN --> CONV_INT
+    MAIN --> TRI
+
+    %% RAG Chain
+    RAG_MOD --> DB
+    RAG_MOD --> KG_DB
+    AI_RESP --> GEMINI
+
+    %% Tri-Lens Chain
+    TRI --> POISSON
+    TRI --> ORACLE
+    ORACLE --> TEAM_RAT
+    ORACLE --> DRAW_DET
+
+    %% Predictor Chain
+    PRED_ENG --> SIDE_A
+    PRED_ENG --> SIDE_B
+    PRED_ENG --> ANALYST
+
+    %% Database Connections
+    DB --> SOCCER_DB
+    PRED_DB --> PRED_FACTS
+    KG_DB --> KG_SQLDB
+
+    %% External APIs
+    DATA_ING --> FOOTBALL
+    AI_RESP --> GEMINI
+
+    %% Styling
+    classDef frontend fill:#2196F3,color:#fff
+    classDef backend fill:#FF9800,color:#fff
+    classDef predictor fill:#9C27B0,color:#fff
+    classDef database fill:#4CAF50,color:#fff
+    classDef external fill:#607D8B,color:#fff
+
+    class APP_PY,INDEX,CHAT,PRED,STAND,FIX,TEAMS,JS,CSS frontend
+    class MAIN,MODELS,DB,RAG_MOD,AI_RESP,CONV_INT,SEC backend
+    class TRI,POISSON,ORACLE,PRED_ENG,TEAM_RAT,DRAW_DET,STAT,ANALYST,SIDE_A,SIDE_B,PRED_DB,DATA_ING,PRED_API,TEST_TRI predictor
+    class SOCCER_DB,PRED_FACTS,KG_SQLDB,ARCH_KG database
+    class GEMINI,FOOTBALL external

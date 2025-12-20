@@ -1,0 +1,300 @@
+# PC Claude Handoff Instructions
+## Soccer-AI React Frontend Development
+
+**From**: Termux-Opus (orchestrator)
+**To**: PC-Sonnet (implementer)
+**Date**: 2025-12-21
+
+---
+
+## YOUR MISSION
+
+Build out the **React frontend** (`frontend/`) to connect to the existing FastAPI backend.
+
+The backend is COMPLETE. Your job is the frontend UI.
+
+---
+
+## ⛔ CRITICAL: DO NOT DO THESE THINGS
+
+1. **DO NOT touch `flask-frontend/`**
+   - It's a lightweight testing tool, NOT the real frontend
+   - The user may ask about it - explain it's for quick backend testing only
+
+2. **DO NOT modify the backend without asking**
+   - `backend/main.py` and friends are working
+   - If you need new endpoints, ADD them, don't change existing ones
+
+3. **DO NOT use Flask for the frontend**
+   - The frontend is React + Vite + TypeScript
+   - Flask is only used in `flask-frontend/` for testing
+
+4. **DO NOT use "soccer" language**
+   - This is a UK football app
+   - Say: match, pitch, nil, kit, gaffer, fixture
+   - Never: soccer, field, zero, uniform, coach, game
+
+5. **DO NOT make generic sports bot UI**
+   - This is an EMOTIONALLY INTELLIGENT fan companion
+   - The UI should feel like talking to a fellow supporter
+   - Not a corporate stats dashboard
+
+---
+
+## ✅ WHAT YOU SHOULD DO
+
+### 1. Verify Backend Works
+
+```bash
+cd soccer-AI/backend
+pip install fastapi uvicorn anthropic aiohttp python-dotenv httpx
+uvicorn main:app --reload --port 8000
+```
+
+Open http://localhost:8000/docs - you should see Swagger UI with 25+ endpoints.
+
+### 2. Build Out React Frontend
+
+```bash
+cd soccer-AI/frontend
+npm install
+npm run dev
+```
+
+The React app exists but needs work. Key pages needed:
+
+#### Chat Page (Primary)
+- Club selector dropdown (20 Premier League teams - each has unique persona)
+- Chat input with send button
+- Message history with styled bubbles
+- AI responses should render with fan personality
+- IMPORTANT: Pass `club_id` to `/api/v1/chat` to activate persona
+
+#### Predictions Page (NEW)
+- Display upcoming fixtures with predictions
+- Show power ratings for each team
+- Highlight draw patterns when detected
+- Endpoint: `GET /api/v1/predictions/weekend`
+
+#### Fixtures Page
+- Today's matches
+- Upcoming fixtures
+- Match times and venues
+- Endpoint: `GET /api/v1/fixtures/today`
+
+#### Standings Page
+- Full Premier League table
+- Form indicators (W/D/L badges)
+- Zone highlighting (CL, Europa, Relegation)
+- Endpoint: `GET /api/v1/standings`
+
+### 3. API Client Setup
+
+Create `frontend/src/services/api.ts`:
+
+```typescript
+const API_BASE = 'http://localhost:8000/api/v1';
+
+export const api = {
+  chat: async (message: string, clubId?: string) => {
+    const res = await fetch(`${API_BASE}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, club_id: clubId })
+    });
+    return res.json();
+  },
+
+  getFixtures: async () => {
+    const res = await fetch(`${API_BASE}/fixtures/today`);
+    return res.json();
+  },
+
+  getStandings: async () => {
+    const res = await fetch(`${API_BASE}/standings`);
+    return res.json();
+  },
+
+  getPrediction: async (home: string, away: string) => {
+    const res = await fetch(`${API_BASE}/predictions/match/${home}/${away}`);
+    return res.json();
+  }
+};
+```
+
+### 4. Styling Guidelines
+
+- **TailwindCSS** is configured
+- Use football/Premier League aesthetic
+- Club colors should be dynamic based on selected team
+- Dark mode friendly
+- Mobile responsive
+
+### 5. Test Everything
+
+```bash
+# Backend tests
+cd backend && python test_api.py
+
+# Frontend build
+cd frontend && npm run build
+```
+
+---
+
+## BACKEND API REFERENCE
+
+### Chat (with Persona)
+```
+POST /api/v1/chat
+{
+  "message": "How did we play?",
+  "club_id": "arsenal"  // Activates Arsenal fan persona
+}
+
+Response:
+{
+  "response": "Ah mate, what a match! ...",
+  "club_mode": "arsenal",
+  "context_used": ["recent_results", "club_mood"]
+}
+```
+
+### Predictions
+```
+GET /api/v1/predictions/match/{home}/{away}
+{
+  "home_team": "arsenal",
+  "away_team": "chelsea",
+  "home_win": 45.2,
+  "draw": 28.1,
+  "away_win": 26.7,
+  "prediction": "home_win",
+  "draw_patterns": 0,
+  "power_diff": 12.5
+}
+
+GET /api/v1/predictions/weekend
+[
+  { ... match 1 ... },
+  { ... match 2 ... }
+]
+```
+
+### Fixtures
+```
+GET /api/v1/fixtures/today
+[
+  {
+    "home_team": "Arsenal",
+    "away_team": "Chelsea",
+    "date": "2025-12-21",
+    "time": "15:00",
+    "venue": "Emirates Stadium"
+  }
+]
+```
+
+### Standings
+```
+GET /api/v1/standings
+[
+  {
+    "position": 1,
+    "team": "Liverpool",
+    "played": 17,
+    "won": 14,
+    "drawn": 2,
+    "lost": 1,
+    "gf": 45,
+    "ga": 15,
+    "gd": 30,
+    "points": 44,
+    "form": ["W", "W", "D", "W", "W"]
+  }
+]
+```
+
+### Teams
+```
+GET /api/v1/teams
+[
+  {"id": "arsenal", "name": "Arsenal", "short_name": "ARS"},
+  {"id": "chelsea", "name": "Chelsea", "short_name": "CHE"},
+  ...
+]
+```
+
+---
+
+## DIRECTORY REFERENCE
+
+```
+soccer-AI/
+├── backend/              # ✅ COMPLETE - Don't modify heavily
+│   ├── main.py           # FastAPI app
+│   ├── predictor/        # Match predictions (62.9% accuracy)
+│   └── soccer_ai.db      # Database
+│
+├── frontend/             # ⭐ YOUR WORK HERE
+│   ├── src/
+│   │   ├── App.tsx       # Main component
+│   │   ├── components/   # UI components
+│   │   ├── hooks/        # React hooks
+│   │   └── services/     # API client
+│   ├── package.json
+│   └── vite.config.ts
+│
+├── flask-frontend/       # ⛔ IGNORE - Testing only
+│
+├── docs/
+│   ├── ARIEL_FULL_STORY.md  # The vision (READ THIS)
+│   └── SOCCER_AI_SYSTEM_ATLAS.md
+│
+├── CLAUDE.md             # Project instructions
+└── README.md             # Quick start
+```
+
+---
+
+## THE VISION (Preserve This)
+
+From `docs/ARIEL_FULL_STORY.md`:
+
+> "What if the AI wasn't neutral? What if it was a fan?"
+
+The AI should:
+- FEEL the weight of rivalries
+- Know club legends and sacred moments
+- Understand pre-match hope vs post-loss grief
+- Use authentic UK football language
+
+**Sample persona response** (Arsenal mode, asked about Spurs):
+
+> "Ah, the lot from down the lane? *chuckles* Look, we've got 13 league titles. They've got... what exactly? That one year they put the pressure on? North London is RED, always has been."
+
+This is NOT a stats bot. This is a fan companion.
+
+---
+
+## IF YOU GET STUCK
+
+1. Check http://localhost:8000/docs for API reference
+2. Read `docs/ARIEL_FULL_STORY.md` for the vision
+3. Read `CLAUDE.md` for project structure
+4. Test backend endpoints with curl before building UI
+
+---
+
+## SUCCESS CRITERIA
+
+When done, the user should be able to:
+
+1. ✅ Open http://localhost:5173 and see the app
+2. ✅ Select their club from a dropdown
+3. ✅ Chat with the AI in fan persona mode
+4. ✅ See today's fixtures
+5. ✅ View standings with form indicators
+6. ✅ See predictions for upcoming matches
+
+**Fan at heart. Analyst in nature.** ⚽

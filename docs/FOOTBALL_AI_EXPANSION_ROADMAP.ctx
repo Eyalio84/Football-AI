@@ -1,0 +1,307 @@
+---
+file_type: expansion_roadmap
+created: 2025-12-20
+status: living_document
+author: Eyal Nof
+purpose: Comprehensive expansion plan built during implementation - captures emergent ideas per phase
+methodology: "Implementation is discovery - ideas captured while hands are in code"
+---
+
+# Football-AI Expansion Roadmap
+## A Living Document Built During Implementation
+
+---
+
+## How This Document Works
+
+Each phase of implementation surfaces ideas for future expansion. Rather than lose them, we capture them here immediately. By the time current implementation completes, the NEXT implementation plan is already drafted.
+
+**Pattern**: Execute → Discover → Document → Repeat
+
+---
+
+## PHASE 1: Backend on Termux
+
+### Completed Features
+- FastAPI running on Termux (Android)
+- anthropic package installed
+- Server on port 8000
+- ESPN data extractor working
+
+### Expansion Ideas (Captured During Implementation)
+
+**1.1 Process Management**
+- Termux processes persist across Claude sessions - leverage this
+- Create startup script that auto-launches backend on Termux boot
+- Add health check cron job (every 5 min)
+- Log rotation for backend.log
+
+**1.2 Multi-Device Architecture**
+- Current: Termux backend only
+- Expansion: PC as fallback, load balancing between devices
+- Tailscale mesh already set up - use for failover
+
+**1.3 Performance Monitoring**
+- Add `/api/v1/metrics` endpoint
+- Track: response times, API costs, cache hit rates
+- Simple SQLite table for metrics storage
+
+---
+
+## PHASE 2: Security Hardening
+
+### Completed Features
+- 20+ injection detection patterns
+- Snap-back responses per club persona
+- Logging of injection attempts
+- All tests passing
+
+### Expansion Ideas (Captured During Implementation)
+
+**2.1 Security Escalation System** (Documented in SECURITY_ESCALATION_DESIGN.ctx)
+- Trigger: 3+ injection attempts in session
+- Routes to SecurityFanPersona
+- Breaks character deliberately
+- Session state machine: NORMAL → WARNED → CAUTIOUS → ESCALATED
+- De-escalation path after 5 clean queries
+
+**2.2 Security Analytics Dashboard**
+- Track injection attempts over time
+- Identify attack patterns
+- Geographic distribution (if available)
+- Most common attack vectors
+
+**2.3 Honeypot Mode**
+- Optional: Fake "vulnerable" endpoint that logs sophisticated attacks
+- Research value: understand what attackers try
+- Never deployed to production - research only
+
+**2.4 Rate Limiting**
+- Per-session query limits
+- Slowdown for flagged sessions
+- Graceful degradation under load
+
+---
+
+## PHASE 3: Database Enhancement
+
+### Completed Features
+- 5 new tables: club_identity, club_legends, club_moments, club_mood, club_rivalries
+- 36 entries for Arsenal, Chelsea, Manchester United
+- Rich narrative data for RAG
+- Dynamic mood system
+
+### Expansion Ideas (Captured During Implementation)
+
+**3.1 More Clubs**
+- Current: 3 clubs deep
+- Phase 1 Expansion: Add Liverpool, Manchester City, Tottenham (top 6)
+- Phase 2 Expansion: All 20 Premier League clubs
+- Phase 3 Expansion: Championship clubs (for promotion storylines)
+
+**3.2 Deeper Legend Data**
+- Add: Career stats per legend
+- Add: Video links to iconic moments (YouTube embeds)
+- Add: Fan songs/chants associated with legends
+- Add: Quotes from legends about the club
+
+**3.3 Live Mood Updates**
+- Current: Manual mood entries
+- Expansion: Auto-update mood after each match result
+- Algorithm: W = +0.2, D = 0, L = -0.2 (clamped 0-1)
+- Derby wins = +0.4, Rival losses = +0.1
+
+**3.4 Historical Seasons Database**
+- Table: `historical_seasons`
+- Track: Final position, points, top scorer, memorable moments per season
+- Enable: "Remember when we finished 4th in 2016?" conversations
+
+**3.5 Transfer Rumors Integration**
+- Table: `transfer_rumors`
+- Fields: player, from_club, to_club, likelihood, source, fan_sentiment
+- Enable: Transfer window conversations with real speculation
+
+**3.6 Fan Vocabulary Expansion**
+- Current: Basic vocabulary in JSON
+- Expansion: Full phrase book per club
+- Include: Match day expressions, goal celebrations, disappointment phrases
+- Regional variations: North London vs South London Arsenal fans
+
+**3.7 Cross-Club Relationship Graph**
+- Current: Rivalries are pair-wise
+- Expansion: Full relationship graph
+- Types: Rivalry, Friendly (same owner), Feeder club, Historical connection
+- Enable: "What do Arsenal fans think about Nottingham Forest?" (Wenger connection)
+
+---
+
+## PHASE 4: UI Polish
+### Status: Pending
+
+### Pre-Implementation Ideas
+- Mobile responsive design
+- Dark mode (football at night!)
+- Club-specific color themes
+- Loading states with club badges
+
+### Expansion Ideas (To Be Captured During Implementation)
+*[This section will be filled during Phase 4 implementation]*
+
+---
+
+## PHASE 5: Legends Page
+### Status: COMPLETED
+
+### Completed Features
+- 10 new API endpoints for legends and club personality
+- `/api/v1/legends` - List all legends
+- `/api/v1/legends/{id}` - Get specific legend
+- `/api/v1/teams/{id}/legends` - Team's legends
+- `/api/v1/teams/{id}/identity` - Club identity
+- `/api/v1/teams/{id}/moments` - Iconic moments
+- `/api/v1/teams/{id}/rivalries` - Rivalries
+- `/api/v1/teams/{id}/mood` - Current mood
+- `/api/v1/teams/{id}/personality` - Full personality bundle
+
+### Expansion Ideas (Captured During Implementation)
+
+**5.1 AI Legend Storytelling Endpoint**
+- New: POST `/api/v1/legends/{id}/tell-story`
+- Uses legend data + club mood to generate dynamic narrative
+- Different story angles: career arc, signature moment, legacy
+- Mood-aware: if team is struggling, emphasizes "we need that spirit again"
+
+**5.2 Legend Comparison**
+- New: GET `/api/v1/legends/compare?a={id}&b={id}`
+- Compare two legends across eras
+- "Who was better: Henry or Drogba?"
+- Uses stats + narrative + achievements
+
+**5.3 Interactive Timeline**
+- Frontend: Timeline component per club
+- Backend: `/api/v1/teams/{id}/timeline` combining moments + legends
+- Filter by: decade, trophy, emotion
+
+**5.4 "On This Day" Feature**
+- GET `/api/v1/on-this-day`
+- Returns moments/matches that happened on current date in history
+- Great for daily engagement
+
+**5.5 Legend Quotes Database**
+- Expand `club_legends` table with `quotes` JSON field
+- "What did Henry say about Arsenal?"
+- Random quote of the day feature
+
+**5.6 Personality Bundle Caching**
+- The /personality endpoint is expensive (5 DB queries)
+- Cache for 5 minutes per team
+- Invalidate on mood update
+
+---
+
+## PHASE 6: RAG Improvements
+### Status: Pending
+
+### Pre-Implementation Ideas
+- Query expansion using synonyms
+- Freshness scoring (recent data weighted higher)
+- Hybrid search (FTS5 + semantic)
+- Context window optimization
+
+### Expansion Ideas (To Be Captured During Implementation)
+*[This section will be filled during Phase 6 implementation]*
+
+---
+
+## PHASE 7: Future Documentation
+### Status: Pending
+
+### Pre-Implementation Ideas
+- FUTURE_EXPANSION_IDEAS.ctx
+- Technical debt log
+- Feature request backlog
+
+### Expansion Ideas (To Be Captured During Implementation)
+*[This section will be filled during Phase 7 implementation]*
+
+---
+
+## PHASE 8: Security Escalation
+### Status: Pending (Post-Demo)
+
+### Pre-Implementation Ideas
+- Full implementation of SECURITY_ESCALATION_DESIGN.ctx
+- Session state machine
+- Security analytics
+
+### Expansion Ideas (To Be Captured During Implementation)
+*[This section will be filled during Phase 8 implementation]*
+
+---
+
+## CROSS-CUTTING EXPANSION IDEAS
+
+These ideas span multiple phases and should be considered holistically:
+
+### Multi-League Support
+- Current: Premier League only
+- Expansion: La Liga, Bundesliga, Serie A, Ligue 1
+- Architecture: Same schema, different league_id
+- Challenge: Different vocabularies per league (Spanish terms for La Liga)
+
+### Mobile App
+- Current: Web only
+- Expansion: React Native app
+- Leverages: Same FastAPI backend
+- Unique features: Push notifications for match days, widget for standings
+
+### Voice Interface
+- Current: Text chat only
+- Expansion: Voice input/output
+- Use case: "Hey Football-AI, how did Arsenal play?"
+- Technology: Whisper for STT, TTS for responses
+
+### Social Features
+- Current: Single user
+- Expansion: Fan communities per club
+- Features: Shared predictions, banter threads, match day chats
+- Moderation: AI-assisted using same security patterns
+
+### Monetization Path
+- Tier 1 (Free): Basic chat, standings, fixtures
+- Tier 2 ($5/mo): Legends stories, historical data, predictions
+- Tier 3 (B2B): White-label for clubs ($10-50K/year)
+
+---
+
+## PRIORITY MATRIX
+
+| Expansion | Impact | Effort | Priority |
+|-----------|--------|--------|----------|
+| More clubs (top 6) | High | Medium | P1 |
+| Live mood updates | High | Low | P1 |
+| Mobile responsive | High | Low | P1 |
+| Security escalation | Medium | Medium | P2 |
+| Historical seasons | Medium | Medium | P2 |
+| Voice interface | High | High | P3 |
+| Multi-league | High | High | P3 |
+
+---
+
+## EMERGENT INSIGHTS LOG
+
+Insights captured during implementation that inform expansion:
+
+### Insight #921 (Phase 2)
+> Snap-back turns security into personality. Attackers get no detection feedback.
+
+**Expansion implication**: Security features should always feel in-character, not robotic.
+
+### Insight #922 (Phase 3)
+> Club personality as database schema enables RAG to inject relevant persona context dynamically.
+
+**Expansion implication**: All personality data should be queryable, not hardcoded. Enables A/B testing of personas.
+
+---
+
+*This document grows with each phase. By implementation end, the next cycle is planned.*

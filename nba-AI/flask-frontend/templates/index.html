@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}NBA-AI - Home{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>NBA-AI</h1>
+    <p class="subtitle">Chat with passionate NBA fan personas</p>
+
+    <div class="team-cards">
+        <a href="/chat?team=lakers" class="team-card lakers">
+            <div class="team-badge">LAL</div>
+            <h3>Lakers Fan</h3>
+            <p>17 Championships - Showtime Forever</p>
+            <span class="legends">Magic, Kobe, Shaq, LeBron</span>
+        </a>
+
+        <a href="/chat?team=celtics" class="team-card celtics">
+            <div class="team-badge">BOS</div>
+            <h3>Celtics Fan</h3>
+            <p>18 Championships - Most in NBA History</p>
+            <span class="legends">Bird, Russell, Pierce, Garnett</span>
+        </a>
+
+        <a href="/chat?team=warriors" class="team-card warriors">
+            <div class="team-badge">GSW</div>
+            <h3>Warriors Fan</h3>
+            <p>Modern Dynasty - Splash Bros Era</p>
+            <span class="legends">Curry, Klay, Draymond</span>
+        </a>
+    </div>
+</div>
+
+<div class="features">
+    <h2>Domain-Agnostic Proof</h2>
+    <p>Same architecture as Soccer-AI, different domain:</p>
+    <ul>
+        <li>NLKE-compliant SQLite KG (source_kg = "nba")</li>
+        <li>Team personas with snap-back security</li>
+        <li>Rivalry banter system</li>
+        <li>Haiku API integration</li>
+    </ul>
+</div>
+{% endblock %}

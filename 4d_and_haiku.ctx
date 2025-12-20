@@ -1,0 +1,237 @@
+# SOCCER-AI 4D TRANSFORMATION - CONTEXT PACKET
+# Created: 2025-12-31
+# Status: PLANNING
+# Purpose: Transform Robert from scattered components to unified 4D persona
+
+## OBJECTIVE
+
+Transform Soccer-AI's Robert from:
+- Scattered 4D components across multiple files
+- Mood computed in fan_enhancements.py
+- Dialect in fan_enhancements.py
+- RAG in rag.py
+- Conversation in conversation_intelligence.py
+
+To:
+- Unified 4D Persona Architecture (like Eyal-AI)
+- Single RobertPersona class with compute_state()
+- FootballDataProvider as ground truth (live API → mood)
+- Clean separation: Framework computes, Backend consumes
+
+---
+
+## CURRENT STATE ANALYSIS
+
+### What Already Exists (Working)
+
+| Component | Location | Status |
+|-----------|----------|--------|
+| Haiku API | ai_response.py:401-437 | Working |
+| Mood computation | fan_enhancements.py | Working but scattered |
+| Dialect injection | fan_enhancements.py | Working but scattered |
+| Rivalry detection | fan_enhancements.py | Working but scattered |
+| KG-RAG retrieval | rag.py | Working |
+| football-data.org | football_api.py | Working |
+| Multi-turn context | conversation_intelligence.py | Working |
+| Security/snap-backs | ai_response.py | Working |
+
+### What's Missing
+
+| Component | Description |
+|-----------|-------------|
+| RobertPersona | Unified class like EyalPersona |
+| FootballDataProvider integration | Use existing from ground_truth_providers.py |
+| compute_state() | Single method returning Persona4D |
+| get_system_prompt(state) | 4D-injected prompt generation |
+
+---
+
+## THE TRANSFORMATION
+
+### Before (Scattered)
+```python
+# main.py - multiple calls to compute mood
+mood = calculate_mood_from_results(team, results)
+dialect = get_dialect_config(team)
+rivalry = detect_rivalry(query, team)
+# ... manually assembled into system prompt
+```
+
+### After (Unified)
+```python
+# main.py - single 4D computation
+from personas.robert.robert_4d import RobertPersona
+from framework.ground_truth_providers import FootballDataProvider
+
+persona = RobertPersona(team="manchester_united")
+provider = FootballDataProvider(api_key=FOOTBALL_API_KEY)
+
+# Live match result → ground truth state
+match_data = provider.fetch_latest_match()
+ground_state = provider.process(match_data)
+
+# Compute 4D position
+state_4d = persona.compute_state(
+    context=user_query,
+    conversation_history=history,
+    match_result=match_data  # Extra context
+)
+
+# Get 4D-injected system prompt
+system_prompt = persona.get_system_prompt(state_4d)
+```
+
+---
+
+## ECOSYSTEM MAP
+
+```
+/storage/emulated/0/Download/synthesis-rules/
+├── 4d_persona_architecture/              # FRAMEWORK (shared)
+│   ├── framework/
+│   │   ├── persona_engine.py             # PersonaEngine (USE THIS)
+│   │   ├── ground_truth_providers.py     # FootballDataProvider (USE THIS)
+│   │   └── dimensions/                   # Computers (USE THESE)
+│   └── personas/
+│       └── robert/
+│           └── robert_4d.py              # RobertPersona (CREATE/UPDATE)
+│
+├── soccer-AI/                            # THIS PROJECT
+│   ├── backend/
+│   │   ├── main.py                       # FastAPI server (MODIFY)
+│   │   ├── ai_response.py                # Haiku calls (MODIFY)
+│   │   ├── fan_enhancements.py           # DEPRECATE (move to framework)
+│   │   ├── football_api.py               # KEEP (data source)
+│   │   └── rag.py                        # KEEP (retrieval)
+│   └── 4d_and_haiku.ctx                  # THIS FILE
+│
+└── eyal-ai/                              # REFERENCE IMPLEMENTATION
+    └── pkg/conversation/chat_engine.py   # Pattern to follow
+```
+
+---
+
+## IMPLEMENTATION PHASES
+
+### Phase 1: Connect to Framework
+1. [ ] Add sys.path to 4d_persona_architecture in backend/
+2. [ ] Import RobertPersona, FootballDataProvider
+3. [ ] Verify imports work
+
+### Phase 2: Migrate Mood Logic
+1. [ ] fan_enhancements.py → FootballDataProvider.compute_state()
+2. [ ] Replace calculate_mood_from_results() calls
+3. [ ] Test mood still works
+
+### Phase 3: Migrate Dialect Logic
+1. [ ] fan_enhancements.py → RobertFootballComputer (Z-dimension)
+2. [ ] Replace get_dialect_config() calls
+3. [ ] Test dialect injection still works
+
+### Phase 4: Migrate Rivalry Logic
+1. [ ] fan_enhancements.py → FootballDataProvider.detect_signals()
+2. [ ] Replace detect_rivalry() calls
+3. [ ] Test rivalry banter still works
+
+### Phase 5: Unified System Prompt
+1. [ ] Replace manual prompt assembly in ai_response.py
+2. [ ] Use persona.get_system_prompt(state_4d)
+3. [ ] Test full conversation flow
+
+### Phase 6: Live API Integration
+1. [ ] Connect FootballDataProvider to football_api.py
+2. [ ] Live match → ground truth → mood
+3. [ ] Test: Win triggers euphoric, Loss triggers frustrated
+
+---
+
+## KEY FILES TO MODIFY
+
+### 1. backend/main.py
+- Add framework imports
+- Initialize RobertPersona + FootballDataProvider
+- Replace scattered mood/dialect/rivalry calls with compute_state()
+
+### 2. backend/ai_response.py
+- Replace manual system prompt assembly
+- Use persona.get_system_prompt(state_4d)
+- Keep security/snap-backs unchanged
+
+### 3. 4d_persona_architecture/personas/robert/robert_4d.py
+- Update to match EyalPersona pattern
+- Ensure compute_state() returns Persona4D
+- Ensure get_system_prompt() uses to_prompt_injection()
+
+### 4. backend/fan_enhancements.py
+- DEPRECATE (move logic to framework)
+- Keep as thin wrapper if needed for backwards compatibility
+
+---
+
+## VERIFICATION COMMANDS
+
+```bash
+# Test framework import in soccer-AI
+cd /storage/emulated/0/Download/synthesis-rules/soccer-AI/backend
+python3 -c "
+import sys
+sys.path.insert(0, '../../4d_persona_architecture')
+from personas.robert.robert_4d import RobertPersona
+print(RobertPersona().entity_id)
+"
+# Expected: robert_fan
+
+# Test mood computation
+python3 -c "
+from framework.ground_truth_providers import FootballDataProvider
+p = FootballDataProvider(team='manchester_united')
+state = p.process({'result': 'win', 'our_score': 3, 'their_score': 0})
+print(f'Mood: {state.mood}')
+"
+# Expected: euphoric
+```
+
+---
+
+## SUCCESS CRITERIA
+
+1. [ ] RobertPersona imported from framework (not local)
+2. [ ] Mood computed via FootballDataProvider.process()
+3. [ ] Dialect injected via Persona4D.z.dialect
+4. [ ] Rivalry detected via FootballDataProvider.detect_signals()
+5. [ ] System prompt generated via get_system_prompt(state_4d)
+6. [ ] Live match results trigger correct mood
+7. [ ] All existing tests still pass
+8. [ ] No behavioral regression (Robert still sounds like Robert)
+
+---
+
+## REFERENCE: EYAL-AI PATTERN
+
+```python
+# What we did in eyal-ai/pkg/conversation/chat_engine.py
+
+class ChatEngine:
+    def __init__(self):
+        self.persona = EyalPersona()
+        self.ground_truth = EyalGroundTruthProvider(biography_path=...)
+
+    def chat(self, message):
+        # 1. Compute 4D state
+        state_4d = self.compute_4d_state(message)
+
+        # 2. Get 4D-injected prompt
+        system_prompt = self.persona.get_system_prompt(state_4d)
+
+        # 3. Call Haiku
+        response = self.client.chat(messages, system=system_prompt)
+```
+
+Apply same pattern to Soccer-AI's main.py.
+
+---
+
+## API KEY LOCATIONS
+
+- Anthropic: /storage/emulated/0/Download/synthesis-rules/API.txt (ANTHROPIC_API_KEY)
+- Football-data.org: soccer-AI/backend/.football_api_token

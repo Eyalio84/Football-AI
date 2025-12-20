@@ -1,0 +1,175 @@
+{
+  "$schema": "football-kg-schema-v1",
+  "version": "1.0.0",
+  "created": "2024-12-27",
+  "description": "Universal football knowledge graph schema - extracted from Wikipedia template patterns",
+
+  "entities": {
+    "club": {
+      "description": "Football club/team",
+      "required": ["name"],
+      "optional": ["full_name", "nickname", "founded", "ground", "capacity", "owner", "manager", "league", "country", "city"],
+      "detection_patterns": ["Football Club", "F\\.C\\.", "Founded\\s+\\d{4}", "Ground\\s+\\w+", "Premier League|La Liga|Bundesliga|Serie A|Ligue 1"],
+      "examples": ["Manchester United", "Liverpool F.C.", "Chelsea F.C."]
+    },
+    "person": {
+      "description": "Player, manager, or other football personality",
+      "required": ["name"],
+      "optional": ["birth_date", "birth_place", "position", "nationality", "height", "preferred_foot"],
+      "detection_patterns": ["born\\s+\\d+\\s+\\w+\\s+\\d{4}", "Playing career", "Managerial career", "Position\\s+(Forward|Midfielder|Defender|Goalkeeper)"],
+      "subtypes": {
+        "player": {"indicators": ["appearances", "goals", "Playing career"]},
+        "manager": {"indicators": ["Managerial career", "managed", "head coach"]},
+        "referee": {"indicators": ["officiated", "FIFA badge"]}
+      },
+      "examples": ["Alex Ferguson", "Wayne Rooney", "Jurgen Klopp"]
+    },
+    "trophy": {
+      "description": "Competition or trophy that can be won",
+      "required": ["name", "category"],
+      "optional": ["first_awarded", "organizing_body", "current_holder", "most_wins"],
+      "categories": ["domestic_league", "domestic_cup", "european", "worldwide", "regional"],
+      "detection_patterns": ["Cup", "League", "Trophy", "Championship", "UEFA", "FIFA"],
+      "examples": ["FA Cup", "Premier League", "UEFA Champions League"]
+    },
+    "match": {
+      "description": "Single football match",
+      "required": ["home_team", "away_team", "home_score", "away_score"],
+      "optional": ["date", "venue", "competition", "attendance", "referee", "man_of_match", "weather"],
+      "detection_patterns": ["\\d+[–-]\\d+", "Referee\\s+\\w+", "Attendance\\s+[\\d,]+", "Man of the Match"],
+      "examples": ["Manchester United 4-3 Manchester City (2009)"]
+    },
+    "season": {
+      "description": "Club's performance in a specific season",
+      "required": ["club", "year"],
+      "optional": ["league_position", "points", "goals_for", "goals_against", "top_scorer", "manager"],
+      "examples": ["Manchester United 2008-09"]
+    },
+    "stadium": {
+      "description": "Football venue",
+      "required": ["name"],
+      "optional": ["capacity", "city", "country", "opened", "tenant_clubs"],
+      "examples": ["Old Trafford", "Anfield", "Stamford Bridge"]
+    },
+    "transfer": {
+      "description": "Player transfer between clubs",
+      "required": ["player", "from_club", "to_club", "date"],
+      "optional": ["fee", "contract_length", "loan"],
+      "examples": ["Cristiano Ronaldo: Manchester United → Real Madrid (2009)"]
+    }
+  },
+
+  "relationships": {
+    "played_for": {
+      "from": "person",
+      "to": "club",
+      "properties": ["years", "appearances", "goals", "assists", "position"],
+      "cardinality": "many-to-many",
+      "extraction_pattern": "(\\d{4}[–-]\\d{2,4})\\s+([A-Z][a-zA-Z\\s]+?)\\s+(\\d+)\\s+\\((\\d+)\\)"
+    },
+    "managed": {
+      "from": "person",
+      "to": "club",
+      "properties": ["years", "matches", "wins", "draws", "losses", "trophies_won"],
+      "cardinality": "many-to-many"
+    },
+    "won": {
+      "from": "club",
+      "to": "trophy",
+      "properties": ["year", "final_opponent", "final_score", "venue"],
+      "cardinality": "many-to-many",
+      "note": "Each win is a separate edge with year property"
+    },
+    "played_in": {
+      "from": "club",
+      "to": "match",
+      "properties": ["role", "score"],
+      "role_values": ["home", "away"],
+      "cardinality": "exactly-two-per-match"
+    },
+    "rival_of": {
+      "from": "club",
+      "to": "club",
+      "properties": ["derby_name", "intensity", "first_meeting"],
+      "cardinality": "many-to-many",
+      "symmetric": true,
+      "examples": [
+        {"clubs": ["Manchester United", "Manchester City"], "derby_name": "Manchester Derby"},
+        {"clubs": ["Manchester United", "Liverpool"], "derby_name": "North West Derby"},
+        {"clubs": ["Liverpool", "Everton"], "derby_name": "Merseyside Derby"}
+      ]
+    },
+    "transferred_to": {
+      "from": "person",
+      "to": "club",
+      "properties": ["date", "fee", "from_club"],
+      "cardinality": "many-to-many"
+    },
+    "scored_in": {
+      "from": "person",
+      "to": "match",
+      "properties": ["minute", "type", "assist_by"],
+      "type_values": ["goal", "own_goal", "penalty", "free_kick", "header"],
+      "cardinality": "many-to-many"
+    },
+    "home_ground": {
+      "from": "club",
+      "to": "stadium",
+      "properties": ["since", "until"],
+      "cardinality": "one-to-many"
+    },
+    "captained": {
+      "from": "person",
+      "to": "club",
+      "properties": ["years"],
+      "cardinality": "many-to-many"
+    }
+  },
+
+  "extraction_rules": {
+    "preprocessing": [
+      "Strip newlines from entity names",
+      "Normalize Unicode dashes (– → -)",
+      "Collapse multiple whitespace",
+      "Remove reference markers [n]"
+    ],
+    "entity_detection_order": ["match", "person", "club", "list"],
+    "extraction_priority": [
+      {"pattern": "career_table", "reliability": "high", "regex": "(\\d{4}[–-]\\d{2,4})\\s+([A-Z][a-zA-Z\\s]+?)\\s+(\\d+)\\s+\\((\\d+)\\)"},
+      {"pattern": "score", "reliability": "high", "regex": "(\\d+)\\s*[–-]\\s*(\\d+)"},
+      {"pattern": "year", "reliability": "high", "regex": "\\b((?:19|20)\\d{2})\\b"},
+      {"pattern": "date", "reliability": "medium", "regex": "\\d{1,2}\\s+\\w+\\s+\\d{4}"},
+      {"pattern": "honours_list", "reliability": "medium", "parser": "hierarchical"},
+      {"pattern": "infobox", "reliability": "low", "parser": "context_aware"}
+    ],
+    "validation": [
+      "Career years must be after birth year",
+      "Trophy years must be within manager/player tenure",
+      "Match scores must be non-negative integers",
+      "Attendance must be positive and less than stadium capacity"
+    ]
+  },
+
+  "expansion_template": {
+    "description": "To add a new team, download these Wikipedia PDFs and run parser",
+    "required_pages": [
+      "{Team} F.C. - Main club page",
+      "List of {Team} F.C. players - Player appearances",
+      "List of {Team} F.C. records - Records and statistics"
+    ],
+    "optional_pages": [
+      "{Team} F.C. season {Year} - Season details",
+      "{Manager name} - Manager biography",
+      "{Stadium name} - Stadium details",
+      "{Team} F.C.–{Rival} F.C. rivalry - Derby history"
+    ],
+    "example_liverpool": [
+      "Liverpool F.C.PDF",
+      "List of Liverpool F.C. players.PDF",
+      "List of Liverpool F.C. records.PDF",
+      "Jurgen Klopp.PDF",
+      "Anfield.PDF",
+      "Liverpool F.C.–Manchester United F.C. rivalry.PDF"
+    ]
+  }
+}

@@ -1,0 +1,343 @@
+# PC-CLAUDE BRIEFING: Soccer-AI Project Continuation
+
+**READ THIS FIRST** - This file contains everything you need to continue this project seamlessly.
+
+---
+
+## 1. ORIGIN STORY: Why Things Are The Way They Are
+
+### Environment Context
+This project was **started on Termux (Android terminal)**. This matters because:
+
+1. **No anthropic SDK**: The `pip install anthropic` failed due to Rust build issues on Termux.
+   - **Solution**: `ai_response.py` uses **direct HTTP calls** via `urllib` (stdlib)
+   - This is NOT a limitation - it's actually cleaner and works everywhere
+
+2. **npm issues**: Frontend scaffolding had permission/environment issues on Termux
+   - Vite project was initialized but dependencies not fully installed
+   - **PC needs to**: `cd frontend && npm install && npm install -D tailwindcss postcss autoprefixer`
+
+3. **Sleep command**: Termux uses different syntax, so server testing was done differently
+
+4. **File sync**: Project lives in Android storage, needs to be copied to PC
+
+### Key Insight
+The backend is **production-ready** and fully tested. The Termux limitations only affected:
+- SDK installation (solved with direct HTTP)
+- Frontend npm packages (trivial to install on PC)
+
+---
+
+## 2. PROJECT VISION: The Big Picture
+
+### What This Is
+**Soccer-AI** is BOTH:
+1. A **portfolio piece** for Upwork freelancing career
+2. A **real product** with B2B potential
+
+### The "2 Birds 1 Stone" Strategy
+User's philosophy: Build something real that also demonstrates skill.
+
+**Target customers** (future):
+- Sports clubs websites
+- Movie theatres (domain-agnostic - can adapt to movies/showtimes)
+- TV channels
+- Any business needing a "living knowledge base + chat"
+
+### User Profile
+- **Name**: Eyal Nof, Haifa, Israel
+- **Background**: 6000+ hours learning, transitioning from janitor to developer
+- **Philosophy**: Quality over quantity, don't reveal AI/efficiency to clients
+- **Goal**: Leave janitor job through legitimate technical work
+
+---
+
+## 3. TECHNICAL STATE: What's Done
+
+### Backend (100% Complete)
+
+```json
+{
+  "status": "COMPLETE",
+  "tested": true,
+  "files": {
+    "schema.sql": "12 tables + FTS5 full-text search + triggers",
+    "backend/database.py": "SQLite connection, CRUD, FTS5 queries",
+    "backend/rag.py": "RAG retrieval - entity extraction, context building",
+    "backend/ai_response.py": "Haiku API via direct HTTP (no SDK)",
+    "backend/models.py": "Pydantic request/response models",
+    "backend/main.py": "FastAPI app with all endpoints",
+    "backend/.env": "ANTHROPIC_API_KEY stored here",
+    "backend/soccer_ai.db": "SQLite database with sample data",
+    "scripts/seed_data.py": "Sample data loader"
+  },
+  "sample_data": {
+    "teams": 10,
+    "players": 16,
+    "games": 5,
+    "injuries": 3,
+    "standings": 10,
+    "news": 5
+  }
+}
+```
+
+### Frontend (Scaffolded, Needs Build)
+
+```json
+{
+  "status": "SCAFFOLDED",
+  "framework": "Vite + React + TypeScript",
+  "needs": [
+    "npm install",
+    "Tailwind CSS setup",
+    "Theme config (easy customization)",
+    "Chat components",
+    "API integration"
+  ],
+  "user_requirement": "Easy to customize and edit - all styles in config file"
+}
+```
+
+---
+
+## 4. ARCHITECTURE: How It Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        USER                                  │
+│                    "Is De Bruyne injured?"                   │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  REACT FRONTEND                              │
+│              (Chat UI - TO BE BUILT)                         │
+│         POST /api/v1/chat {message: "..."}                   │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  FASTAPI BACKEND                             │
+│                                                              │
+│  1. rag.py: Extract entities → "De Bruyne", "injured"        │
+│  2. database.py: FTS5 search → Find relevant rows            │
+│  3. rag.py: Build context from database results              │
+│  4. ai_response.py: Send context + query to Haiku            │
+│  5. Return natural language response                         │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+              ┌───────────┴───────────┐
+              ▼                       ▼
+┌─────────────────────┐   ┌─────────────────────┐
+│   SQLite + FTS5     │   │   Haiku API         │
+│   (Knowledge Base)  │   │   (Response Gen)    │
+│                     │   │                     │
+│   - Players         │   │   Direct HTTP call  │
+│   - Teams           │   │   No SDK needed     │
+│   - Games           │   │   ~$0.001/query     │
+│   - Injuries        │   │                     │
+│   - News            │   │                     │
+└─────────────────────┘   └─────────────────────┘
+```
+
+---
+
+## 5. REMAINING TASKS: The Roadmap
+
+### Phase 1: Frontend (CURRENT - Do This First)
+```json
+{
+  "priority": 1,
+  "task": "Build React Chat UI",
+  "requirements": [
+    "Easy to customize (theme config file)",
+    "Clean, professional design",
+    "Modular components",
+    "Mobile responsive"
+  ],
+  "structure": {
+    "config/theme.ts": "All colors, fonts, sizes - SINGLE SOURCE OF TRUTH",
+    "components/Chat/ChatContainer.tsx": "Main chat wrapper",
+    "components/Chat/ChatMessage.tsx": "Individual message bubble",
+    "components/Chat/ChatInput.tsx": "Input field + send button",
+    "hooks/useChat.ts": "Chat state management",
+    "services/api.ts": "Backend API calls"
+  }
+}
+```
+
+### Phase 2: ESPN Extraction Agent (AFTER Frontend)
+```json
+{
+  "priority": 2,
+  "task": "Build data extraction agent",
+  "purpose": "Keep database updated with real soccer data",
+  "approach": "Conventional KB + RAG (NOT agent swarm)",
+  "details": {
+    "method": "Web scraping + Haiku for parsing",
+    "sources": ["ESPN", "BBC Sport", "official APIs if available"],
+    "frequency": "Daily cron job",
+    "cost_estimate": "$0.10/day for updates"
+  },
+  "user_insight": "User correctly identified that conventional KB + RAG is simpler and better than agent swarm for MVP"
+}
+```
+
+### Phase 3: Deployment & Polish
+```json
+{
+  "priority": 3,
+  "tasks": [
+    "Deploy backend (Railway/Render/Vercel)",
+    "Deploy frontend (Vercel/Netlify)",
+    "Add more sample data",
+    "Polish UI/UX",
+    "Create demo video for portfolio"
+  ]
+}
+```
+
+### Phase 4: B2B Potential (Future)
+```json
+{
+  "priority": 4,
+  "vision": "White-label platform",
+  "potential_clients": [
+    "Sports clubs",
+    "Movie theatres (adapt to movies/showtimes)",
+    "TV channels",
+    "Event venues"
+  ],
+  "key_insight": "Architecture is domain-agnostic - soccer is just the first vertical"
+}
+```
+
+---
+
+## 6. API REFERENCE
+
+### Main Chat Endpoint
+```
+POST /api/v1/chat
+Content-Type: application/json
+
+Request:
+{
+  "message": "Is De Bruyne injured?",
+  "conversation_id": "optional-uuid-for-context"
+}
+
+Response:
+{
+  "response": "Yes, Kevin De Bruyne is currently injured with a moderate hamstring injury...",
+  "conversation_id": "uuid",
+  "sources": [{"type": "injury", "id": 1}],
+  "confidence": 0.85,
+  "usage": {"input_tokens": 241, "output_tokens": 99}
+}
+```
+
+### Other Endpoints
+```
+GET  /api/v1/players          - List players
+GET  /api/v1/players/{id}     - Player detail
+GET  /api/v1/teams            - List teams
+GET  /api/v1/games            - List games
+GET  /api/v1/injuries/active  - Active injuries
+GET  /api/v1/standings/{league} - League standings
+GET  /api/v1/search?q=        - Search everything
+GET  /health                  - Health check
+```
+
+---
+
+## 7. DECISIONS LOG: Why Things Were Done This Way
+
+| Decision | Why | Alternative Considered |
+|----------|-----|------------------------|
+| SQLite + FTS5 | Simple, no external deps, FTS5 handles RAG retrieval natively | Supabase (more features but external dependency) |
+| Direct HTTP for Haiku | anthropic SDK failed on Termux, direct HTTP is cleaner anyway | SDK (would work on PC but direct HTTP is portable) |
+| Conventional KB + RAG | User insight: simpler than agent swarm, same results | Agent swarm (over-engineering for MVP) |
+| Theme config file | User requested "easy to customize" | Inline styles (harder to change) |
+| FastAPI | Fast, modern, auto-docs, great for APIs | Flask (less features), Django (overkill) |
+
+---
+
+## 8. COMMANDS REFERENCE
+
+### Start Backend
+```bash
+cd soccer-AI/backend
+python main.py
+# Runs on http://localhost:8000
+# Docs at http://localhost:8000/docs
+```
+
+### Start Frontend (after building)
+```bash
+cd soccer-AI/frontend
+npm run dev
+# Runs on http://localhost:5173
+```
+
+### Test Backend
+```bash
+curl -X POST http://localhost:8000/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Who are the injured players?"}'
+```
+
+### Re-seed Database (if needed)
+```bash
+cd soccer-AI
+python scripts/seed_data.py
+```
+
+---
+
+## 9. IMMEDIATE NEXT STEPS FOR PC-CLAUDE
+
+1. **Verify backend works**:
+   ```bash
+   cd soccer-AI/backend
+   python main.py
+   # Test with curl or browser at /docs
+   ```
+
+2. **Setup frontend**:
+   ```bash
+   cd soccer-AI/frontend
+   npm install
+   npm install -D tailwindcss postcss autoprefixer
+   npx tailwindcss init -p
+   ```
+
+3. **Build chat UI** with easy customization:
+   - Create `config/theme.ts` with all colors/styles
+   - Build modular chat components
+   - Connect to backend API
+
+4. **User preference reminder**:
+   - Quality over quantity
+   - Easy to customize (theme config)
+   - Clean, modular code
+   - Learning mode: explain decisions as you build
+
+---
+
+## 10. SUCCESS CRITERIA
+
+The frontend is "done" when:
+- [ ] Chat interface works end-to-end
+- [ ] User can ask soccer questions and get AI responses
+- [ ] All colors/styles are in a single config file
+- [ ] Components are modular and easy to understand
+- [ ] Looks professional (portfolio-worthy)
+- [ ] Mobile responsive
+
+---
+
+**END OF BRIEFING**
+
+When you read this, respond with: "I've read the Soccer-AI briefing. Backend is complete, I'll build the frontend with easy customization. Ready to start?"

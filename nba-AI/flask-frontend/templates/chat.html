@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}NBA-AI - {{ team.title() }} Chat{% endblock %}
+
+{% block content %}
+<div class="chat-container {{ team }}">
+    <div class="chat-header">
+        <a href="/" class="back-btn">&larr; Teams</a>
+        <h2 id="team-name">{{ team.title() }} Fan</h2>
+        <span class="team-badge-small">{{ team[:3].upper() }}</span>
+    </div>
+
+    <div class="messages" id="messages">
+        <div class="message assistant">
+            <div class="message-content">
+                {% if team == 'lakers' %}
+                What's up, Lakers Nation! Purple and Gold forever! What do you want to know about the greatest franchise in NBA history?
+                {% elif team == 'celtics' %}
+                Welcome to Celtic Pride! 18 banners and counting. What's on your mind about the most storied franchise in basketball?
+                {% elif team == 'warriors' %}
+                Dub Nation! The dynasty that changed basketball forever. What can I tell you about the Warriors?
+                {% else %}
+                Hey! Ready to talk NBA basketball. What's on your mind?
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-input-container">
+        <input type="text" id="message-input" placeholder="Ask about {{ team.title() }}..." autocomplete="off">
+        <button id="send-btn">Send</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const team = "{{ team }}";
+let conversationId = null;
+
+const messagesDiv = document.getElementById('messages');
+const input = document.getElementById('message-input');
+const sendBtn = document.getElementById('send-btn');
+
+function addMessage(content, role) {
+    const div = document.createElement('div');
+    div.className = 'message ' + role;
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    contentDiv.textContent = content;
+
+    div.appendChild(contentDiv);
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+async function sendMessage() {
+    const message = input.value.trim();
+    if (!message) return;
+
+    addMessage(message, 'user');
+    input.value = '';
+    sendBtn.disabled = true;
+
+    try {
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                message: message,
+                team: team,
+                conversation_id: conversationId
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.conversation_id) {
+            conversationId = data.conversation_id;
+        }
+
+        addMessage(data.response || data.error || 'No response', 'assistant');
+    } catch (error) {
+        addMessage('Error: ' + error.message, 'assistant');
+    }
+
+    sendBtn.disabled = false;
+    input.focus();
+}
+
+sendBtn.addEventListener('click', sendMessage);
+input.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') sendMessage();
+});
+
+input.focus();
+</script>
+{% endblock %}

@@ -1,0 +1,215 @@
+# Soccer-AI Session Handoff - Continue on PC
+
+**Created**: December 18, 2024
+**Purpose**: Transfer context to PC for frontend development
+
+---
+
+## Project Status
+
+### Backend: COMPLETE ✅
+
+All backend components are working:
+
+| Component | Status | File |
+|-----------|--------|------|
+| Database Schema | ✅ | `schema.sql` (12 tables + FTS5) |
+| SQLite + FTS5 | ✅ | `backend/soccer_ai.db` |
+| Database Module | ✅ | `backend/database.py` |
+| RAG Retrieval | ✅ | `backend/rag.py` |
+| AI Response (Haiku) | ✅ | `backend/ai_response.py` |
+| Pydantic Models | ✅ | `backend/models.py` |
+| FastAPI App | ✅ | `backend/main.py` |
+| Sample Data | ✅ | `scripts/seed_data.py` |
+| API Key | ✅ | `backend/.env` |
+
+**Tested & Working:**
+- RAG retrieves relevant context from database
+- Haiku generates natural responses
+- Direct HTTP API (no SDK needed - works on Termux)
+
+### Frontend: IN PROGRESS 🔄
+
+Vite + React + TypeScript scaffolded, needs:
+- Tailwind CSS setup
+- Chat components
+- API integration
+
+---
+
+## What to Build on PC
+
+### 1. Install Dependencies (if not done)
+```bash
+cd soccer-AI/frontend
+npm install
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+```
+
+### 2. Frontend Architecture (Easy to Customize)
+
+```
+frontend/src/
+├── config/
+│   └── theme.ts          # Colors, fonts - CUSTOMIZE HERE
+├── components/
+│   ├── Chat/
+│   │   ├── ChatContainer.tsx
+│   │   ├── ChatMessage.tsx
+│   │   ├── ChatInput.tsx
+│   │   └── index.ts
+│   └── ui/
+│       ├── Button.tsx
+│       └── Avatar.tsx
+├── hooks/
+│   └── useChat.ts        # Chat state management
+├── services/
+│   └── api.ts            # Backend API calls
+├── types/
+│   └── index.ts          # TypeScript types
+├── App.tsx
+└── main.tsx
+```
+
+### 3. Key Files to Create
+
+**config/theme.ts** - All customization in one place:
+```typescript
+export const theme = {
+  colors: {
+    primary: '#10B981',      // Green - change to any color
+    secondary: '#3B82F6',    // Blue
+    background: '#0F172A',   // Dark bg
+    surface: '#1E293B',      // Card bg
+    text: '#F8FAFC',         // Light text
+    textMuted: '#94A3B8',    // Muted text
+    userBubble: '#10B981',   // User message
+    botBubble: '#1E293B',    // Bot message
+  },
+  fonts: {
+    sans: 'Inter, system-ui, sans-serif',
+  },
+  borderRadius: '12px',
+}
+```
+
+**services/api.ts** - Backend connection:
+```typescript
+const API_URL = 'http://localhost:8000/api/v1'
+
+export async function sendMessage(message: string, conversationId?: string) {
+  const response = await fetch(`${API_URL}/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, conversation_id: conversationId })
+  })
+  return response.json()
+}
+```
+
+**hooks/useChat.ts** - Chat state:
+```typescript
+interface Message {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: Date
+}
+
+// useState for messages array
+// Function to send message and update state
+```
+
+---
+
+## Backend Commands (for reference)
+
+```bash
+# Start backend server
+cd backend
+python main.py
+# Runs on http://localhost:8000
+# Docs at http://localhost:8000/docs
+
+# Test backend
+curl -X POST http://localhost:8000/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Is De Bruyne injured?"}'
+```
+
+---
+
+## API Endpoints Available
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/chat` | POST | Main chat - send message, get AI response |
+| `/api/v1/players` | GET | List players |
+| `/api/v1/teams` | GET | List teams |
+| `/api/v1/games` | GET | List games |
+| `/api/v1/injuries/active` | GET | Active injuries |
+| `/api/v1/search?q=` | GET | Search everything |
+| `/health` | GET | Health check |
+
+**Chat Request:**
+```json
+{
+  "message": "How did Arsenal play yesterday?",
+  "conversation_id": "optional-uuid"
+}
+```
+
+**Chat Response:**
+```json
+{
+  "response": "Arsenal won 3-0 against Brighton...",
+  "conversation_id": "uuid",
+  "sources": [{"type": "game", "id": 2}],
+  "confidence": 0.85
+}
+```
+
+---
+
+## Design Requirements
+
+User requested: **Easy to customize and edit**
+
+This means:
+- All colors/styles in `config/theme.ts`
+- Small, focused components
+- Clear prop interfaces
+- Comments explaining customization points
+- No hardcoded values in components
+
+---
+
+## Sample Data in Database
+
+- 10 Premier League teams
+- 16 star players (Haaland, Salah, Saka, etc.)
+- 5 games (yesterday, today, tomorrow)
+- 3 active injuries (De Bruyne, Gabriel Jesus, Maddison)
+- 10 league standings
+- 5 news articles
+
+---
+
+## To Continue on PC
+
+1. Copy/sync the `soccer-AI/` folder to PC
+2. Open in VS Code or preferred editor
+3. Start backend: `cd backend && python main.py`
+4. Start frontend: `cd frontend && npm run dev`
+5. Tell Claude: "Continue building Soccer-AI frontend from SESSION_HANDOFF_PC.ctx"
+
+---
+
+## User Preferences
+
+- Quality over quantity
+- Easy to customize
+- Clean, modular code
+- Professional design
+- Learning mode: explain decisions as we build

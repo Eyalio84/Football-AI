@@ -1,0 +1,193 @@
+# Work Tracker: Soccer-AI MVP
+
+**Project**: Soccer-AI - Living Knowledge Base with AI Chat
+**Type**: Full-Stack Application (Portfolio + Real Product)
+**Status**: Architecture Design Phase
+**Started**: December 18, 2024
+**Location**: synthesis-rules/soccer-AI/
+
+---
+
+## Project Overview
+
+A soccer knowledge base with:
+- Structured database of players, teams, games, stats
+- RAG-powered retrieval for relevant context
+- Haiku API for natural language responses
+- React chatbot frontend
+- Automated daily updates
+
+---
+
+## Phase Tracking
+
+| Phase | Status | Est. Time | Notes |
+|-------|--------|-----------|-------|
+| 1. Architecture Design | IN PROGRESS | 1 day | Schema, API, decisions |
+| 2. Database Setup | PENDING | 1-2 days | SQLite or Supabase |
+| 3. Backend API | PENDING | 2-3 days | FastAPI + RAG |
+| 4. AI Integration | PENDING | 1-2 days | Haiku response gen |
+| 5. Frontend Chat | PENDING | 3-5 days | React + TypeScript |
+| 6. Automation | PENDING | 1-2 days | Daily updates |
+| 7. Polish & Deploy | PENDING | 2-3 days | Vercel deployment |
+
+**Total Estimated**: 2-3 weeks
+
+---
+
+## Architecture Decisions
+
+### Database Choice
+- [ ] SQLite + FTS5 (simple, local, free)
+- [ ] Supabase (hosted, auth, realtime, free tier)
+
+### Backend Stack
+- [ ] FastAPI (Python) - proven pattern
+- [ ] Node.js/Express - same language as frontend
+
+### AI Integration
+- [x] Haiku API for response generation
+- [ ] RAG retrieval strategy
+
+### Frontend Stack
+- [x] React + TypeScript
+- [x] Tailwind CSS
+- [ ] Component library choice
+
+---
+
+## Current Session Goals
+
+### Session 1 (Dec 18 Evening)
+- [x] Create work tracker
+- [ ] Finalize architecture decisions
+- [ ] Create project structure
+- [ ] Design database schema
+- [ ] Begin implementation
+
+---
+
+## Entity Schema (Draft)
+
+```
+Players
+├── id, name, team_id, position, nationality
+├── stats (goals, assists, games)
+└── injuries, transfers
+
+Teams
+├── id, name, league, country
+├── roster, form, standings
+└── stadium, founded
+
+Games
+├── id, date, home_team, away_team
+├── score, events, lineups
+└── venue, attendance
+
+Statistics (per game)
+├── player_id, game_id
+├── goals, assists, shots, passes
+└── tackles, fouls, cards
+
+Injuries
+├── player_id, type, severity
+├── occurred, expected_return
+└── status
+
+Transfers
+├── player_id, from_team, to_team
+├── fee, date, contract_length
+└── status (rumor/completed)
+```
+
+---
+
+## API Endpoints (Draft)
+
+```
+GET  /api/players           - List players
+GET  /api/players/{id}      - Player details
+GET  /api/teams             - List teams
+GET  /api/teams/{id}        - Team details
+GET  /api/games             - Recent games
+GET  /api/games/{id}        - Game details
+POST /api/chat              - Natural language query
+GET  /api/search?q=         - Search entities
+GET  /api/stats/player/{id} - Player statistics
+GET  /api/stats/team/{id}   - Team statistics
+```
+
+---
+
+## File Structure (Planned)
+
+```
+soccer-AI/
+├── WORK_TRACKER-soccer-ai.wt
+├── CLAUDE.md
+├── backend/
+│   ├── main.py           # FastAPI app
+│   ├── database.py       # DB connection + queries
+│   ├── rag.py            # RAG retrieval logic
+│   ├── ai_response.py    # Haiku integration
+│   ├── models.py         # Pydantic models
+│   └── soccer_ai.db      # SQLite database
+├── frontend/
+│   ├── src/
+│   │   ├── components/   # React components
+│   │   ├── hooks/        # Custom hooks
+│   │   ├── services/     # API calls
+│   │   └── App.tsx
+│   ├── package.json
+│   └── vite.config.ts
+├── scripts/
+│   ├── seed_data.py      # Initial data seeding
+│   └── daily_update.py   # Automation script
+└── data/
+    └── sample_data.json  # Test data
+```
+
+---
+
+## Key Decisions Log
+
+| Date | Decision | Reasoning |
+|------|----------|-----------|
+| Dec 18 | Conventional KB + RAG over Agent Swarm | Simpler, same result, easier debug |
+| Dec 18 | Haiku for responses | Cost-effective (~$0.001/query) |
+| Dec 18 | Soccer-AI as name | Clear, memorable |
+
+---
+
+## Session Log
+
+### Session 1 - December 18, 2024 (Evening)
+- Created work tracker
+- Discussing architecture approach
+- Plugins loaded (16 total)
+- Learning mode active
+
+---
+
+## Success Criteria (MVP)
+
+- [ ] Can ask "How did [team] play yesterday?"
+- [ ] Can ask "Show me [player]'s stats"
+- [ ] Can ask "Which teams have injuries?"
+- [ ] Responses are natural, not raw data
+- [ ] Data is accurate and up-to-date
+- [ ] Frontend is polished and professional
+- [ ] Deployable to Vercel
+
+---
+
+## Links & References
+
+- Concept doc: `contexts/SOCCER_KG_CONCEPT.ctx`
+- Session handoff: `contexts/SESSION_HANDOFF_SOCCER_KG_MVP.ctx`
+- Existing patterns: `api_server.py`, `tools/agent_orchestrator.py`
+
+---
+
+**Status**: Ready to begin architecture finalization

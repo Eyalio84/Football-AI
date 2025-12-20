@@ -1,0 +1,280 @@
+# 4D Persona Implementation Context
+
+**Project**: Soccer-AI
+**Completed**: 2025-12-31
+**Status**: PRODUCTION READY
+
+---
+
+## Implementation Summary
+
+The 4D Persona Architecture transforms Robert from a "costume" (declared personality) into a "computed position" - a dynamic persona whose state is mathematically derived from live data.
+
+### The Formula: P(t) = (X, Y, Z, T)
+
+| Dimension | Name | Source | Example |
+|-----------|------|--------|---------|
+| X | Emotional | Match results API / DB | WWDLW → confident |
+| Y | Relational | Unified KG edges | "Liverpool" → rivalry mode |
+| Z | Linguistic | config.py regions | Man Utd → Mancunian |
+| T | Temporal | Conversation history | Turn 5 → rising |
+
+---
+
+## Key Files Created
+
+### Core Components
+
+| File | Purpose | LOC |
+|------|---------|-----|
+| `backend/config.py` | Feature flag, dialect regions, club mappings | ~50 |
+| `backend/persona_bridge.py` | Main 4D integration - computers + synthesis | ~450 |
+| `backend/live_football_provider.py` | Live API + DB fallback for mood data | ~250 |
+| `backend/unified_soccer_ai_kg.db` | Unified knowledge graph (41.8 MB) | N/A |
+
+### Test Suites
+
+| File | Tests | Coverage |
+|------|-------|----------|
+| `tests/test_4d_behavioral.py` | 35 | Identity, mood, rivalry, anti-gaslighting |
+| `tests/test_4d_integration.py` | 33 | Config, providers, bridge, prompts |
+| `tests/test_kg_migration.py` | 34 | Schema, nodes, edges, FTS, traversal |
+
+---
+
+## Unified Knowledge Graph
+
+**Database**: `backend/unified_soccer_ai_kg.db`
+**Size**: 41.8 MB
+
+### Contents
+
+| Table | Records | Purpose |
+|-------|---------|---------|
+| nodes | 745 | Teams, legends, stadiums, persons |
+| edges | 674 | Rivalries (43), legends (18), moments |
+| match_history | 230,557 | Form strings for mood fallback |
+| elo_history | 26,410 | Match predictions |
+| kb_facts | 681 | Robert's knowledge base |
+| kb_documents | 12 | Wikipedia content |
+
+### Critical Lesson Learned
+
+**Graph ≠ Knowledge Base**
+
+The 4D persona needs BOTH:
+1. **Graph** (nodes + edges) → WHO relates to WHOM
+2. **Knowledge** (facts + history) → WHAT happened
+
+Without both, Robert would know his rivals but have no memories.
+
+---
+
+## Dialect Regions
+
+```python
+DIALECT_REGIONS = {
+    "north": ["liverpool", "everton", "manchester_united", "manchester_city",
+              "newcastle", "leeds"],
+    "midlands": ["aston_villa", "wolves", "nottingham_forest", "leicester"],
+    "london": ["arsenal", "chelsea", "tottenham", "west_ham", "crystal_palace",
+               "fulham", "brentford"],
+    "south": ["brighton", "bournemouth", "southampton"]
+}
+```
+
+---
+
+## Club Aliases
+
+The RelationalComputer detects these aliases in user messages:
+
+```python
+CLUB_ALIASES = {
+    "man utd": "Manchester United",
+    "man united": "Manchester United",
+    "united": "Manchester United",
+    "spurs": "Tottenham",
+    "villa": "Aston Villa",
+    "city": "Manchester City",
+    "palace": "Crystal Palace",
+    "forest": "Nottingham Forest"
+}
+```
+
+---
+
+## Key Bug Fixes
+
+### 1. Rivalry Activation (entity_id extraction)
+
+**Problem**: `entity_id` was `"robert_manchester_united"` but KG nodes were `"Manchester United"`
+
+**Solution**: Added `_extract_club_from_entity_id()` method:
+```python
+def _extract_club_from_entity_id(self, entity_id: str) -> str:
+    if "_" in entity_id:
+        parts = entity_id.split("_", 1)
+        if len(parts) > 1:
+            club_id = parts[1]
+    club_mapping = {
+        "manchester_united": "Manchester United",
+        # ... more mappings
+    }
+    return club_mapping.get(club_id, club_id.replace("_", " ").title())
+```
+
+### 2. DB Fallback for Mood
+
+**Problem**: Live API returns empty when offline, no fallback
+
+**Solution**: Implemented `_get_db_results()` in live_football_provider.py:
+```python
+def _get_db_results(self, club_id: str) -> List[Dict]:
+    team_name_mapping = {
+        "manchester_united": "Man United",
+        # DB uses short names
+    }
+    cursor.execute("""
+        SELECT match_date, home_team, away_team, ft_home, ft_away, ft_result
+        FROM match_history
+        WHERE home_team LIKE ? OR away_team LIKE ?
+        ORDER BY match_date DESC LIMIT 5
+    """, (f"%{team_name}%", f"%{team_name}%"))
+```
+
+---
+
+## Feature Flag
+
+```python
+# backend/config.py
+USE_4D_PERSONA = True  # Use 4D computed position
+USE_4D_PERSONA = False # Fallback to legacy fan_enhancements
+```
+
+### Rollback Plan
+
+If issues arise:
+1. Set `USE_4D_PERSONA = False` in config.py
+2. Backend automatically uses legacy path
+3. No code changes needed - instant rollback
+
+---
+
+## API Endpoints
+
+### 4D State
+```
+GET /api/v1/fan/{club}/4d-state
+
+Response:
+{
+  "enabled": true,
+  "position_4d": {
+    "x": {"mood": "confident", "intensity": 0.6, "reason": "Recent form: WWDLW"},
+    "y": {"activated": false, "target": null},
+    "z": {"dialect": "mancunian", "distinctiveness": 0.7},
+    "t": {"step": 3, "momentum": "rising"}
+  },
+  "form_string": "WWDLW"
+}
+```
+
+### Rivalry Check
+```
+POST /api/v1/fan/{club}/check-rivalry
+Body: {"message": "What about Liverpool?"}
+
+Response:
+{
+  "rivalry_detected": true,
+  "rivalry": {
+    "target": "Liverpool",
+    "type": "rival",
+    "intensity": 0.98,
+    "derby_name": "North West Derby"
+  }
+}
+```
+
+---
+
+## Frontend 4D Indicator
+
+The Flask frontend displays a 4D position indicator:
+
+```html
+<div class="position-4d">
+  <div class="axis-indicator" id="axis-x">
+    <span class="axis-label">X</span>
+    <span class="axis-value">😊 confident</span>
+  </div>
+  <div class="axis-indicator" id="axis-y">
+    <span class="axis-label">Y</span>
+    <span class="axis-value">⚔️ Liverpool</span>
+  </div>
+  <div class="axis-indicator" id="axis-z">
+    <span class="axis-label">Z</span>
+    <span class="axis-value">🔵 mancunian</span>
+  </div>
+  <div class="axis-indicator" id="axis-t">
+    <span class="axis-label">T</span>
+    <span class="axis-value">📈 turn 3</span>
+  </div>
+</div>
+```
+
+---
+
+## Test Commands
+
+```bash
+cd backend
+
+# Run all 102 tests
+python -m pytest tests/ -v
+
+# Run specific suites
+python -m pytest tests/test_4d_behavioral.py -v  # 35 tests
+python -m pytest tests/test_4d_integration.py -v  # 33 tests
+python -m pytest tests/test_kg_migration.py -v    # 34 tests
+```
+
+---
+
+## Dependencies
+
+- Python 3.10+
+- FastAPI
+- anthropic (Claude API)
+- sqlite3 (standard library)
+
+### Ariel Framework (External)
+```
+/storage/emulated/0/Download/synthesis-rules/Ariel/
+├── framework/
+│   ├── persona_engine.py
+│   └── dimensions/
+│       ├── emotional.py
+│       ├── relational.py
+│       ├── linguistic.py
+│       └── temporal.py
+└── personas/robert/robert_4d.py
+```
+
+---
+
+## Summary
+
+**Key Innovation**: Robert's mood is now COMPUTED from real match data, not declared.
+
+This provides:
+- **Anti-gaslighting**: Mood has provenance from API/DB
+- **Dynamic personality**: Mood changes with wins/losses
+- **Regional authenticity**: Dialects grouped by geography
+- **Rivalry awareness**: Y-axis activates from KG edges
+
+**Tests**: 102/102 passing
+**Feature flag**: Safe rollback enabled
+**Documentation**: Complete (atlas, readme, claude.md, api docs)

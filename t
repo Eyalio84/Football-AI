@@ -1,0 +1,1 @@
+start thinking about /storage/emulated/0/Download/synthesis-rules/soccer-AI/nba-AI/ what would it take to make the 3 fans demo into 3 fans prototype with full personas?^

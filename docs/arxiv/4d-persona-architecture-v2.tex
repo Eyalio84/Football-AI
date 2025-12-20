@@ -1,0 +1,501 @@
+\documentclass[11pt]{article}
+
+% arXiv recommended packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage[margin=1in]{geometry}
+
+% Code listing style
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  language=Python,
+  showstringspaces=false,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{orange}
+}
+
+\title{4D Persona Architecture: A Dimensional Model for Reality-Grounded AI Agents}
+
+\author{
+  Eyal Nof\\
+  \texttt{eyalnof123@gmail.com}
+}
+
+\date{January 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We propose the \textbf{4D Persona Architecture}, a framework for AI persona systems where agent identity is computed as a dynamic position across four conceptual dimensions rather than declared through static text descriptions. The four dimensions are: \textbf{Emotional} (affective state derived from real-world data), \textbf{Relational} (position in a knowledge graph of relationships), \textbf{Linguistic} (voice, dialect, and vocabulary identity), and \textbf{Temporal} (evolution trajectory through time). Unlike traditional approaches where personas are ``costumes'' the model wears, our architecture treats persona as a coordinate that moves through dimensional space based on ground truth data, contextual triggers, and temporal dynamics. We demonstrate this architecture through a reference implementation (Soccer-AI) and show that computed personas exhibit qualitatively different behaviors than declared personas. This work introduces the concept of \textbf{Grounded Persona RAG}, where Retrieval-Augmented Generation is extended to include persona computation from external data, not just fact retrieval.
+\end{abstract}
+
+\section{Introduction}
+
+Current AI systems define personas through static text descriptions in system prompts:
+
+\begin{quote}
+``You are a helpful assistant who is enthusiastic about football.''
+\end{quote}
+
+This approach has fundamental limitations. The persona never changes regardless of context. Emotions are performed rather than derived from reality. There is no dimensional variation in response to stimuli, and no memory of persona evolution over time.
+
+We observe that static personas create \textit{actors}, not \textit{characters}. The AI says the right words but does not \textit{inhabit} the identity. This paper proposes an alternative approach: instead of describing \textbf{who} the persona is, we compute \textbf{where} the persona is across four conceptual dimensions.
+
+Our contributions are:
+\begin{enumerate}
+    \item \textbf{4D Persona Model}: A conceptual framework modeling persona across four dimensions: emotional, relational, linguistic, and temporal
+    \item \textbf{Grounded Persona RAG}: An extension of RAG where persona state is computed from external ground truth data
+    \item \textbf{Temporal Dynamics}: Introduction of trajectory, velocity, and momentum for persona evolution
+    \item \textbf{Reference Implementation}: Soccer-AI, demonstrating the architecture with Premier League fan personas
+\end{enumerate}
+
+\section{Related Work}
+
+\subsection{Retrieval-Augmented Generation}
+RAG \cite{lewis2020retrieval} revolutionized how AI systems access knowledge by retrieving relevant information at query time rather than relying solely on parametric knowledge. However, RAG focuses on \textit{fact retrieval}, leaving persona definition untouched. The system prompt remains static regardless of retrieved content.
+
+\subsection{Persona-Based Dialogue Systems}
+Prior work on persona-based dialogue \cite{zhang2018personalizing} introduced persona-conditioned response generation. However, these approaches use static persona descriptions (e.g., ``I have a dog'', ``I work as a teacher'') that do not change based on external events or temporal dynamics.
+
+\textbf{PersonaRAG} \cite{personarag2024} extends RAG to adapt retrieval based on user characteristics, focusing on user-centric personalization. Our work differs by focusing on \textit{agent} persona rather than user modeling, and by deriving persona state from external data sources.
+
+Recent work on dialogue systems with persona data \cite{personadialogue2024} has explored large-scale persona-conditioned generation. Our approach complements this by providing a framework for \textit{dynamic} persona computation rather than static persona conditioning.
+
+\subsection{Emotional AI}
+Affective computing \cite{picard1997affective} has explored emotional expression in AI systems. Most approaches either classify user emotion or generate predefined emotional responses. Our work differs by \textit{deriving} emotional state from external ground truth data rather than inferring or declaring it.
+
+Persona-Adaptive Attention \cite{personaadaptive2023} introduces dynamic attention mechanisms for persona consistency. We extend this temporal adaptation by grounding it in external data sources.
+
+\subsection{Knowledge Graphs in Dialogue}
+Knowledge-grounded dialogue \cite{dinan2018wizard} uses structured knowledge to inform responses. We extend this by positioning the persona \textit{within} the knowledge graph, enabling relationship-aware behavior.
+
+\subsection{Embodied AI}
+The term ``embodied'' in AI typically refers to physical embodiment, as in robotics. Embodied-RAG \cite{embodiedrag2024} applies RAG to robotic navigation and spatial reasoning. Our use of ``grounded'' rather than ``embodied'' is deliberate: we refer to grounding persona in external data sources, not physical embodiment. This distinction is important to avoid terminological confusion.
+
+\section{The 4D Persona Architecture}
+
+\subsection{Core Formulation}
+
+We model persona state $P$ across four conceptual dimensions:
+
+\begin{equation}
+P(t) = (x, y, z, t)
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item $x \in [-1, 1]$: Emotional dimension (negative to positive affect)
+    \item $y \in \mathcal{G}$: Relational dimension (position in knowledge graph $\mathcal{G}$)
+    \item $z \in \mathcal{L}$: Linguistic dimension (dialect/vocabulary space $\mathcal{L}$)
+    \item $t \in \mathbb{N} \times \mathcal{H}$: Temporal dimension (time step and history $\mathcal{H}$)
+\end{itemize}
+
+\textbf{Note on mathematical formulation}: We use the notation $\mathcal{P} = E \times R \times L \times T$ as a conceptual shorthand. Strictly speaking, these dimensions have different mathematical types (scalar, graph position, linguistic space, time-history tuple) and do not form a traditional Cartesian product. The ``4D'' framing is a useful conceptual metaphor for organizing the four aspects of persona, not a claim of rigorous geometric structure.
+
+\subsection{Dimension Overview}
+
+Table \ref{tab:dimensions} summarizes the four dimensions with their input signals and computed outputs.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Dimension} & \textbf{Input Signal} & \textbf{Computed Output} & \textbf{Example} \\
+\midrule
+X: Emotional & Real-world metrics & Mood state & Match results $\rightarrow$ euphoric \\
+Y: Relational & KG neighbors & Relationship activation & Rival mentioned $\rightarrow$ rivalry mode \\
+Z: Linguistic & Dialect config & Voice identity & Liverpool $\rightarrow$ Scouse dialect \\
+T: Temporal & Recent events & Memory + trajectory & 3 losses $\rightarrow$ declining mood \\
+\bottomrule
+\end{tabular}
+\caption{The four dimensions of persona state with input signals and computed outputs.}
+\label{tab:dimensions}
+\end{table}
+
+\subsection{Dimension X: Emotional}
+
+The emotional dimension represents the affective state of the persona, \textbf{derived from real-world ground truth data} rather than declared.
+
+\begin{equation}
+x = f_E(D) = \frac{2 \cdot \text{points}(D)}{\text{max\_points}(D)} - 1
+\end{equation}
+
+Where $D$ is ground truth data (e.g., recent match results for a sports fan persona). This ensures:
+\begin{itemize}
+    \item Emotion changes automatically when reality changes
+    \item Emotion has \textit{provenance} (can explain why)
+    \item Emotion exists on a continuum, not discrete categories
+\end{itemize}
+
+\subsection{Dimension Y: Relational}
+
+The relational dimension positions the persona within a knowledge graph $\mathcal{G} = (V, E, W)$ with vertices $V$, edges $E$, and weights $W$.
+
+\begin{equation}
+y = f_R(\mathcal{G}, c) = \max_{e \in E_{activated}(c)} W(e)
+\end{equation}
+
+Where $E_{activated}(c)$ are edges activated by context $c$. This enables:
+\begin{itemize}
+    \item Multi-hop reasoning through graph traversal
+    \item Relationship intensity based on edge weights
+    \item Context-dependent relationship activation
+\end{itemize}
+
+\subsection{Dimension Z: Linguistic}
+
+The linguistic dimension captures voice, dialect, and vocabulary identity:
+
+\begin{equation}
+z = f_L(entity) = (\delta, \mathcal{V}, \mathcal{C})
+\end{equation}
+
+Where $\delta$ is dialect distinctiveness, $\mathcal{V}$ is vocabulary mapping, and $\mathcal{C}$ is constraints (forbidden terms). This affects \textit{how} things are said, not \textit{what} is said.
+
+\subsection{Dimension T: Temporal}
+
+The temporal dimension introduces trajectory dynamics:
+
+\begin{equation}
+\tau(t, w) = [P(t-w), P(t-w+1), \ldots, P(t)]
+\end{equation}
+
+With velocity and momentum:
+\begin{align}
+v(t) &= P(t) - P(t-1) \\
+\hat{P}(t+1) &= P(t) + v(t)
+\end{align}
+
+This enables prediction of future persona states and ensures temporal continuity.
+
+\subsection{State Transition Function}
+
+The persona evolves according to:
+
+\begin{equation}
+P(t+1) = f(P(t), c(t), D(t))
+\end{equation}
+
+Where $c(t)$ is context and $D(t)$ is ground truth data. The transition decomposes:
+
+\begin{equation}
+f(P, c, D) = (f_E(D), f_R(\mathcal{G}, c), f_L(entity), f_T(P))
+\end{equation}
+
+\section{Grounded Persona RAG}
+
+We introduce \textbf{Grounded Persona RAG} as an extension of traditional RAG. The term ``grounded'' emphasizes that persona state is derived from external, verifiable data sources---grounding the persona in reality rather than declaration.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Aspect} & \textbf{Traditional RAG} & \textbf{Grounded Persona RAG} \\
+\midrule
+Persona & Static text & Computed from data \\
+Emotion & Declared & Derived from ground truth \\
+Retrieval & Facts only & Facts + relationships \\
+Memory & Context window & Full trajectory \\
+\bottomrule
+\end{tabular}
+\caption{Comparison of Traditional RAG and Grounded Persona RAG}
+\end{table}
+
+The key insight is that \textbf{RAG retrieves facts; Grounded Persona RAG also computes affective state}.
+
+Traditional RAG:
+\begin{equation}
+\text{Response} = \text{LLM}(\text{static\_persona} + \text{retrieved\_chunks} + \text{query})
+\end{equation}
+
+Grounded Persona RAG:
+\begin{equation}
+\text{Response} = \text{LLM}(\text{compute\_persona}(D, \mathcal{G}, t) + \text{retrieved\_chunks} + \text{query})
+\end{equation}
+
+This differs from PersonaRAG \cite{personarag2024}, which adapts retrieval based on user characteristics. Grounded Persona RAG computes \textit{agent} persona from external data, rather than adapting to user personas.
+
+\section{Dynamic System Prompt Synthesis}
+
+The 4D position is synthesized into a dynamic system prompt per-request:
+
+\begin{algorithm}
+\caption{System Prompt Synthesis}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} Persona state $P(t) = (x, y, z, t)$, base prompt $B$
+\STATE \textbf{Output:} Synthesized system prompt $S$
+\STATE $S \leftarrow B$
+\STATE $S \leftarrow S + $ EmotionalInjection$(x)$
+\IF{$y.\text{activated}$}
+    \STATE $S \leftarrow S + $ RelationalInjection$(y)$
+\ENDIF
+\IF{$z.\text{dialect} \neq \text{neutral}$}
+    \STATE $S \leftarrow S + $ LinguisticInjection$(z)$
+\ENDIF
+\IF{$t.\text{memory} \neq \emptyset$}
+    \STATE $S \leftarrow S + $ TemporalInjection$(t)$
+\ENDIF
+\RETURN $S$
+\end{algorithmic}
+\end{algorithm}
+
+Every request receives a persona calibrated to current reality.
+
+\section{Reference Implementation: Soccer-AI}
+
+We demonstrate the 4D Persona Architecture through Soccer-AI, a conversational system where users interact with AI ``fans'' of Premier League football clubs.
+
+\subsection{Emotional Computation}
+Mood is derived from actual match results stored in a database:
+\begin{lstlisting}
+def calculate_mood(club, num_matches=5):
+    matches = db.query(
+        "SELECT result FROM matches
+         WHERE team = ?
+         ORDER BY date DESC LIMIT ?",
+        (club, num_matches)
+    )
+    points = sum(3 if m=='W' else 1 if m=='D' else 0
+                 for m in matches)
+    form = points / (num_matches * 3)
+    return derive_mood(form)
+\end{lstlisting}
+
+\subsection{Relational Activation}
+Rivalry detection triggers relationship-specific behavior:
+\begin{lstlisting}
+RIVALRIES = {
+    "arsenal": ["tottenham", "chelsea"],
+    "liverpool": ["manchester_united", "everton"],
+    # ...
+}
+
+def check_rivalry(club, message):
+    rivals = RIVALRIES.get(club, [])
+    for rival in rivals:
+        if rival in message.lower():
+            return activate_rivalry(club, rival)
+\end{lstlisting}
+
+\subsection{Linguistic Identity}
+Regional dialects applied based on club:
+\begin{lstlisting}
+DIALECTS = {
+    "liverpool": {"phrases": ["la", "sound", "boss"],
+                  "style": "Scouse"},
+    "newcastle": {"phrases": ["howay", "canny"],
+                  "style": "Geordie"},
+}
+\end{lstlisting}
+
+\subsection{Qualitative Comparison}
+
+\textbf{Traditional approach} (static persona):
+\begin{quote}
+User: ``What do you think about Tottenham?''
+
+Response: ``As an Arsenal fan, I don't like Tottenham. They are our rivals. The North London Derby is always intense.''
+\end{quote}
+
+\textbf{4D Persona approach} (computed state: mood=anxious, rivalry=activated):
+\begin{quote}
+User: ``What do you think about Tottenham?''
+
+Response: ``Spurs? \textit{sighs} Look, normally I'd be all over them - what do we think of Tottenham and all that - but after that Chelsea result, I'm just... we need to sort ourselves out before the derby, you know? Mind you, they're not exactly setting the world alight either, are they?''
+\end{quote}
+
+The second response weaves together current emotional state (anxious from recent results), rivalry activation, and authentic voice.
+
+\section{Discussion}
+
+\subsection{Grounded vs. Declared Emotion}
+The critical distinction is between emotion that is \textit{told} versus emotion that is \textit{derived}. When an AI is told ``be enthusiastic,'' it performs enthusiasm. When enthusiasm emerges from winning streak data, it \textit{has} enthusiasm.
+
+\subsection{Persona as Trajectory}
+Traditional personas are points. Our architecture treats persona as a \textit{path} through conceptual space over time. This enables questions like ``Where is this persona heading?'' and ``How stable is this character?''
+
+\subsection{The Costume Problem Solved}
+Static personas are costumes. The 4D architecture creates characters that inhabit their identity because that identity is computed from the same reality they discuss.
+
+\section{Limitations and Future Work}
+
+This work has several limitations that suggest directions for future research:
+
+\begin{itemize}
+    \item \textbf{Ground truth dependency}: The architecture requires access to external data sources. Without ground truth data, the emotional dimension cannot be computed meaningfully.
+
+    \item \textbf{Domain-specific knowledge graphs}: The relational dimension requires constructing knowledge graphs specific to each domain. This involves significant upfront effort.
+
+    \item \textbf{State management complexity}: Temporal persistence requires maintaining state across sessions, adding infrastructure requirements.
+
+    \item \textbf{Evaluation challenges}: Quantitative evaluation of persona quality is an open problem. This paper provides qualitative examples; future work should develop metrics for persona consistency, authenticity, and user preference.
+
+    \item \textbf{Mathematical formalization}: The ``4D'' framing is conceptual rather than rigorous. Future work could explore more formal mathematical foundations for multi-aspect persona modeling.
+
+    \item \textbf{Scalability}: The current implementation handles single personas. Scaling to many concurrent personas with shared knowledge graphs requires further engineering.
+\end{itemize}
+
+\section{Applications Beyond Sports}
+
+The architecture generalizes to any domain where personas should be grounded in reality:
+
+\begin{itemize}
+    \item \textbf{Customer Service}: Agent patience derived from actual wait time metrics
+    \item \textbf{Education}: Tutor encouragement calibrated to real student progress
+    \item \textbf{Healthcare}: Wellness companion tone based on actual health data
+    \item \textbf{Gaming}: NPC emotions grounded in actual game world state
+\end{itemize}
+
+\subsection{Vignette: Tutor-AI}
+
+Consider a math tutoring AI for a student named Marcus:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Dimension} & \textbf{Signal} & \textbf{State} \\
+\midrule
+X: Emotional & 3 failed quizzes this week & Patient, encouraging \\
+Y: Relational & Struggling with fractions & Fractions $\rightarrow$ prerequisites activated \\
+Z: Linguistic & Age 12, casual setting & Simple language, friendly tone \\
+T: Temporal & Improved from 40\% to 55\% & Momentum positive, celebrate progress \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Traditional approach}: ``Let me explain fractions again. A fraction represents...''
+
+\textbf{4D Persona approach} (computed state: patient + progress-aware):
+
+\begin{quote}
+``Hey Marcus! You know what? Last week you got 4 out of 10 on fractions, and today you got 5.5 out of 10. That's real progress, mate! I can see the multiplication stuff is clicking now. Want to try one more problem together? I think you're closer than you realize.''
+\end{quote}
+
+The tutor's encouragement is \textit{derived} from actual progress data (T), its patience from recent struggles (X), its vocabulary from student profile (Z), and its focus on prerequisites from the knowledge graph (Y).
+
+\section{Conclusion}
+
+We presented the 4D Persona Architecture, an alternative approach to AI persona design that computes persona state rather than declaring it. By modeling persona across four conceptual dimensions (Emotional, Relational, Linguistic, Temporal), we enable:
+
+\begin{enumerate}
+    \item \textbf{Grounded emotion}: Feelings derived from real data
+    \item \textbf{Relationship awareness}: Graph-based reasoning
+    \item \textbf{Linguistic identity}: Consistent voice
+    \item \textbf{Temporal continuity}: Memory and trajectory
+\end{enumerate}
+
+The architecture integrates existing concepts---affective computing, knowledge-grounded dialogue, persona consistency, and temporal modeling---into a unified framework for dynamic persona computation. The reference implementation (Soccer-AI) demonstrates that computed personas produce qualitatively different responses than static personas.
+
+Future work should develop quantitative evaluation methods and explore formal mathematical foundations for multi-dimensional persona modeling.
+
+\section*{Acknowledgments}
+[To be added]
+
+\bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\bibitem{lewis2020retrieval}
+Lewis, P., et al. (2020).
+Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.
+\textit{NeurIPS 2020}.
+
+\bibitem{zhang2018personalizing}
+Zhang, S., et al. (2018).
+Personalizing Dialogue Agents: I have a dog, do you have pets too?
+\textit{ACL 2018}.
+
+\bibitem{picard1997affective}
+Picard, R. W. (1997).
+\textit{Affective Computing}.
+MIT Press.
+
+\bibitem{dinan2018wizard}
+Dinan, E., et al. (2018).
+Wizard of Wikipedia: Knowledge-Powered Conversational Agents.
+\textit{ICLR 2019}.
+
+\bibitem{personarag2024}
+Amer, A. A., et al. (2024).
+PersonaRAG: Enhancing Retrieval-Augmented Generation Systems with User-Centric Agents.
+\textit{arXiv preprint arXiv:2407.09394}.
+
+\bibitem{personadialogue2024}
+Kim, J., et al. (2024).
+Enhancing Persona Consistency in Dialogue Language Models.
+\textit{arXiv preprint arXiv:2412.09034}.
+
+\bibitem{personaadaptive2023}
+Fu, J., et al. (2023).
+Improving Persona Consistency in Dialogue Generation via Model-Agnostic Persona-Adaptive Attention.
+\textit{AAAI 2023}.
+
+\bibitem{embodiedrag2024}
+Huang, Q., et al. (2024).
+Embodied-RAG: General Non-parametric Embodied Memory for Retrieval and Generation.
+\textit{arXiv preprint arXiv:2409.18313}.
+
+\end{thebibliography}
+
+\appendix
+
+\section{Implementation Details}
+
+The reference implementation (Soccer-AI) is available at: [GitHub URL to be added]
+
+Key components:
+\begin{itemize}
+    \item \texttt{fan\_enhancements.py}: Emotional dimension computation
+    \item \texttt{rag.py}: Relational dimension (KG-RAG)
+    \item \texttt{ai\_response.py}: 4D synthesis and generation
+    \item \texttt{database.py}: Ground truth data access
+\end{itemize}
+
+\section{Glossary}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Term} & \textbf{Definition} \\
+\midrule
+Grounded Persona RAG & RAG with persona computed from external data \\
+Ground Truth & Real-world data determining emotion \\
+Persona Trajectory & Path through conceptual space over time \\
+Dimensional Synthesis & Combining dimensions into state \\
+Temporal Momentum & Predicted future persona state \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Relationship to Prior Work}
+
+To clarify the relationship between our work and related approaches:
+
+\begin{itemize}
+    \item \textbf{vs. PersonaRAG}: PersonaRAG adapts \textit{retrieval} based on user characteristics. We compute \textit{agent persona} from external data. The approaches are complementary.
+
+    \item \textbf{vs. Embodied-RAG}: Embodied-RAG uses ``embodied'' to mean physical robotic embodiment for spatial navigation. We use ``grounded'' to mean data-grounded persona computation. These are distinct concepts.
+
+    \item \textbf{vs. Static Persona Conditioning}: Traditional persona-conditioned generation uses fixed persona descriptions. We compute dynamic persona state from external signals.
+
+    \item \textbf{vs. Affective Computing}: Affective computing typically infers emotion from user signals. We derive agent emotion from external ground truth data about the domain.
+\end{itemize}
+
+\end{document}

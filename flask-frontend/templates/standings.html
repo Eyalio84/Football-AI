@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Premier League Standings - Soccer-AI{% endblock %}
+
+{% block content %}
+<div class="standings-container">
+    <h1>📊 Premier League Standings</h1>
+    <p class="subtitle">2024-25 Season • Updated with live data</p>
+
+    <div id="loading" class="loading-state">
+        Loading standings...
+    </div>
+
+    <div id="standings-table" style="display:none;">
+        <table class="standings">
+            <thead>
+                <tr>
+                    <th>Pos</th>
+                    <th>Club</th>
+                    <th>P</th>
+                    <th>W</th>
+                    <th>D</th>
+                    <th>L</th>
+                    <th>GF</th>
+                    <th>GA</th>
+                    <th>GD</th>
+                    <th>Pts</th>
+                    <th>Form</th>
+                </tr>
+            </thead>
+            <tbody id="standings-tbody">
+                <!-- Populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="error" class="error-state" style="display:none;">
+        Failed to load standings. Is the backend running?
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadStandings() {
+    const loading = document.getElementById('loading');
+    const table = document.getElementById('standings-table');
+    const error = document.getElementById('error');
+    const tbody = document.getElementById('standings-tbody');
+
+    try {
+        const response = await fetch('http://localhost:8000/api/v1/standings/Premier League');
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        const standings = data.data || [];
+
+        if (standings.length === 0) {
+            throw new Error('No standings data');
+        }
+
+        // Clear tbody
+        while (tbody.firstChild) {
+            tbody.removeChild(tbody.firstChild);
+        }
+
+        // Populate table safely using DOM methods
+        standings.forEach((team) => {
+            const row = document.createElement('tr');
+
+            // Highlight zones
+            if (team.position <= 4) {
+                row.classList.add('champions-league');
+            } else if (team.position === 5) {
+                row.classList.add('europa-league');
+            } else if (team.position >= 18) {
+                row.classList.add('relegation');
+            }
+
+            // Create cells safely
+            const posCell = document.createElement('td');
+            posCell.className = 'pos';
+            posCell.textContent = team.position;
+
+            const nameCell = document.createElement('td');
+            nameCell.className = 'team-name';
+            const strongEl = document.createElement('strong');
+            strongEl.textContent = team.team_name;
+            nameCell.appendChild(strongEl);
+
+            const playedCell = document.createElement('td');
+            playedCell.textContent = team.played || 0;
+
+            const wonCell = document.createElement('td');
+            wonCell.textContent = team.won || 0;
+
+            const drawnCell = document.createElement('td');
+            drawnCell.textContent = team.drawn || 0;
+
+            const lostCell = document.createElement('td');
+            lostCell.textContent = team.lost || 0;
+
+            const gfCell = document.createElement('td');
+            gfCell.textContent = team.goals_for || 0;
+
+            const gaCell = document.createElement('td');
+            gaCell.textContent = team.goals_against || 0;
+
+            const gdCell = document.createElement('td');
+            const gd = (team.goals_for || 0) - (team.goals_against || 0);
+            gdCell.textContent = gd;
+            gdCell.className = gd > 0 ? 'positive' : (gd < 0 ? 'negative' : '');
+
+            const ptsCell = document.createElement('td');
+            ptsCell.className = 'points';
+            const ptsStrong = document.createElement('strong');
+            ptsStrong.textContent = team.points;
+            ptsCell.appendChild(ptsStrong);
+
+            const formCell = document.createElement('td');
+            formCell.className = 'form';
+            if (team.form) {
+                team.form.split('').forEach(result => {
+                    const span = document.createElement('span');
+                    if (result === 'W') {
+                        span.className = 'form-w';
+                        span.textContent = 'W';
+                    } else if (result === 'D') {
+                        span.className = 'form-d';
+                        span.textContent = 'D';
+                    } else if (result === 'L') {
+                        span.className = 'form-l';
+                        span.textContent = 'L';
+                    }
+                    formCell.appendChild(span);
+                });
+            }
+
+            // Append all cells
+            row.appendChild(posCell);
+            row.appendChild(nameCell);
+            row.appendChild(playedCell);
+            row.appendChild(wonCell);
+            row.appendChild(drawnCell);
+            row.appendChild(lostCell);
+            row.appendChild(gfCell);
+            row.appendChild(gaCell);
+            row.appendChild(gdCell);
+            row.appendChild(ptsCell);
+            row.appendChild(formCell);
+
+            tbody.appendChild(row);
+        });
+
+        // Show table, hide loading
+        loading.style.display = 'none';
+        table.style.display = 'block';
+
+    } catch (err) {
+        console.error('Failed to load standings:', err);
+        loading.style.display = 'none';
+        error.style.display = 'block';
+    }
+}
+
+// Load on page load
+loadStandings();
+</script>
+{% endblock %}

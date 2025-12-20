@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Soccer-AI{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="nav-brand">⚽ Soccer-AI</a>
+        <div class="nav-links">
+            <a href="/">Dashboard</a>
+            <a href="/chat">💬 Chat</a>
+            <a href="/standings">📊 Standings</a>
+            <a href="/predictions">🔮 Predictions</a>
+        </div>
+        <div class="team-selector-nav">
+            <label for="team-dropdown">My Team:</label>
+            <select id="team-dropdown" onchange="selectTeam(this.value)">
+                <option value="">Select Club...</option>
+                <option value="arsenal">Arsenal</option>
+                <option value="aston_villa">Aston Villa</option>
+                <option value="bournemouth">Bournemouth</option>
+                <option value="brentford">Brentford</option>
+                <option value="brighton">Brighton</option>
+                <option value="chelsea">Chelsea</option>
+                <option value="crystal_palace">Crystal Palace</option>
+                <option value="everton">Everton</option>
+                <option value="fulham">Fulham</option>
+                <option value="leicester">Leicester City</option>
+                <option value="liverpool">Liverpool</option>
+                <option value="manchester_city">Man City</option>
+                <option value="manchester_united">Man United</option>
+                <option value="newcastle">Newcastle</option>
+                <option value="nottingham_forest">Nott'm Forest</option>
+                <option value="tottenham">Tottenham</option>
+                <option value="west_ham">West Ham</option>
+                <option value="wolves">Wolves</option>
+            </select>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <script>
+        // Persistent team selection across all pages
+        function selectTeam(team) {
+            if (team) {
+                localStorage.setItem('selectedTeam', team);
+                // Dispatch event for pages that need to react
+                window.dispatchEvent(new CustomEvent('teamChanged', { detail: team }));
+            }
+        }
+
+        // Load saved team on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTeam = localStorage.getItem('selectedTeam');
+            const dropdown = document.getElementById('team-dropdown');
+            if (savedTeam && dropdown) {
+                dropdown.value = savedTeam;
+            }
+        });
+
+        // Helper to get current team
+        function getSelectedTeam() {
+            return localStorage.getItem('selectedTeam') || null;
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

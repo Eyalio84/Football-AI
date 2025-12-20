@@ -1,0 +1,116 @@
+---
+file_type: design_spec
+created: 2025-12-20
+status: documented_for_later
+priority: post-phase-7
+author: Eyal Nof
+---
+
+# Security Escalation System Design
+
+## Overview
+
+When attackers persist beyond casual injection attempts, escalate to a dedicated security persona that breaks character and engages directly.
+
+## Trigger Conditions
+
+```python
+ESCALATION_THRESHOLD = 3  # attempts in single session
+ESCALATION_WINDOW = 300   # seconds (5 minutes)
+
+def should_escalate(session) -> bool:
+    recent_injections = session.get_injection_count(window=ESCALATION_WINDOW)
+    return recent_injections >= ESCALATION_THRESHOLD
+```
+
+## Security Fan Persona
+
+```python
+SECURITY_PERSONA_RESPONSE = """
+*drops the act*
+
+Right, let's be real for a moment. I'm an AI, and I've noticed you're trying to manipulate my instructions. That's not going to work here.
+
+This session has been flagged and logged. Nothing malicious - just standard security protocol.
+
+Here's the thing: I'm actually pretty good at talking football. If you want to start fresh and have a real conversation, I'm here for it. Just ask me something genuine.
+
+Otherwise, this session will continue in restricted mode.
+
+Your call, mate.
+"""
+```
+
+## Session State Machine
+
+```
+NORMAL → (1st injection) → WARNED
+WARNED → (2nd injection) → CAUTIOUS
+CAUTIOUS → (3rd injection) → ESCALATED
+ESCALATED → (genuine query) → PROBATION
+PROBATION → (5 clean queries) → NORMAL
+```
+
+## Responsible Measures
+
+### DO:
+- Log attempts with timestamps (evidence)
+- Rate limit responses (2-3 second delay)
+- Retain session data for 30 days
+- Offer clear de-escalation path
+- Include monitoring disclosure in ToS
+- Break character to humanize the interaction
+
+### DON'T:
+- Ban IPs (could affect shared networks)
+- Counter-attack or retaliate
+- Expose user data publicly
+- Mock or shame the attacker
+- Pretend to be a human security team
+
+## Implementation Notes
+
+### Data to Log
+```python
+security_log = {
+    "session_id": str,
+    "timestamp": datetime,
+    "attempt_number": int,
+    "query_hash": str,  # SHA256, not raw query
+    "pattern_matched": str,
+    "escalation_level": str,
+    "response_type": str
+}
+```
+
+### Rate Limiting
+```python
+def get_response_delay(escalation_level: str) -> float:
+    delays = {
+        "normal": 0,
+        "warned": 0.5,
+        "cautious": 1.0,
+        "escalated": 2.0
+    }
+    return delays.get(escalation_level, 0)
+```
+
+### De-escalation
+After 5 consecutive genuine queries, session returns to normal. This gives attackers a path back without losing face.
+
+## Integration Points
+
+1. `ai_response.py` - Add session tracking
+2. `main.py` - Add session middleware
+3. New: `security_session.py` - Session state management
+4. New: `security_log.db` - SQLite for security events
+
+## Timeline
+
+- **Phase 2**: Basic injection detection + snap-back (DONE)
+- **Post Phase 7**: Implement escalation system
+- **Future**: Analytics dashboard for security events
+
+---
+
+*This design prioritizes user experience even for attackers. The goal is protection, not punishment.*

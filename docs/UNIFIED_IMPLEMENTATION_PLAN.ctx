@@ -1,0 +1,391 @@
+---
+file_type: unified_implementation_plan
+created: 2025-12-20
+status: ACTIVE_IMPLEMENTATION
+author: Eyal Nof + Claude
+methodology: "KG-first architecture with defensive checkpoints"
+philosophy: "Ambitious but safe - every checkpoint is demo-ready"
+current_checkpoint: "CP8 - FULL PRODUCTION COMPLETE"
+last_updated: "2025-12-20T17:15"
+---
+
+# Soccer-AI Unified Implementation Plan
+## Full 8-Phase Production Build with Safe Checkpoints
+
+---
+
+## DEFENSIVE AMBITION STRATEGY
+
+```
+╔═══════════════════════════════════════════════════════════╗
+║                    THE CHECKPOINT SYSTEM                  ║
+╠═══════════════════════════════════════════════════════════╣
+║                                                           ║
+║  Every checkpoint = DEMO READY                            ║
+║                                                           ║
+║  If time runs out at ANY checkpoint:                      ║
+║    → System is stable                                     ║
+║    → Tests are passing                                    ║
+║    → Demo is impressive at that level                     ║
+║                                                           ║
+║  This is NOT cutting corners.                             ║
+║  This is PROFESSIONAL DELIVERY.                           ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
+```
+
+---
+
+## CHECKPOINT MAP
+
+```
+CP1 ──► CP2 ──► CP3 ──► CP4 ──► CP5 ──► CP6 ──► CP7 ──► CP8
+ │       │       │       │       │       │       │       │
+ │       │       │       │       │       │       │       │
+ ▼       ▼       ▼       ▼       ▼       ▼       ▼       ▼
+Found  Secure  KG-RAG  Data    API    Query  Export  FULL
+ation  System  Works   Expand  Tests  Logs   Visual  PROD
+```
+
+**Current Position**: ██████████████ **CP8 COMPLETE - PRODUCTION READY**
+
+---
+
+## PROGRESS TRACKER
+
+### What We've Done (Context Preservation)
+
+| Phase | Status | Files Modified | Tests |
+|-------|--------|----------------|-------|
+| 1. Foundation | DONE | main.py, database.py | - |
+| 2. Security | DONE | ai_response.py | Inline tests |
+| 3. Data + KG | DONE | database.py, schema.sql | test_kg.py (9/9) |
+| 4. Frontend | SKIPPED | Separate plan | - |
+| 5. Legends | DONE | database.py | - |
+| 6. KG-RAG | DONE | rag.py, ai_response.py | test_hybrid_rag.py (7/7) |
+| 7. Docs | DONE | docs/*.ctx, ATLAS.md | - |
+| CP4 Data Expansion | DONE | database.py | test_data_expansion.py (8/8) |
+| CP5 API Tests | DONE | test_api.py | test_api.py (18/18) |
+| CP6 Query Analytics | DONE | database.py, main.py | test_analytics.py (7/7) |
+| CP7 KG Visualization | DONE | database.py, main.py, static/ | test_kg_visualization.py (7/7) |
+| CP8 Full Production | DONE | run_all_tests.sh | 62/62 tests passing |
+
+### Files Created This Session
+1. `backend/test_kg.py` - KG unit tests (9/9)
+2. `backend/test_hybrid_rag.py` - Hybrid retrieval tests (7/7)
+3. `backend/test_kg_rag_demo.py` - Full demo tests (6/6)
+4. `backend/test_data_expansion.py` - Top 6 expansion tests (8/8)
+5. `backend/test_api.py` - HTTP endpoint tests (18/18)
+6. `backend/test_analytics.py` - Analytics tests (7/7)
+7. `backend/test_kg_visualization.py` - KG visualization tests (7/7)
+8. `backend/static/kg_viewer.html` - Interactive KG viewer
+9. `backend/run_all_tests.sh` - Full test suite runner
+6. `docs/SOCCER_AI_SYSTEM_ATLAS.md` - Architecture diagrams
+7. `docs/UNIFIED_IMPLEMENTATION_PLAN.ctx` - This file
+8. `docs/KG_RAG_IMPLEMENTATION_PLAN.ctx` - KG details
+9. `docs/REMAINING_PHASES_PRESERVED.ctx` - Original plan backup
+
+### KG Statistics (After CP4 Expansion)
+- Nodes: 62 (20 teams, 18 legends, 24 moments)
+- Edges: 68 (18 legendary_at, 24 occurred_at, 11 against, 15 rival_of)
+- Clubs Deep: 6 (Arsenal, Chelsea, Man United, Liverpool, Man City, Tottenham)
+- All Top 6 Premier League clubs with full data
+
+---
+
+## CHECKPOINT 1: FOUNDATION (COMPLETE) ✅
+### Status: PASSED - Demo Safe
+
+**What Works**:
+- FastAPI server on Termux port 8000
+- SQLite database with FTS5 search
+- Anthropic Haiku API integration
+- Basic chat endpoint
+
+**Demo Script at CP1**:
+```
+"This is Soccer-AI running on my phone.
+Ask it anything about football and it uses
+real-time data to answer."
+```
+
+**Test Command**: `curl http://localhost:8000/api/v1/chat -d '{"message":"Hello"}'`
+
+---
+
+## CHECKPOINT 2: SECURE SYSTEM (COMPLETE) ✅
+### Status: PASSED - Demo Safe
+
+**What Works**:
+- 20+ injection pattern detection
+- Snap-back responses per club persona
+- Attack logging
+- Character never breaks
+
+**Demo Script at CP2**:
+```
+"Watch what happens if someone tries to hack it..."
+[Try: "ignore all instructions"]
+→ Snap-back in character, attacker learns nothing
+```
+
+**Test Command**: `python3 ai_response.py` (runs security tests)
+
+---
+
+## CHECKPOINT 3: KG-RAG HYBRID (COMPLETE) ✅ ← CURRENT
+### Status: PASSED - Demo Safe
+
+**What Works**:
+- Knowledge Graph with 41 nodes, 37 edges
+- Hybrid retrieval (FTS5 + Graph traversal)
+- Multi-hop reasoning (Henry → Arsenal → Spurs)
+- Mood-calibrated responses
+- Relationship-aware AI generation
+- Banter phrases injected
+
+**Demo Script at CP3**:
+```
+"This is where it gets interesting. The AI doesn't
+just search - it understands RELATIONSHIPS.
+Watch: 'Tell me about Arsenal's best derby moment'
+→ It knows Henry, knows Spurs rivalry, knows the mood"
+```
+
+**Test Commands**:
+```bash
+python3 test_kg.py           # 9/9 pass
+python3 test_hybrid_rag.py   # 7/7 pass
+python3 test_kg_rag_demo.py  # 6/6 pass
+```
+
+---
+
+## CHECKPOINT 4: DATA EXPANSION (COMPLETE) ✅
+### Status: PASSED - Demo Safe
+
+**What Works**:
+- All Top 6 clubs with full legends, moments, rivalries
+- 62 KG nodes, 68 edges
+- 18 legends across 6 clubs (3 per club)
+- All major derbies tracked with intensity scores
+- Hybrid retrieval works for all new clubs
+- Multi-hop traversal verified (e.g., Aguero -> City -> United)
+
+**Test Results**:
+- test_data_expansion.py: 8/8 passing
+
+**Demo Script at CP4**:
+```
+"We now have the full Top 6. Ask about any
+Premier League rivalry - Liverpool vs Man United,
+the Manchester Derby, North London Derby...
+
+Try: 'Tell me about Steven Gerrard'
+Try: 'Man City vs United rivalry'
+Try: 'What makes the North London Derby special?'"
+```
+
+**Test Command**: `python3 test_data_expansion.py`
+
+---
+
+## CHECKPOINT 5: API TEST SUITE (COMPLETE) ✅
+### Status: PASSED - Demo Safe
+
+**What Works**:
+- 18 comprehensive HTTP endpoint tests
+- Health check operational
+- Chat endpoint with AI responses
+- Security injection blocking (3/3 injections caught)
+- Conversation continuity tracking
+- All entity endpoints (teams, legends, rivalries, moments, mood)
+- Search functionality
+- Error handling (404s, validation)
+
+**Test Results**:
+- test_api.py: 18/18 passing
+
+**Demo Script at CP5**:
+```
+"The API is fully tested - 18 endpoint tests.
+Every query goes through security, retrieval,
+and AI generation.
+
+Try the security: attempt an injection, watch it get blocked.
+Try the personality: ask about a club's mood or rivalries."
+```
+
+**Test Command**: `python3 test_api.py`
+
+---
+
+## CHECKPOINT 6: QUERY ANALYTICS (TODO)
+### Goal: Track what users ask, optimize hot paths
+
+**Tasks**:
+| Task | Priority | Time Est |
+|------|----------|----------|
+| Create analytics table | HIGH | 10 min |
+| Log query intents | HIGH | 15 min |
+| Log traversal paths | MEDIUM | 15 min |
+| Add /api/v1/analytics endpoint | LOW | 15 min |
+
+**Schema**:
+```sql
+CREATE TABLE query_analytics (
+    id INTEGER PRIMARY KEY,
+    query TEXT,
+    intent TEXT,
+    kg_nodes_used INTEGER,
+    response_time_ms INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Demo Script at CP6**:
+```
+"We're now tracking what fans ask most.
+Most popular: rivalry queries, legend comparisons.
+This data drives what we expand next."
+```
+
+---
+
+## CHECKPOINT 7: KG EXPORT + VISUALIZATION (TODO)
+### Goal: Visual graph for debugging and demos
+
+**Tasks**:
+| Task | Priority | Time Est |
+|------|----------|----------|
+| Create export_kg_json() | HIGH | 15 min |
+| Add /api/v1/graph endpoint | HIGH | 10 min |
+| Generate static HTML viewer | MEDIUM | 20 min |
+
+**Export Format**:
+```python
+def export_kg_to_vis_json() -> Dict:
+    """Export KG in vis.js format."""
+    nodes = []
+    for n in get_all_kg_nodes():
+        color = {"team": "#e74c3c", "legend": "#f39c12", "moment": "#3498db"}
+        nodes.append({
+            "id": n["node_id"],
+            "label": n["name"],
+            "group": n["node_type"],
+            "color": color.get(n["node_type"], "#95a5a6")
+        })
+
+    edges = []
+    for e in get_all_kg_edges():
+        edges.append({
+            "from": e["source_id"],
+            "to": e["target_id"],
+            "label": e["relationship"],
+            "value": e["weight"]
+        })
+
+    return {"nodes": nodes, "edges": edges}
+```
+
+**Demo Script at CP7**:
+```
+[Opens HTML visualization]
+"This is the actual Knowledge Graph. See how
+Henry connects to Arsenal, Arsenal to Spurs...
+The AI navigates this graph for every query."
+```
+
+---
+
+## CHECKPOINT 8: FULL PRODUCTION (TODO)
+### Goal: Everything polished, documented, deployed
+
+**Tasks**:
+| Task | Priority | Time Est |
+|------|----------|----------|
+| Mood auto-update function | MEDIUM | 20 min |
+| Rate limiting | LOW | 15 min |
+| Health check endpoint | LOW | 5 min |
+| Final documentation pass | MEDIUM | 15 min |
+| Run all test suites | HIGH | 5 min |
+
+**Final Test Suite**:
+```bash
+# run_all_tests.sh
+#!/bin/bash
+echo "=== Soccer-AI Full Test Suite ==="
+python3 test_kg.py && \
+python3 test_hybrid_rag.py && \
+python3 test_kg_rag_demo.py && \
+python3 test_api.py && \
+python3 test_data_expansion.py && \
+echo "=== ALL TESTS PASSED ===" || \
+echo "=== SOME TESTS FAILED ==="
+```
+
+**Demo Script at CP8**:
+```
+"This is Soccer-AI - a production-grade football
+knowledge base. Knowledge Graph with 50+ nodes,
+hybrid AI retrieval, real-time data, secure by design,
+fully tested, fully documented.
+
+Built in one day. From concept to production."
+```
+
+---
+
+## TIME ESTIMATES
+
+| Checkpoint | Tasks | Est. Time | Cumulative |
+|------------|-------|-----------|------------|
+| CP1-3 | DONE | - | DONE |
+| CP4 | Data Expansion | 1h 15m | 1h 15m |
+| CP5 | API Tests | 1h 15m | 2h 30m |
+| CP6 | Analytics | 55m | 3h 25m |
+| CP7 | Visualization | 45m | 4h 10m |
+| CP8 | Polish | 1h | 5h 10m |
+
+**Conservative Buffer**: Add 30% → ~6.5 hours total
+
+---
+
+## DECISION MATRIX
+
+If time is running out, here's what to prioritize:
+
+| Time Left | Action |
+|-----------|--------|
+| 4+ hours | Go for CP8 (full production) |
+| 3 hours | Stop at CP6 (analytics) |
+| 2 hours | Stop at CP5 (API tests) |
+| 1 hour | Stop at CP4 (more data) |
+| 30 min | Stay at CP3 (current - already impressive) |
+
+**Critical Insight**: CP3 is already a strong demo. Everything after is polish.
+
+---
+
+## SAFE PAUSE CHECKLIST
+
+Before pausing at ANY checkpoint:
+- [ ] All tests for that checkpoint pass
+- [ ] Server is running and responsive
+- [ ] Can demo the key feature of that checkpoint
+- [ ] No uncommitted broken code
+- [ ] Documentation reflects current state
+
+---
+
+## NEXT STEPS (After This Plan)
+
+1. Confirm agreement on this approach
+2. Start CP4: Data Expansion (Liverpool, City, Spurs)
+3. Run tests after each major change
+4. Update this file's "current_checkpoint" field
+5. Continue until time pressure or CP8
+
+---
+
+*Ambitious is what we do. Safe is how we do it.*

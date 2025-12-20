@@ -1,0 +1,1 @@
+we need to document our progress, we have a working MVP KG with moee then 500 nodes we need to doc features , achivements stuf like that, before we proceed, 

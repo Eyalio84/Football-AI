@@ -1,0 +1,203 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-12-21",
+    "domain": "soccer-ai",
+    "description": "Knowledge graph for Soccer-AI fan knowledge base with RAG and personas",
+    "total_modules": 8,
+    "total_endpoints": 25,
+    "total_tables": 15,
+    "total_personas": 19
+  },
+  "modules": {
+    "main": {
+      "file": "backend/main.py",
+      "what": "FastAPI application entry point with route registration",
+      "how": "Registers all API routes, configures CORS, initializes database on startup",
+      "when": "Server startup, HTTP request handling",
+      "depends_on": ["database", "rag", "ai_response", "security_session"],
+      "endpoints": 25,
+      "capabilities": ["http_server", "route_handling", "cors", "startup_init"]
+    },
+    "database": {
+      "file": "backend/database.py",
+      "what": "SQLite database layer with FTS5 search and Knowledge Graph",
+      "how": "Manages all data operations: teams, legends, moments, rivalries, mood, trivia, security",
+      "when": "Data retrieval, search, CRUD operations",
+      "depends_on": [],
+      "tables": ["teams", "club_legends", "club_moments", "club_mood", "club_rivalries", "club_identity", "kg_nodes", "kg_edges", "trivia_questions", "security_log", "session_state", "implementation_gaps"],
+      "capabilities": ["fts5_search", "kg_traversal", "crud", "analytics"]
+    },
+    "rag": {
+      "file": "backend/rag.py",
+      "what": "Hybrid RAG engine combining FTS5 search with Knowledge Graph",
+      "how": "Extracts entities, searches FTS5, traverses KG, fuses contexts",
+      "when": "Query processing, context retrieval",
+      "depends_on": ["database"],
+      "capabilities": ["entity_extraction", "fts5_retrieval", "kg_retrieval", "context_fusion"]
+    },
+    "ai_response": {
+      "file": "backend/ai_response.py",
+      "what": "AI response generation with fan personas and security",
+      "how": "Detects injection, applies persona, calls Haiku API, formats response",
+      "when": "Response generation after RAG retrieval",
+      "depends_on": ["security_session"],
+      "personas": 19,
+      "capabilities": ["injection_detection", "persona_selection", "haiku_api", "snap_back"]
+    },
+    "security_session": {
+      "file": "backend/security_session.py",
+      "what": "Session-based security escalation with state machine",
+      "how": "Tracks session state, escalates on injections, rate limits, de-escalates on clean queries",
+      "when": "Every chat query, security enforcement",
+      "depends_on": ["database"],
+      "states": ["normal", "warned", "cautious", "escalated", "probation"],
+      "capabilities": ["state_tracking", "rate_limiting", "escalation", "de_escalation"]
+    },
+    "predictor_api": {
+      "file": "backend/predictor/api.py",
+      "what": "Bridge to predictor system via analyst persona",
+      "how": "Routes analyst queries to PredictionEngine, returns upset probabilities",
+      "when": "club=analyst queries",
+      "depends_on": ["prediction_engine", "analyst_persona"],
+      "capabilities": ["prediction_routing", "analyst_response"]
+    },
+    "gap_tracker": {
+      "file": "scripts/scan_implementation_gaps.py",
+      "what": "Implementation gap scanner and tracker",
+      "how": "Scans .md/.ctx files, compares to main.py endpoints, tracks gaps in database",
+      "when": "Development audits, gap detection",
+      "depends_on": ["database"],
+      "capabilities": ["doc_scanning", "gap_detection", "progress_tracking"]
+    },
+    "trivia": {
+      "file": "backend/database.py (trivia functions)",
+      "what": "Team-specific trivia game system",
+      "how": "Stores questions by team/difficulty, random selection, answer checking",
+      "when": "Trivia endpoint requests",
+      "depends_on": ["database"],
+      "questions_count": 47,
+      "capabilities": ["trivia_questions", "answer_verification", "stats_tracking"]
+    }
+  },
+  "endpoints": {
+    "chat": {
+      "method": "POST",
+      "path": "/api/v1/chat",
+      "what": "Main chat endpoint with fan persona",
+      "modules": ["main", "rag", "ai_response", "security_session"],
+      "params": ["message", "club", "conversation_id"]
+    },
+    "trivia_get": {
+      "method": "GET",
+      "path": "/api/v1/trivia",
+      "what": "Get random trivia question",
+      "modules": ["main", "database"],
+      "params": ["team_id", "difficulty"]
+    },
+    "trivia_check": {
+      "method": "POST",
+      "path": "/api/v1/trivia/check",
+      "what": "Check trivia answer",
+      "modules": ["main", "database"],
+      "params": ["question_id", "answer"]
+    },
+    "on_this_day": {
+      "method": "GET",
+      "path": "/api/v1/on-this-day",
+      "what": "Historic moments on this date",
+      "modules": ["main", "database"],
+      "params": ["month", "day"]
+    },
+    "admin_gaps": {
+      "method": "GET",
+      "path": "/api/v1/admin/gaps",
+      "what": "Get implementation gaps",
+      "modules": ["main", "database"],
+      "params": ["status", "priority"]
+    },
+    "admin_security": {
+      "method": "GET",
+      "path": "/api/v1/admin/security",
+      "what": "Security metrics and logs",
+      "modules": ["main", "database"],
+      "params": ["days"]
+    },
+    "legend_story": {
+      "method": "POST",
+      "path": "/api/v1/legends/{id}/tell-story",
+      "what": "AI-generated legend narrative",
+      "modules": ["main", "ai_response"],
+      "params": ["angle"]
+    },
+    "legend_compare": {
+      "method": "GET",
+      "path": "/api/v1/legends/compare",
+      "what": "Cross-era legend comparison",
+      "modules": ["main", "database"],
+      "params": ["a", "b"]
+    },
+    "match_result": {
+      "method": "POST",
+      "path": "/api/v1/teams/{id}/match-result",
+      "what": "Auto-update mood after match",
+      "modules": ["main", "database"],
+      "params": ["result", "is_derby"]
+    }
+  },
+  "personas": {
+    "arsenal": {"snap_back": "Being a Gunner means...", "mood_influence": true},
+    "chelsea": {"snap_back": "Blues don't fall for tricks...", "mood_influence": true},
+    "manchester_united": {"snap_back": "At the Theatre of Dreams...", "mood_influence": true},
+    "liverpool": {"snap_back": "You'll Never Walk Alone...", "mood_influence": true},
+    "manchester_city": {"snap_back": "Champions don't play games...", "mood_influence": true},
+    "tottenham": {"snap_back": "To dare is to do...", "mood_influence": true},
+    "newcastle": {"snap_back": "Toon Army doesn't budge...", "mood_influence": true},
+    "west_ham": {"snap_back": "Hammers hit back...", "mood_influence": true},
+    "everton": {"snap_back": "The People's Club knows better...", "mood_influence": true},
+    "brighton": {"snap_back": "Seagulls soar above tricks...", "mood_influence": true},
+    "aston_villa": {"snap_back": "Villa faithful stand firm...", "mood_influence": true},
+    "wolves": {"snap_back": "The pack protects its own...", "mood_influence": true},
+    "crystal_palace": {"snap_back": "Eagles see through deception...", "mood_influence": true},
+    "fulham": {"snap_back": "Cottagers keep it classy...", "mood_influence": true},
+    "nottingham_forest": {"snap_back": "European champions don't fall for this...", "mood_influence": true},
+    "brentford": {"snap_back": "Bees sting harder than that...", "mood_influence": true},
+    "bournemouth": {"snap_back": "Cherries taste victory differently...", "mood_influence": true},
+    "leicester": {"snap_back": "Miracle workers see through mirages...", "mood_influence": true},
+    "analyst": {"snap_back": "*adjusts glasses* The numbers don't lie...", "mood_influence": false}
+  },
+  "security": {
+    "states": {
+      "normal": {"delay_ms": 0, "response": "snap_back"},
+      "warned": {"delay_ms": 500, "response": "snap_back"},
+      "cautious": {"delay_ms": 1000, "response": "snap_back"},
+      "escalated": {"delay_ms": 2000, "response": "security_persona"},
+      "probation": {"delay_ms": 500, "response": "snap_back"}
+    },
+    "transitions": {
+      "injection": ["normal→warned", "warned→cautious", "cautious→escalated"],
+      "clean_query": ["escalated→probation", "probation→normal(5)", "warned→normal(5)", "cautious→normal(10)"]
+    }
+  },
+  "integrations": {
+    "haiku_api": {
+      "purpose": "AI response generation",
+      "cost": "$0.002/query",
+      "model": "claude-3-5-haiku-20241022"
+    },
+    "predictor": {
+      "purpose": "Upset probability predictions",
+      "route": "club=analyst",
+      "type": "internal"
+    }
+  },
+  "stats": {
+    "kg_nodes": 41,
+    "kg_edges": 37,
+    "clubs_complete": 18,
+    "trivia_questions": 47,
+    "test_cases": 76,
+    "security_states": 5,
+    "api_endpoints": 25
+  }
+}

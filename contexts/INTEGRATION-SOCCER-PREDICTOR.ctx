@@ -1,0 +1,317 @@
+---
+title: Soccer-AI + Predictor Integration
+domain: cross-domain
+component: integration
+status: architecture-defined
+last_updated: 2024-12-21
+resumption_context: true
+---
+
+# Integration Context Packet
+
+## Purpose
+Define how Soccer-AI (fan chat + trivia) and Predictor (upset predictions) work together as a unified system.
+
+---
+
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         USER INTERFACE                          │
+│    /chat (fan persona)    /trivia (quiz)    /predict (games)   │
+└─────────────────────────────┬───────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                         FastAPI (main.py)                        │
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌───────────────────────┐  │
+│  │ routers/     │  │ routers/     │  │ routers/              │  │
+│  │ chat.py      │  │ trivia.py    │  │ predictions.py        │  │
+│  └──────┬───────┘  └──────┬───────┘  └───────────┬───────────┘  │
+└─────────┼─────────────────┼──────────────────────┼──────────────┘
+          │                 │                      │
+          ▼                 ▼                      ▼
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────────────┐
+│   SOCCER-AI     │ │   SOCCER-AI     │ │      PREDICTOR          │
+│                 │ │                 │ │                         │
+│ ai_response.py  │ │ database.py     │ │ prediction_engine.py    │
+│ rag.py          │ │ (trivia funcs)  │ │ side_a_calculator.py    │
+│ personas        │ │                 │ │ side_b_calculator.py    │
+└────────┬────────┘ └────────┬────────┘ └────────────┬────────────┘
+         │                   │                       │
+         └───────────────────┴───────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   UNIFIED KNOWLEDGE GRAPH                        │
+│                      soccer_ai_kg.db                             │
+│                                                                  │
+│  source_kg="soccer-ai"  │  source_kg="predictor"                │
+│  ──────────────────────────────────────────────────             │
+│  41 nodes               │  34 nodes                              │
+│  modules, endpoints     │  factors, patterns                     │
+│  personas, security     │  equations, confidence                 │
+│                                                                  │
+│  ══════════════ CROSS-DOMAIN EDGES ══════════════               │
+│  predictor_api ──integrates_with──> prediction_engine            │
+│  chat ──uses_predictions──> prediction_engine                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Integration Points
+
+### 1. Chat Uses Predictions
+When a fan asks about upcoming matches, chat can include upset predictions:
+
+```python
+# In ai_response.py
+
+async def build_response(query: str, persona: str, context: Dict):
+    """Build AI response with optional prediction data."""
+
+    # Detect match-related queries
+    if is_match_query(query):
+        # Get predictions from Predictor
+        from predictor.prediction_engine import get_team_predictions
+        predictions = await get_team_predictions(persona_to_team(persona))
+
+        # Add to context
+        context["predictions"] = predictions
+
+    # Build response with enriched context
+    return await generate_response(query, persona, context)
+```
+
+### 2. Trivia References Predictions
+Trivia can ask about historical upsets that were predicted:
+
+```python
+# Example trivia question
+{
+    "question": "Which upset did we predict at 42% that actually happened?",
+    "correct_answer": "Bournemouth beating Liverpool",
+    "wrong_answers": [...],
+    "category": "predictions",
+    "explanation": "Our model detected FA_FAT + FB_HME pattern"
+}
+```
+
+### 3. Shared Knowledge Graph
+
+Both systems query the same KG:
+```python
+from kg import KnowledgeGraphDB, NLKEBridge
+
+# Soccer-AI: Find persona info
+persona = KnowledgeGraphDB.get_node("soccer-ai_persona_arsenal")
+
+# Predictor: Find factors
+factors = KnowledgeGraphDB.get_nodes_by_type("factor_a", source_kg="predictor")
+
+# Cross-domain: Find everything about a team
+NLKEBridge.unified_query("Arsenal", mode="cross")
+```
+
+---
+
+## Shared Data Models
+
+### Team Entity (Shared)
+```python
+# models.py
+
+from pydantic import BaseModel
+from typing import Optional, List
+
+class Team(BaseModel):
+    id: int
+    name: str
+    short_name: str
+    league: str
+
+    # Soccer-AI fields
+    persona: Optional[str] = None
+    mood: Optional[str] = None
+
+    # Predictor fields
+    recent_form: Optional[str] = None  # "WWDLW"
+    injuries: Optional[List[str]] = None
+    rest_days: Optional[int] = None
+```
+
+### Match Entity (Predictor → Chat)
+```python
+class MatchPrediction(BaseModel):
+    home_team: str
+    away_team: str
+    favorite: str
+    underdog: str
+    upset_probability: float
+    confidence: str  # low, medium, high
+    key_factors: List[str]
+```
+
+---
+
+## API Routes Summary
+
+| Route | Domain | Purpose |
+|-------|--------|---------|
+| `POST /api/v1/chat` | soccer-ai | Fan chat with persona |
+| `POST /api/v1/trivia/question` | soccer-ai | Get trivia question |
+| `POST /api/v1/trivia/answer` | soccer-ai | Check answer |
+| `GET /api/v1/predictions/today` | predictor | Today's predictions |
+| `GET /api/v1/predictions/tomorrow` | predictor | Tomorrow's predictions |
+| `GET /api/v1/kg/query` | cross-domain | Query unified KG |
+| `GET /api/v1/kg/stats` | cross-domain | KG statistics |
+
+---
+
+## Testing Strategy
+
+### Unit Tests (Per Domain)
+```python
+# tests/test_soccer_ai.py
+def test_persona_detection():
+    """Test that persona is correctly identified from message."""
+
+def test_trivia_question_format():
+    """Test trivia question has required fields."""
+
+# tests/test_predictor.py
+def test_side_a_calculation():
+    """Test Side A factors are calculated correctly."""
+
+def test_upset_probability_bounds():
+    """Test probability is clamped to 5%-85%."""
+```
+
+### Integration Tests
+```python
+# tests/test_integration.py
+
+def test_chat_includes_predictions():
+    """Test chat response includes predictions when asking about matches."""
+    response = client.post("/api/v1/chat", json={
+        "message": "What are Arsenal's chances this weekend?",
+        "persona": "arsenal"
+    })
+    assert "prediction" in response.json() or "upset" in response.json()
+
+def test_cross_domain_query():
+    """Test unified KG returns results from both domains."""
+    from kg import KnowledgeGraphDB
+    results = KnowledgeGraphDB.query_across_domains(
+        query="module",
+        domains=["soccer-ai", "predictor"]
+    )
+    domains = set(r["source_kg"] for r in results)
+    assert len(domains) == 2
+```
+
+### Edge Cases
+```python
+# tests/test_edge_cases.py
+
+def test_no_games_today():
+    """Handle empty fixture list gracefully."""
+
+def test_missing_injury_data():
+    """Calculate prediction even with missing injury data."""
+
+def test_persona_not_found():
+    """Fallback to neutral persona if unknown team."""
+
+def test_trivia_no_questions():
+    """Handle team with no trivia questions."""
+
+def test_fts5_special_characters():
+    """Search handles special characters safely."""
+```
+
+---
+
+## Debugging Guide
+
+### Common Issues
+
+| Symptom | Likely Cause | Fix |
+|---------|--------------|-----|
+| Chat doesn't show predictions | `is_match_query()` not detecting | Add more match keywords |
+| Prediction always 15% | Side A/B calculators returning 0 | Check factor data is populated |
+| KG search returns empty | FTS5 query syntax error | Use `escape_fts_query()` |
+| Trivia 404 | No questions seeded for team | Run seed script |
+
+### Debug Endpoints
+```python
+@router.get("/debug/kg-stats")
+async def debug_kg():
+    from kg import KnowledgeGraphDB
+    return KnowledgeGraphDB.get_stats()
+
+@router.get("/debug/prediction-factors/{team}")
+async def debug_factors(team: str):
+    from predictor import get_team_factors
+    return get_team_factors(team)
+```
+
+---
+
+## Data Flow Example
+
+**User:** "Will Arsenal beat Bournemouth this weekend?"
+
+```
+1. POST /api/v1/chat
+   ├── persona: "arsenal" (from session)
+   ├── message: "Will Arsenal beat Bournemouth?"
+   │
+2. rag.py: detect_intent(message)
+   ├── intent: "match_prediction"
+   ├── teams: ["Arsenal", "Bournemouth"]
+   │
+3. predictor/prediction_engine.py: predict_upset(match)
+   ├── favorite: Arsenal
+   ├── underdog: Bournemouth
+   ├── side_a: 0.12 (Arsenal fatigue + injury)
+   ├── side_b: 0.08 (Bournemouth home + rest)
+   ├── pattern_bonus: 0.05 (fatigue × rest)
+   ├── upset_probability: 0.40
+   │
+4. ai_response.py: generate_with_context()
+   ├── context: {predictions, team_data, persona}
+   ├── prompt: [system + context + query]
+   │
+5. Response:
+   "Look, as an Arsenal fan I want to say we'll smash them,
+    but honestly? Bournemouth at home after our midweek trip
+    to Milan... the numbers say 40% upset chance. We've got
+    Saka doubtful and they've had a full week's rest.
+    I'm nervous, not gonna lie."
+```
+
+---
+
+## Next Steps
+
+1. [ ] Create shared `models.py` with Team, Match types
+2. [ ] Add prediction context to chat responses
+3. [ ] Create `/debug` endpoints for troubleshooting
+4. [ ] Write integration tests
+5. [ ] Write edge case tests
+6. [ ] Test full flow: chat → prediction → response
+
+---
+
+## Resumption Instructions
+
+To continue work on integration:
+1. Read this file + both domain packets
+2. Ensure both domains work independently first
+3. Add cross-domain calls
+4. Run integration tests
+5. Test edge cases

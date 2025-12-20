@@ -1,0 +1,78 @@
+# Soccer-AI Context Loader
+# Load this file to resume development
+
+## Identity
+Project: Soccer-AI
+Type: Premier League Knowledge Base + Match Predictor
+Platform: Termux (Android)
+
+## Architecture
+- Flask Frontend: localhost:5000 (flask-frontend/app.py)
+- FastAPI Backend: localhost:8000 (backend/main.py)
+- Tri-Lens Predictor: backend/predictor/tri_lens_predictor.py
+
+## Key Files
+frontend:
+  - flask-frontend/app.py
+  - flask-frontend/templates/{index,chat,predictions,standings,fixtures,teams}.html
+  - flask-frontend/static/{app.js,style.css}
+
+backend:
+  - backend/main.py (FastAPI endpoints)
+  - backend/database.py (SQLite + FTS5)
+  - backend/rag.py (context retrieval)
+  - backend/ai_response.py (LLM + validation)
+  - backend/models.py (Pydantic schemas)
+  - backend/conversation_intelligence.py (fluent memory)
+
+predictor:
+  - backend/predictor/tri_lens_predictor.py (MAIN - 55% Poisson + 45% Oracle)
+  - backend/predictor/poisson_predictor.py (xG-based)
+  - backend/predictor/hybrid_oracle.py (ELO + patterns)
+  - backend/predictor/team_ratings.py (ELO system)
+  - backend/predictor/draw_detector.py (draw analysis)
+  - backend/predictor/test_tri_lens.py (35 tests)
+
+kg:
+  - backend/kg/kg_database.py (NLKE graph)
+  - backend/kg_integration.py (KG bridge)
+
+## Databases
+- backend/soccer_ai.db (main KB)
+- backend/predictor_facts.db (match facts)
+- backend/soccer_ai_kg.db (knowledge graph)
+
+## API Endpoints
+POST /api/v1/chat
+POST /api/v1/tri-lens/predict
+GET  /api/v1/standings
+GET  /api/v1/fixtures
+GET  /api/v1/teams
+GET  /health
+
+## Current Stats
+- Tri-Lens: 53.2% accuracy, 17.3% draw, Brier 0.5799
+- Tests: 35/35 passing
+- Validation: Input sanitization + output leak detection
+
+## Import Pattern (Critical)
+# At top of predictor files:
+import sys
+from pathlib import Path
+_predictor_dir = Path(__file__).parent
+if str(_predictor_dir) not in sys.path:
+    sys.path.insert(0, str(_predictor_dir))
+
+## Start Commands
+bash start.sh
+# OR
+cd backend && uvicorn main:app --port 8000 &
+cd flask-frontend && python app.py &
+
+## Test Command
+cd backend && python predictor/test_tri_lens.py
+
+## Full Documentation
+- CHECKPOINT_02_20251228.md (detailed checkpoint)
+- ARCHITECTURE.mmd (mermaid diagram)
+- backend/predictor/IMPORT_PATTERNS.md (import fix docs)

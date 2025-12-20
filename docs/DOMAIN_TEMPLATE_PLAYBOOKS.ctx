@@ -1,0 +1,131 @@
+---
+file_type: planning_context
+created: 2025-12-20
+status: PLANNING
+purpose: Domain Template Expansion System
+related_insight: "Domain-agnostic KG-RAG architecture"
+---
+
+# Domain Template Playbooks - Planning Log
+
+## Core Insight
+
+Soccer-AI is not just a demo - it's a **domain template**.
+The KG-RAG architecture is domain-agnostic.
+
+## Pattern Mapping
+
+| Soccer Domain | NBA Domain | UFC Domain | Cinema Domain |
+|--------------|------------|------------|---------------|
+| teams | teams | fighters | studios |
+| legends | hall_of_famers | champions | iconic_actors |
+| rivalries | rivalries | feuds | studio_rivalries |
+| moments | iconic_games | legendary_fights | iconic_moments |
+| mood | form | momentum | trending |
+| fixtures | schedule | fight_cards | releases |
+
+## Playbooks Needed
+
+### 1. FOUNDATION-domain-template.pb
+- **Purpose**: How to clone and adapt Soccer-AI for any domain
+- **Contents**:
+  - Schema extraction patterns
+  - Entity relationship mapping
+  - KG node type definitions
+  - Edge relationship definitions
+  - API endpoint patterns
+
+### 2. KNOWLEDGE-kg-schema-design.pb
+- **Purpose**: Design KG schema for any domain
+- **Contents**:
+  - Node type hierarchy
+  - Edge relationship types
+  - Property definitions
+  - Index optimization
+  - FTS5 configuration
+
+### 3. AGENT-domain-persona.pb
+- **Purpose**: Create domain-specific AI persona
+- **Contents**:
+  - System prompt templates
+  - Fan persona system
+  - Tone/voice configuration
+  - Domain-specific knowledge injection
+
+### 4. DEV-domain-seeding.pb
+- **Purpose**: Seed data for new domains
+- **Contents**:
+  - Data source identification
+  - Entity extraction patterns
+  - Relationship inference
+  - Historical data loading
+
+### 5. FOUNDATION-frontend-template.pb
+- **Purpose**: Adapt React frontend for any domain
+- **Contents**:
+  - Component mapping
+  - Type definitions
+  - API service patterns
+  - Theme configuration
+
+## Context Files Needed
+
+### 1. DOMAIN_SCHEMA_TEMPLATE.ctx
+```
+Generic schema patterns:
+- Primary entities (teams → X)
+- Secondary entities (players → Y)
+- Tertiary entities (legends → Z)
+- Relationship types
+- Temporal data (fixtures → schedule)
+```
+
+### 2. DOMAIN_API_TEMPLATE.ctx
+```
+API endpoint patterns:
+- /api/v1/{entities}
+- /api/v1/{entities}/{id}
+- /api/v1/{entities}/{id}/{relationship}
+- /api/v1/chat (domain persona)
+- /api/v1/graph (KG visualization)
+```
+
+### 3. DOMAIN_EXPANSION_CHECKLIST.ctx
+```
+Checklist for expanding to new domain:
+[ ] Define primary entities
+[ ] Define relationships
+[ ] Create schema.sql
+[ ] Implement database.py
+[ ] Create AI persona
+[ ] Seed initial data
+[ ] Adapt frontend types
+[ ] Create components
+[ ] Test endpoints
+[ ] Document API
+```
+
+## Implementation Order
+
+1. Complete Soccer-AI (current work)
+2. Document all patterns used
+3. Extract generic templates
+4. Create FOUNDATION-domain-template.pb
+5. Test with second domain (NBA?)
+
+## Notes
+
+- Each domain should take 1-2 days with template
+- The playbooks ARE the replication engine
+- Documentation = training data for future implementations
+
+---
+
+*Log entries below as we implement and discover patterns*
+
+## Log Entries
+
+### 2025-12-20 - Initial Planning
+- Identified core pattern: KG-RAG is domain-agnostic
+- Soccer-AI serves as reference implementation
+- 5 playbooks + 3 context files needed for template system

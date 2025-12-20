@@ -1,0 +1,16 @@
+# Soccer-AI Backend Dependencies
+# Install: pip install -r requirements.txt
+
+# --- Core ---
+fastapi>=0.115.0
+uvicorn>=0.30.0
+pydantic>=2.7.0
+
+# --- AI ---
+anthropic>=0.40.0            # Anthropic SDK (handles retries, rate limits)
+
+# --- Optional but recommended ---
+python-dotenv>=1.0.0        # .env file loading (graceful fallback if absent)
+
+# --- Testing ---
+pytest>=8.0.0

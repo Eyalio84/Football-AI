@@ -1,0 +1,75 @@
+{
+  "project": "Soccer-AI",
+  "created": "2024-12-18",
+  "origin": "Termux (Android)",
+  "continuation": "PC",
+
+  "status": {
+    "backend": "COMPLETE",
+    "frontend": "SCAFFOLDED",
+    "extraction_agent": "PENDING",
+    "deployment": "PENDING"
+  },
+
+  "termux_context": {
+    "why_direct_http": "anthropic SDK failed to build on Termux (jiter/Rust issue)",
+    "why_frontend_incomplete": "npm had permission issues on Termux",
+    "solution": "Direct HTTP works everywhere, frontend trivial to complete on PC"
+  },
+
+  "backend_files": {
+    "schema.sql": "Database schema with FTS5",
+    "backend/database.py": "SQLite + FTS5 queries",
+    "backend/rag.py": "RAG retrieval logic",
+    "backend/ai_response.py": "Haiku via direct HTTP",
+    "backend/models.py": "Pydantic models",
+    "backend/main.py": "FastAPI application",
+    "backend/.env": "API key stored here",
+    "scripts/seed_data.py": "Sample data seeder"
+  },
+
+  "api_endpoints": {
+    "chat": "POST /api/v1/chat",
+    "players": "GET /api/v1/players",
+    "teams": "GET /api/v1/teams",
+    "games": "GET /api/v1/games",
+    "injuries": "GET /api/v1/injuries/active",
+    "search": "GET /api/v1/search?q=",
+    "health": "GET /health"
+  },
+
+  "frontend_requirements": {
+    "framework": "Vite + React + TypeScript + Tailwind",
+    "key_requirement": "Easy to customize - all styles in config/theme.ts",
+    "components_needed": [
+      "config/theme.ts",
+      "components/Chat/ChatContainer.tsx",
+      "components/Chat/ChatMessage.tsx",
+      "components/Chat/ChatInput.tsx",
+      "hooks/useChat.ts",
+      "services/api.ts"
+    ]
+  },
+
+  "roadmap": [
+    {"phase": 1, "task": "Frontend chat UI", "status": "IN_PROGRESS"},
+    {"phase": 2, "task": "ESPN extraction agent", "status": "PENDING"},
+    {"phase": 3, "task": "Deployment", "status": "PENDING"},
+    {"phase": 4, "task": "B2B white-label", "status": "FUTURE"}
+  ],
+
+  "user_preferences": {
+    "quality_over_quantity": true,
+    "easy_to_customize": true,
+    "learning_mode": true,
+    "explain_decisions": true
+  },
+
+  "pc_first_steps": [
+    "cd backend && python main.py (verify backend)",
+    "cd frontend && npm install",
+    "npm install -D tailwindcss postcss autoprefixer",
+    "npx tailwindcss init -p",
+    "Build chat components with theme config"
+  ]
+}

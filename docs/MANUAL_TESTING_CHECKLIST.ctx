@@ -1,0 +1,144 @@
+---
+file_type: testing_checklist
+created: 2025-12-20
+status: PENDING
+tester: Eyal Nof
+---
+
+# Soccer-AI Manual Testing Checklist
+
+## Prerequisites
+- [ ] Backend running on http://localhost:8000
+- [ ] Frontend running on http://localhost:5173
+- [ ] .env file has valid ANTHROPIC_API_KEY
+
+## Startup Test
+- [ ] Run `./start.sh` from soccer-AI/ directory
+- [ ] Backend starts without errors
+- [ ] Frontend starts without errors
+- [ ] No port conflicts
+
+---
+
+## Backend API Tests
+
+### Health Check
+- [ ] GET http://localhost:8000/health returns {"status": "healthy"}
+
+### Teams API
+- [ ] GET /api/v1/teams returns list of 6 teams
+- [ ] GET /api/v1/teams/42 returns Arsenal
+- [ ] GET /api/v1/teams/42/legends returns legends array
+- [ ] GET /api/v1/teams/42/rivalries returns rivalries array
+- [ ] GET /api/v1/teams/42/moments returns moments array
+- [ ] GET /api/v1/teams/42/personality returns full personality object
+
+### Graph API
+- [ ] GET /api/v1/graph returns nodes and edges
+- [ ] GET /api/v1/graph/team/42 returns Arsenal subgraph
+- [ ] Nodes have correct colors (red=team, orange=legend, blue=moment)
+
+### Chat API
+- [ ] POST /api/v1/chat with {"message": "Who is Arsenal's top scorer?"} returns response
+- [ ] POST /api/v1/chat with {"message": "Tell me about the North London Derby", "club_id": "arsenal"} uses Arsenal persona
+
+### KG Viewer
+- [ ] GET /kg-viewer loads HTML page
+- [ ] Graph renders with vis.js
+- [ ] Team filter works
+- [ ] Depth selector works
+- [ ] Node click shows details
+
+---
+
+## Frontend UI Tests
+
+### Navigation
+- [ ] Logo/Home link works
+- [ ] Dashboard link works
+- [ ] Teams link works
+- [ ] Standings link works
+- [ ] Chat link works
+
+### Dashboard Page (/)
+- [ ] Page loads without errors
+- [ ] Stats cards display (or placeholders)
+- [ ] Navigation works
+
+### Teams Page (/teams)
+- [ ] Team grid displays 6 teams
+- [ ] Team cards show name, league
+- [ ] Click team navigates to detail
+
+### Team Detail Page (/teams/42)
+- [ ] Team header shows name, stadium, manager
+- [ ] Mood indicator appears (if mood data exists)
+- [ ] Nickname appears in italics (if exists)
+
+#### Overview Tab
+- [ ] Fixtures section displays
+- [ ] Results section displays
+- [ ] GameCards render correctly
+
+#### Legends Tab
+- [ ] LegendsGrid displays
+- [ ] Legend cards show name, position, era
+- [ ] Goals/appearances show if available
+- [ ] Star icons display
+
+#### Rivalries Tab
+- [ ] RivalryDisplay shows rivalries
+- [ ] Intensity bars are colored correctly
+- [ ] Derby names display
+- [ ] Sorted by intensity (highest first)
+
+#### Moments Tab
+- [ ] MomentsTimeline displays
+- [ ] Timeline line visible
+- [ ] Emotion icons match emotion type
+- [ ] Dates formatted correctly
+- [ ] Sorted by date (recent first)
+
+#### Graph Tab
+- [ ] "Open Interactive Graph" button visible
+- [ ] Click opens KG Viewer in new tab
+- [ ] URL includes team parameter
+
+### Standings Page (/standings)
+- [ ] Table loads
+- [ ] Teams sorted by position
+- [ ] Stats display correctly
+
+### Chat Page (/chat)
+- [ ] Chat input visible
+- [ ] Club selector works (Arsenal, Chelsea, Man Utd)
+- [ ] Message sends successfully
+- [ ] AI response appears
+- [ ] Smart suggestions work
+
+---
+
+## Cross-Browser (Optional)
+- [ ] Chrome
+- [ ] Firefox
+- [ ] Safari/Mobile
+
+---
+
+## Performance
+- [ ] Pages load in < 2 seconds
+- [ ] No console errors
+- [ ] No network errors (check DevTools)
+
+---
+
+## Sign-Off
+
+Tester: _____________________
+Date: _____________________
+Status: [ ] PASS  [ ] FAIL
+
+Notes:
+_________________________________
+_________________________________
+_________________________________

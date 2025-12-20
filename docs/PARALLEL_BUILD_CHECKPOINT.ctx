@@ -1,0 +1,210 @@
+# Parallel Build Checkpoint: Soccer v3.0 + Market Oracle
+## Created: 2025-12-21 | Week 1 Complete
+
+---
+
+## CRITICAL MILESTONES
+
+### Week 5 Checkpoint (CRUCIAL - Go/No-Go Decision)
+**Why Week 5 matters**: This is the validation gate. By Week 5, BOTH systems must show:
+
+1. **Soccer v3.0**: Accuracy consistently above 60% on unseen matches
+   - If below 55%: System has no real edge, consider pivot
+   - If 55-60%: Borderline, needs feature enhancement
+   - If above 60%: Green light for profit optimization
+
+2. **Market Oracle**: Winner Categories must show measurable separation
+   - Crash Protection stocks must outperform during VIX spikes
+   - Bull Accelerators must lead during rallies
+   - If no separation: Behavioral hypothesis is wrong
+
+**Week 5 Questions to Answer**:
+- [ ] Does power rating + Third Knowledge beat bookmaker consensus?
+- [ ] Do Winner Categories predict regime-appropriate performance?
+- [ ] Is cross-domain learning producing transferable insights?
+
+### Week 10 Deadline (MVP Complete)
+Both systems should be:
+- Fully backtested on historical data
+- Ready for paper trading / forward testing
+- Documented with clear edge metrics
+
+---
+
+## WHAT WE'VE ACHIEVED (Week 1)
+
+### Soccer v3.0 - Prediction System
+
+**Core Achievement**: 62.9% accuracy on Premier League predictions
+
+| Component | Status | Result |
+|-----------|--------|--------|
+| Team Power Ratings | ✅ Complete | ELO-style, 20 teams initialized |
+| Backtest Framework | ✅ Complete | 70 matches (MW 1-7) validated |
+| Base Accuracy | ✅ Validated | 58.6% (beats 33% random, 45% naive) |
+| Draw Detection | ✅ Complete | 6 Third Knowledge patterns |
+| Threshold Tuning | ✅ Complete | 0.32 optimal (tested 8 values) |
+| Enhanced Accuracy | ✅ Validated | **62.9%** (+4.3% improvement) |
+
+**Files Created**:
+```
+soccer-AI/backend/predictor/
+├── team_ratings.py        # ELO-style power ratings
+├── draw_detector.py       # Third Knowledge patterns
+├── backtest_ratings.py    # Base validation
+├── backtest_with_draws.py # Enhanced validation
+└── tune_draw_threshold.py # Threshold optimization
+```
+
+**Third Knowledge Patterns for Draws**:
+1. `close_matchup` - Power diff < 10 = evenly matched
+2. `midtable_clash` - Both teams positions 8-15
+3. `defensive_matchup` - Both teams low goal averages
+4. `parked_bus_risk` - Big favorite vs defensive underdog
+5. `derby_caution` - Rivalry matches tend toward draws
+6. `top_vs_top` - Top 6 clashes often tactical battles
+
+**Key Insight**: Draw detection is a precision/recall trade-off. Lower thresholds catch more draws but create false positives. Optimal threshold (0.32) maximizes OVERALL accuracy, not just draw detection.
+
+---
+
+### Market Oracle - Behavioral Prediction System
+
+**Core Achievement**: Full data infrastructure with derived metrics
+
+| Component | Status | Result |
+|-----------|--------|--------|
+| Database Schema | ✅ Complete | 6 tables in market_facts.db |
+| Stock Price Data | ✅ Complete | 10 stocks, 5 years each |
+| Sector ETFs | ✅ Complete | 5 ETFs (XLK, XLF, XLE, XLV, XLU) |
+| Total Records | ✅ Complete | 18,825 price records |
+| Derived Metrics | ✅ Complete | 18,375 metrics calculated |
+
+**Files Created**:
+```
+market-oracle/
+├── schema.sql              # Database structure
+├── load_data.py            # Stock price loader
+├── download_historical.py  # PC script for yfinance
+├── download_sector_etfs.py # Sector ETF downloader
+└── load_etfs_and_metrics.py # Metrics calculator
+```
+
+**Winner Categories** (Behavioral Archetypes):
+| Category | Stocks/ETFs | Behavioral Pattern |
+|----------|-------------|-------------------|
+| Bull Market Accelerator | NVDA, AMZN, XLK | Leads in rallies, volatile in corrections |
+| Crash Protection | JNJ, WMT, XLV, XLU | Outperforms during VIX spikes |
+| Robust All-Weather | AAPL, JPM, XLF | Steady performance across regimes |
+| Volatility Profit | XOM, CAT, XLE | Profits from regime changes |
+
+**Derived Metrics Calculated**:
+- `rs_30d` - 30-day relative strength vs S&P 500
+- `rs_signal` - OUTPERFORM / NEUTRAL / UNDERPERFORM
+- `vol_20d` - 20-day rolling volatility (annualized)
+- `vol_signal` - EXPANSION / NORMAL / COMPRESSION
+- `volume_ratio` - Today volume / 20-day average
+- `volume_signal` - HIGH_CONVICTION / NORMAL / LOW_CONVICTION
+- `composite_signal` - BULLISH / NEUTRAL / BEARISH
+
+---
+
+## NOBEL PRIZE VALIDATION
+
+The behavioral approach is backed by Nobel Prize-winning economics:
+
+1. **Daniel Kahneman (2002)** - Prospect Theory
+   - People feel losses 2x more than gains
+   - Explains panic selling, FOMO buying
+
+2. **Richard Thaler (2017)** - Behavioral Economics
+   - Markets are NOT perfectly efficient
+   - Systematic biases create exploitable patterns
+
+**Implication**: Winner Categories exploit predictable behavioral patterns, not random noise.
+
+---
+
+## CROSS-DOMAIN INSIGHTS DISCOVERED
+
+### Third Knowledge Patterns (Interaction Effects)
+
+| Pattern | Domain | Description |
+|---------|--------|-------------|
+| `close_matchup_x_midtable` | Soccer | Close power + midtable = draw likely |
+| `platform_x_dependency` | Both | Termux can't run yfinance (native libs) |
+| `threshold_x_precision_recall` | Soccer | Lower threshold = more draws but more false positives |
+| `market_mood_x_category` | Market | VIX level determines which Winner Category leads |
+
+### Persisted Facts (Cross-Session Memory)
+- Fact #287-291: Cross-domain comparison insights
+- Fact #292-293: Platform dependency patterns
+- Fact #296: Draw detection accuracy (+4.3% improvement)
+
+### Logged Insights
+- Insight #931-936: Build process discoveries
+
+---
+
+## NEXT STEPS (Week 2+)
+
+### Soccer v3.0
+1. **Confidence Scores**: Add high/medium/low conviction ratings
+2. **Dynamic Ratings**: Update power ratings after each match result
+3. **Form Detection**: Recent 5-match form as modifier
+4. **Value Detection**: Compare our probabilities to bookmaker odds
+
+### Market Oracle
+1. **Side A/B Scoring**: Implement the Side A (bullish) vs Side B (bearish) system
+2. **Pattern Triggers**: Build the Third Knowledge trigger system
+3. **VIX Correlation**: Test Winner Category performance vs VIX regimes
+4. **Backtest Framework**: Create historical validation like Soccer
+
+### Cross-Domain
+1. **Transfer Learning**: Can soccer draw patterns inform market uncertainty detection?
+2. **Threshold Tuning**: Apply soccer's threshold optimization to market signals
+3. **Composite Signals**: Combine multiple weak signals into strong predictions
+
+---
+
+## ARCHITECTURE DECISIONS MADE
+
+1. **SQLite for both**: Simple, portable, no server needed
+2. **Python-first**: No complex frameworks, easy to debug
+3. **Termux-compatible**: Market downloads run on PC, everything else works in Termux
+4. **Third Knowledge focus**: Interaction effects between variables, not just single factors
+5. **Threshold tuning**: Always test multiple values, don't assume default is optimal
+
+---
+
+## KEY METRICS TO TRACK
+
+### Soccer
+| Metric | Week 1 | Week 5 Target | Week 10 Target |
+|--------|--------|---------------|----------------|
+| Overall Accuracy | 62.9% | >65% | >68% |
+| Draw Detection | 36.4% recall | >45% | >50% |
+| ROI (theoretical) | TBD | Positive | >5% |
+
+### Market
+| Metric | Week 1 | Week 5 Target | Week 10 Target |
+|--------|--------|---------------|----------------|
+| Category Separation | TBD | Measurable | >2x differential |
+| Regime Detection | TBD | Working | 80%+ accuracy |
+| Signal Quality | TBD | Backtested | Forward-tested |
+
+---
+
+## REMEMBER
+
+1. **Week 5 is GO/NO-GO** - If no edge by Week 5, pivot or abandon
+2. **This is for science** - Learning, not real money (yet)
+3. **Third Knowledge is the edge** - Single factors are priced in, interactions are not
+4. **Nobel Prize backs us** - Behavioral patterns are real and exploitable
+5. **Cross-domain learning** - Insights from one domain transfer to the other
+
+---
+
+**Last Updated**: 2025-12-21
+**Current Phase**: Week 1 Complete, Ready for Week 2
+**Primary Focus**: Soccer confidence scores + Market Side A/B scoring

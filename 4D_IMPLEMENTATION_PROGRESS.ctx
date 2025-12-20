@@ -1,0 +1,254 @@
+# 4D Persona Implementation Progress
+
+**Started**: 2025-12-31
+**Completed**: 2025-12-31
+**Status**: COMPLETE
+
+---
+
+## User Requirements (CONFIRMED)
+
+| Requirement | Choice | Implementation |
+|-------------|--------|----------------|
+| Live Data | A - Real-time | Mood from football-data.org API |
+| Dialects | B - Regional | North/Midlands/London/South groupings |
+| Rivalry Source | A - Use KG | Existing edge weights from soccer_ai_kg.db |
+| Breaking Changes | B - Feature flag | `USE_4D_PERSONA = True/False` |
+| Anti-Gaslighting | B - Implicit | Natural fan defense, no technical citations |
+| Conversation Topics | C - Weave naturally | Injuries/transfers/fixtures based on context |
+
+---
+
+## What We're Building
+
+**The Vision**: Transform Robert from "costume" to "computed position"
+
+- **BEFORE**: Mood is a string, declared, easily gaslighted
+- **AFTER**: Mood is COMPUTED from live match results, has provenance
+
+The 4D Position: `P(t) = (x, y, z, t)`
+- **X (Emotional)**: Win 3-0 -> euphoric, Loss to rival -> devastated
+- **Y (Relational)**: Mention Everton to Liverpool fan -> rivalry mode
+- **Z (Linguistic)**: Liverpool -> Northern dialect
+- **T (Temporal)**: Conversation trajectory, memory, momentum
+
+Conversation topics (injuries, transfers, fixtures) are woven NATURALLY based on context, not forced.
+
+---
+
+## Implementation Phases
+
+### Phase 1: Create backend/config.py
+**Status**: COMPLETED
+**File**: `/storage/emulated/0/Download/synthesis-rules/soccer-AI/backend/config.py`
+
+Contains:
+- `USE_4D_PERSONA = True` feature flag
+- `DIALECT_REGIONS` - regional groupings (North/Midlands/London/South)
+- `CLUB_TO_REGION` - reverse mapping
+- `CLUB_DISPLAY_NAMES` and `CLUB_API_NAMES`
+- `ARIEL_FRAMEWORK_PATH`
+
+---
+
+### Phase 2: Create backend/live_football_provider.py
+**Status**: COMPLETED
+**File**: `/storage/emulated/0/Download/synthesis-rules/soccer-AI/backend/live_football_provider.py`
+
+Contains:
+- `LiveFootballProvider` class
+- `get_ground_truth(club_id)` - returns all live data
+- `get_match_result_for_4d(club_id)` - latest match in 4D format
+- `get_conversation_topics(club_id)` - topics to weave naturally
+- Integration with `football_api.py`
+
+---
+
+### Phase 3: Create backend/persona_bridge.py
+**Status**: COMPLETED
+**File**: `/storage/emulated/0/Download/synthesis-rules/soccer-AI/backend/persona_bridge.py`
+
+Contains:
+- `SoccerAILinguisticComputer` - regional dialect groupings (North→Scouse/Mancunian/Geordie, Midlands, London→Cockney, South)
+- `SoccerAIRelationalComputer` - integrates with soccer_ai_kg.db for rivalry edge weights
+- `PersonaBridge` class with:
+  - `compute_4d_state(club_id, user_message, conversation_history)` → Persona4D
+  - `get_system_prompt(state_4d, club_id, include_topics)` → Complete system prompt
+  - `get_conversation_topics(club_id)` → Topics to weave naturally
+- Singleton access via `get_persona_bridge()`
+- Integration with Ariel framework at `/storage/emulated/0/Download/synthesis-rules/Ariel/`
+
+---
+
+### Phase 4: Modify backend/main.py
+**Status**: COMPLETED
+**Lines modified**: 180-234 (fan_enhancements section)
+
+Changes:
+- Added import: `from config import USE_4D_PERSONA`
+- Added conditional import: `from persona_bridge import get_persona_bridge`
+- Added 4D path with `bridge.compute_4d_state()`
+- Store `conv_state.use_4d`, `conv_state.persona_4d`, `conv_state.conversation_topics`
+- Preserved legacy `fan_enhancements` path when flag is False
+- Added [4D] logging for X/Y/Z/T position
+
+---
+
+### Phase 5: Modify backend/ai_response.py
+**Status**: COMPLETED
+**Lines modified**: 575-586 (function signature), 674-760 (system prompt assembly)
+
+Changes:
+- Added parameters: `use_4d`, `persona_4d`, `conversation_topics`
+- Added 4D path using `PersonaBridge.get_system_prompt()`
+- Preserved legacy manual mood/rivalry/dialect injection
+- Added error handling with fallback to legacy path
+- Updated main.py call site to pass 4D parameters
+
+---
+
+### Phase 6: Create tests
+**Status**: COMPLETED
+**File**: `backend/tests/test_4d_integration.py`
+
+Test Classes:
+- `TestConfig` - Feature flag, dialect regions, club mappings
+- `TestLiveFootballProvider` - Ground truth, match results, topics
+- `TestPersonaBridge` - 4D state computation, system prompt
+- `TestDialectGroupings` - Regional dialect mappings (North/Midlands/London/South)
+- `TestMoodFromMatchResults` - Mood computed from W/L/D, not declared
+- `TestAPIControlsTopics` - Topics (injuries, transfers, fixtures) from API
+- `TestMoodChangesWithForm` - Form string (WWDLW), dynamic mood
+- `TestSystemPromptIntegration` - Prompt includes mood, dialect, topics
+- `TestRivalryFromKG` - Rivalry detection from KG edges
+- `TestLegacyFallback` - Legacy fan_enhancements still works
+
+---
+
+### Phase 7: Update flask-frontend
+**Status**: COMPLETED
+**Files**: `flask-frontend/templates/chat.html`, `flask-frontend/static/style.css`
+
+Changes:
+- Added 4D position indicator (X/Y/Z/T axes) to chat header
+- Added `fetch4DState()` function to call `/api/v1/fan/{club}/4d-state` endpoint
+- Added `update4DDisplay()` function to render 4D state with axis-specific colors
+- Fallback to legacy mood display when 4D is disabled
+- Added CSS for `.position-4d`, `.axis-indicator`, `.axis-label`, `.axis-value`
+- Mobile responsive design for 4D indicator
+
+Display:
+- X (Emotional): Mood emoji + state from match results
+- Y (Relational): Rivalry activation with target
+- Z (Linguistic): Regional dialect with icon
+- T (Temporal): Turn count and momentum indicator
+
+---
+
+### Phase 8: Update CLAUDE.md (FINAL)
+**Status**: COMPLETED
+**File**: `/storage/emulated/0/Download/synthesis-rules/soccer-AI/CLAUDE.md`
+
+Changes:
+- Added "4D Persona Architecture (NEW)" section with:
+  - 4D Position dimension table (X/Y/Z/T)
+  - Dialect regions table
+  - API endpoints for 4D state
+  - Feature flag documentation
+  - Testing instructions
+- Updated directory structure to include new 4D files
+- Added 4D tests to testing section
+
+---
+
+## Key Files Reference
+
+### Created (New)
+- `backend/config.py` - Configuration and feature flag
+- `backend/live_football_provider.py` - Live data bridge
+
+### To Create
+- `backend/persona_bridge.py` - Main 4D integration
+- `backend/tests/test_4d_integration.py` - Tests
+
+### To Modify
+- `backend/main.py` - Chat endpoint (lines 175-195)
+- `backend/ai_response.py` - System prompt (lines 675-731)
+- `flask-frontend/templates/*.html` - UI updates
+- `CLAUDE.md` - Documentation
+
+### Ariel Framework (Existing - Use As-Is)
+- `/storage/emulated/0/Download/synthesis-rules/Ariel/framework/persona_engine.py`
+- `/storage/emulated/0/Download/synthesis-rules/Ariel/framework/dimensions/emotional.py`
+- `/storage/emulated/0/Download/synthesis-rules/Ariel/framework/dimensions/relational.py`
+- `/storage/emulated/0/Download/synthesis-rules/Ariel/framework/dimensions/linguistic.py`
+- `/storage/emulated/0/Download/synthesis-rules/Ariel/framework/dimensions/temporal.py`
+- `/storage/emulated/0/Download/synthesis-rules/Ariel/personas/robert/robert_4d.py`
+
+---
+
+## Rollback Plan
+
+If issues arise:
+1. Set `USE_4D_PERSONA = False` in `config.py`
+2. Legacy path preserved - no code changes needed
+3. All existing functionality unchanged
+
+---
+
+## Implementation Complete
+
+All 8 phases completed successfully:
+
+- **67 tests passing** (33 4D integration + 34 KG migration)
+- **Feature flag** enables safe rollback to legacy behavior
+- **Frontend** displays 4D position indicator (X/Y/Z/T axes)
+- **Backend** computes mood from live match results
+
+### Key Innovation
+Robert's mood is now COMPUTED from real match data, not declared. This provides:
+- Anti-gaslighting: Mood has provenance from API
+- Dynamic personality: Mood changes with wins/losses
+- Regional authenticity: Dialects grouped by geography
+
+---
+
+## Unified Knowledge Graph (Phase 9)
+
+**Status**: COMPLETED (2025-12-31)
+
+### Why Unification Was Needed
+
+Three separate databases caused confusion:
+- `soccer_ai_architecture_kg.db` (47MB) - Full knowledge base
+- `soccer_ai_kg.db` (340KB) - Predictor patterns
+- `soccer_ai.db` (340KB) - Main DB with rivalries
+
+### What's in the Unified DB
+
+| Component | Count | Purpose |
+|-----------|-------|---------|
+| **Nodes** | 745 | Teams, legends, persons, stadiums |
+| **Edges** | 674 | Rivalries (43), legends (18), etc |
+| **Match History** | 230,557 | Form strings, mood fallback |
+| **ELO History** | 26,410 | Predictions |
+| **Facts** | 681 | Robert's knowledge |
+| **Documents** | 12 | Wikipedia content |
+| **Total Size** | 41.8 MB | Complete knowledge base |
+
+### Key Files
+
+- `backend/unified_soccer_ai_kg.db` - The unified knowledge base
+- `backend/migrate_to_unified_kg.py` - Graph migration script
+- `backend/migrate_kb_tables.py` - KB tables migration script
+- `backend/persona_bridge.py` - Updated to use unified KG
+
+### Critical Lesson
+
+**Graph ≠ Knowledge Base**
+
+The 4D persona needs BOTH:
+1. **Graph** (nodes + edges) → WHO relates to WHOM
+2. **Knowledge** (facts + history) → WHAT happened
+
+Without both, Robert would know his rivals but have no memories.

@@ -1,0 +1,243 @@
+---
+file_type: retrospective_analysis
+created: 2025-12-20
+status: COMPLETE
+purpose: Extract domain-agnostic patterns from Soccer-AI implementation
+phases_covered: CP1-CP8 Backend + FE1-FE7 Frontend
+---
+
+# Soccer-AI Retrospective Analysis
+## Extracting Domain-Agnostic Patterns
+
+---
+
+## IMPLEMENTATION SUMMARY
+
+### Backend (CP1-CP8)
+- **CP1**: SQLite + FTS5 schema with KG tables
+- **CP2**: KG-RAG hybrid retrieval (FTS + Graph traversal)
+- **CP3**: Haiku AI persona with fan system
+- **CP4**: FastAPI CRUD + personality endpoints
+- **CP5**: Pytest suite (62 tests)
+- **CP6**: Query analytics system
+- **CP7**: KG visualization (vis.js export)
+- **CP8**: Production startup script
+
+### Frontend (FE1-FE7)
+- **FE1**: TypeScript type definitions
+- **FE2**: API service functions
+- **FE3-FE5**: Personality components (Legends, Rivalries, Moments)
+- **FE6**: Enhanced TeamDetail with tabs
+- **FE7**: KG Viewer integration
+
+---
+
+## DOMAIN-AGNOSTIC PATTERNS EXTRACTED
+
+### Pattern 1: Entity Hierarchy
+```
+Primary Entity → Secondary Entities → Tertiary Relationships
+    Team      →     Legends        →      Achievements
+    Team      →     Rivalries      →      Historical Context
+    Team      →     Moments        →      Emotional Tags
+```
+
+**Domain Mapping:**
+| Concept | Soccer | NBA | UFC | Cinema |
+|---------|--------|-----|-----|--------|
+| Primary | Team | Team | Fighter | Studio |
+| Secondary | Legends | Hall of Famers | Champions | Iconic Actors |
+| Tertiary | Rivalries | Rivalries | Feuds | Studio Wars |
+| Events | Moments | Iconic Games | Legendary Fights | Iconic Films |
+
+### Pattern 2: KG Node Types
+```sql
+-- Universal node pattern
+CREATE TABLE kg_nodes (
+    id INTEGER PRIMARY KEY,
+    entity_type TEXT,      -- 'team', 'legend', 'moment'
+    entity_id INTEGER,     -- Reference to entity table
+    properties TEXT        -- JSON metadata
+);
+```
+
+**Fact**: Node types are domain-specific labels but structure is universal.
+
+### Pattern 3: Edge Relationships
+```sql
+-- Universal edge pattern
+CREATE TABLE kg_edges (
+    source_id INTEGER,
+    target_id INTEGER,
+    relationship TEXT,     -- 'HAS_LEGEND', 'RIVALS_WITH', 'ACHIEVED'
+    weight REAL,           -- Relevance/importance
+    properties TEXT        -- JSON metadata
+);
+```
+
+**Fact**: Relationship types map to domain vocabulary.
+
+### Pattern 4: FTS5 Search Configuration
+```sql
+-- Universal FTS pattern
+CREATE VIRTUAL TABLE search_index USING fts5(
+    name,
+    description,
+    keywords,
+    content='entities',
+    content_rowid='id'
+);
+```
+
+**Fact**: FTS5 tokenize='porter' works across domains for English.
+
+### Pattern 5: RAG Retrieval Flow
+```
+User Query
+    ↓
+Entity Extraction (regex patterns)
+    ↓
+FTS5 Search (keyword matching)
+    ↓
+KG Traversal (relationship expansion)
+    ↓
+Context Assembly (score-weighted)
+    ↓
+LLM Response (persona-aware)
+```
+
+**Fact**: The RAG flow is identical across domains. Only the entity patterns change.
+
+### Pattern 6: Persona System
+```python
+PERSONA_TEMPLATES = {
+    "{entity_id}": {
+        "name": "{Entity Name}",
+        "tone": "{enthusiastic|neutral|passionate}",
+        "vocabulary": ["{domain-specific terms}"],
+        "rivals": ["{rival entities}"],
+        "legendary_figures": ["{icons}"]
+    }
+}
+```
+
+**Fact**: Persona structure is universal. Content is domain-specific.
+
+### Pattern 7: Frontend Type Pattern
+```typescript
+interface DomainEntity {
+    id: number
+    name: string
+    // Common fields
+}
+
+interface SecondaryEntity {
+    id: number
+    primary_entity_id: number  // Foreign key
+    name: string
+    // Domain-specific fields
+}
+```
+
+**Fact**: TypeScript interfaces follow the same inheritance pattern.
+
+### Pattern 8: API Endpoint Structure
+```
+/api/v1/{entities}                    # List all
+/api/v1/{entities}/{id}               # Get one
+/api/v1/{entities}/{id}/{relationship} # Get related
+/api/v1/chat                          # AI conversation
+/api/v1/graph                         # KG export
+```
+
+**Fact**: REST endpoint patterns are domain-agnostic.
+
+### Pattern 9: Component Hierarchy
+```
+TeamDetail (Page)
+├── Overview Tab (fixtures, results)
+├── Legends Tab (LegendsGrid)
+├── Rivalries Tab (RivalryDisplay)
+├── Moments Tab (MomentsTimeline)
+└── Graph Tab (KG Viewer link)
+```
+
+**Fact**: Tab structure maps directly to entity relationships.
+
+### Pattern 10: Mood/Status System
+```typescript
+interface EntityMood {
+    current_mood: string      // Dynamic state
+    mood_intensity: number    // 1-10 scale
+    last_event?: string       // Trigger
+    mood_factors?: string[]   // Contributing factors
+}
+```
+
+**Fact**: Mood patterns apply to any entity with temporal state.
+
+---
+
+## BUGS FIXED (Insights Logged)
+
+### Insight #925: Node ID Type Normalization
+**Problem**: Backend returns int IDs, frontend expected string prefixes.
+**Solution**: Normalize to integers in export functions.
+**Pattern**: Always use consistent ID types across API boundaries.
+
+### Insight #926: XSS Prevention in Dynamic HTML
+**Problem**: innerHTML allows script injection.
+**Solution**: Use createElement + textContent + appendChild.
+**Pattern**: Never use innerHTML with dynamic data. Always use DOM methods.
+
+---
+
+## REPLICATION CHECKLIST
+
+For new domain D:
+1. [ ] Define primary entity (D_entity)
+2. [ ] Define secondary entities (D_legends, D_rivalries, etc.)
+3. [ ] Create schema.sql with KG tables
+4. [ ] Implement database.py with FTS5 + KG queries
+5. [ ] Create D persona templates
+6. [ ] Implement RAG with D-specific entity extraction
+7. [ ] Create FastAPI endpoints
+8. [ ] Add TypeScript types
+9. [ ] Create API service functions
+10. [ ] Build personality components
+11. [ ] Enhance detail page with tabs
+12. [ ] Test all endpoints
+13. [ ] Run test suite
+
+**Estimated Time**: 1-2 days with template
+
+---
+
+## FILES TO TEMPLATE
+
+### Backend Templates
+- `schema.sql` → `DOMAIN_schema.sql`
+- `database.py` → `DOMAIN_database.py`
+- `rag.py` → `DOMAIN_rag.py`
+- `ai_response.py` → `DOMAIN_ai.py`
+- `main.py` → `DOMAIN_main.py`
+
+### Frontend Templates
+- `types/index.ts` → `DOMAIN_types.ts`
+- `services/api.ts` → `DOMAIN_api.ts`
+- `components/Teams/` → `components/DOMAIN/`
+- `pages/TeamDetail.tsx` → `pages/DOMAIN_Detail.tsx`
+
+---
+
+## NEXT STEPS
+
+1. Create FOUNDATION-domain-template.pb playbook
+2. Extract generic templates from Soccer-AI
+3. Test template with second domain (NBA recommended)
+4. Document any gaps found during NBA implementation
+5. Iterate and refine templates
+
+---
+
+*This retrospective captures the patterns needed to replicate Soccer-AI for any domain.*

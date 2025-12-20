@@ -1,0 +1,411 @@
+---
+file_type: implementation_plan
+created: 2025-12-20
+status: active
+priority: critical_for_demo
+author: Eyal Nof + Claude
+source_patterns:
+  - KNOWLEDGE-graph-traversal.pb
+  - KNOWLEDGE-advanced-rag-fusion.pb
+  - FOUNDATION-cost-optimization.pb
+methodology: "Production patterns from synthesis-rules applied to Football-AI"
+---
+
+# KG-RAG Implementation Plan for Football-AI
+## Production-Grade Architecture from Playbook Patterns
+
+---
+
+## Pattern Sources Applied
+
+From **KNOWLEDGE-advanced-rag-fusion.pb**:
+- Hybrid formula: `α=0.40 vector + β=0.45 keyword + γ=0.15 graph`
+- 3x accuracy improvement over pure RAG
+- Entity extraction for graph queries
+- Hierarchical chunking
+
+From **KNOWLEDGE-graph-traversal.pb**:
+- Traversal as perception (movement creates understanding)
+- Hub detection for central concepts
+- Path caching for performance
+- Cycle avoidance patterns
+
+From **FOUNDATION-cost-optimization.pb**:
+- Cache common traversal paths
+- Ephemeral caching for repeated queries
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     USER QUERY                               │
+│         "Tell me about Arsenal's best derby moment"          │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   QUERY ANALYZER                             │
+│  • Entity extraction: [Arsenal, derby]                       │
+│  • Intent: factual + emotional                               │
+│  • Complexity: medium (multi-hop)                            │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+            ┌─────────────┴─────────────┐
+            ▼                           ▼
+┌───────────────────────┐   ┌───────────────────────┐
+│    FTS5 SEARCH        │   │   GRAPH TRAVERSAL     │
+│    (β = 0.60)         │   │   (γ = 0.40)          │
+│                       │   │                       │
+│  • Keyword match      │   │  Arsenal → rivalries  │
+│  • Existing rag.py    │   │  → moments (derby)    │
+└───────────┬───────────┘   └───────────┬───────────┘
+            │                           │
+            └─────────────┬─────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   CONTEXT FUSION                             │
+│  • FTS5 results: text chunks                                 │
+│  • Graph context: relationships, related entities            │
+│  • Club mood: emotional calibration                          │
+│  • Session: conversation memory                              │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   HAIKU GENERATION                           │
+│  • Rich context from fusion                                  │
+│  • Relationship-aware prompt                                 │
+│  • Mood-calibrated response                                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Implementation Steps
+
+### Step 1: Graph Schema (SQLite)
+
+```sql
+-- Node table (entities in the knowledge graph)
+CREATE TABLE kg_nodes (
+    node_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    node_type TEXT NOT NULL,  -- team, legend, moment, rivalry, era
+    entity_id INTEGER,        -- FK to source table
+    name TEXT NOT NULL,
+    properties TEXT,          -- JSON metadata
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_nodes_type ON kg_nodes(node_type);
+CREATE INDEX idx_nodes_name ON kg_nodes(name COLLATE NOCASE);
+
+-- Edge table (relationships)
+CREATE TABLE kg_edges (
+    edge_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_id INTEGER NOT NULL,
+    target_id INTEGER NOT NULL,
+    relationship TEXT NOT NULL,  -- legendary_at, rival_of, occurred_at, etc.
+    weight REAL DEFAULT 1.0,     -- relationship strength
+    properties TEXT,              -- JSON metadata
+    FOREIGN KEY (source_id) REFERENCES kg_nodes(node_id),
+    FOREIGN KEY (target_id) REFERENCES kg_nodes(node_id)
+);
+
+CREATE INDEX idx_edges_source ON kg_edges(source_id);
+CREATE INDEX idx_edges_target ON kg_edges(target_id);
+CREATE INDEX idx_edges_rel ON kg_edges(relationship);
+```
+
+### Step 2: Relationship Types
+
+```python
+RELATIONSHIPS = {
+    # Core relationships
+    "legendary_at": "Legend played at team",
+    "rival_of": "Teams are rivals (bidirectional)",
+    "occurred_at": "Moment occurred at team",
+    "against": "Moment was against opponent",
+
+    # Emotional relationships
+    "evokes": "Moment evokes emotion",
+    "intensifies": "Rivalry intensifies emotion",
+
+    # Temporal
+    "during_era": "Entity during era",
+    "preceded_by": "Era ordering",
+}
+```
+
+### Step 3: Populate Graph
+
+```python
+def populate_knowledge_graph():
+    """Migrate existing data to KG."""
+
+    # 1. Create team nodes (3 teams)
+    teams = get_teams()
+    for team in teams:
+        create_node("team", team["id"], team["name"])
+
+    # 2. Create legend nodes + edges (9 legends)
+    legends = get_legends()
+    for legend in legends:
+        node_id = create_node("legend", legend["id"], legend["name"], {
+            "era": legend["era"],
+            "position": legend["position"]
+        })
+        create_edge(node_id, get_team_node(legend["team_id"]), "legendary_at")
+
+    # 3. Create moment nodes + edges (12 moments)
+    for team_id in [3, 4, 5]:
+        moments = get_club_moments(team_id)
+        for moment in moments:
+            node_id = create_node("moment", moment["id"], moment["title"], {
+                "emotion": moment["emotion"],
+                "significance": moment["significance"]
+            })
+            create_edge(node_id, get_team_node(team_id), "occurred_at")
+            # If opponent is a tracked team, link it
+            if moment["opponent"]:
+                opponent_node = find_team_by_name(moment["opponent"])
+                if opponent_node:
+                    create_edge(node_id, opponent_node, "against")
+
+    # 4. Create rivalry edges (9 rivalries)
+    rivalries = get_all_rivalries()
+    for rivalry in rivalries:
+        team_node = get_team_node(rivalry["team_id"])
+        rival_node = get_team_node(rivalry["rival_team_id"])
+        create_edge(team_node, rival_node, "rival_of",
+                   weight=rivalry["intensity"]/10.0,
+                   properties={"type": rivalry["rivalry_type"]})
+```
+
+### Step 4: Traversal Functions
+
+```python
+def traverse_from(node_id: int, relationship: str = None,
+                  depth: int = 1) -> List[Dict]:
+    """BFS traversal from node."""
+    visited = {node_id}
+    current_level = [node_id]
+    results = []
+
+    for d in range(depth):
+        next_level = []
+        for nid in current_level:
+            edges = get_edges_from(nid, relationship)
+            for edge in edges:
+                if edge["target_id"] not in visited:
+                    visited.add(edge["target_id"])
+                    next_level.append(edge["target_id"])
+                    results.append({
+                        "node": get_node(edge["target_id"]),
+                        "edge": edge,
+                        "depth": d + 1
+                    })
+        current_level = next_level
+
+    return results
+
+def get_entity_context(entity_type: str, entity_id: int) -> Dict:
+    """Get full context for an entity via traversal."""
+    node = get_node_by_entity(entity_type, entity_id)
+    if not node:
+        return {}
+
+    context = {"entity": node}
+
+    if entity_type == "team":
+        context["legends"] = traverse_from(node["node_id"], "legendary_at", reverse=True)
+        context["rivalries"] = traverse_from(node["node_id"], "rival_of")
+        context["moments"] = traverse_from(node["node_id"], "occurred_at", reverse=True)
+        context["mood"] = get_club_mood(entity_id)
+
+    elif entity_type == "legend":
+        context["team"] = traverse_from(node["node_id"], "legendary_at")[0]
+        context["era_moments"] = get_moments_in_era(node["properties"]["era"])
+
+    return context
+```
+
+### Step 5: Hybrid Retrieval
+
+```python
+def retrieve_hybrid(query: str) -> Tuple[str, List[Dict], Dict]:
+    """Hybrid FTS5 + Graph retrieval."""
+
+    # 1. Entity extraction
+    entities = extract_entities(query)  # {"teams": ["Arsenal"], ...}
+
+    # 2. FTS5 retrieval (existing)
+    fts_context, fts_sources = rag.retrieve_context(query)
+
+    # 3. Graph traversal
+    kg_context = {}
+    for entity_type, names in entities.items():
+        for name in names:
+            node = find_node_by_name(name)
+            if node:
+                kg_context[name] = get_entity_context(
+                    node["node_type"],
+                    node["entity_id"]
+                )
+
+    # 4. Get mood for emotional calibration
+    team_mood = None
+    if entities.get("teams"):
+        team_name = entities["teams"][0]
+        team_node = find_node_by_name(team_name)
+        if team_node:
+            team_mood = get_club_mood(team_node["entity_id"])
+
+    # 5. Fuse contexts
+    fused = fuse_contexts(fts_context, kg_context, team_mood)
+
+    return fused, fts_sources, {"entities": entities, "mood": team_mood}
+```
+
+### Step 6: Context Fusion
+
+```python
+def fuse_contexts(fts_context: str, kg_context: Dict, mood: Dict) -> str:
+    """Merge FTS5 + Graph + Mood into rich context."""
+    parts = []
+
+    # FTS5 results
+    if fts_context:
+        parts.append(f"## Retrieved Information\n{fts_context}")
+
+    # Graph relationships
+    if kg_context:
+        parts.append("\n## Relationship Context")
+        for entity, relations in kg_context.items():
+            parts.append(f"\n### {entity}")
+
+            if relations.get("rivalries"):
+                rivals = [r["node"]["name"] for r in relations["rivalries"][:3]]
+                parts.append(f"Rivals: {', '.join(rivals)}")
+
+            if relations.get("legends"):
+                legends = [l["node"]["name"] for l in relations["legends"][:3]]
+                parts.append(f"Legends: {', '.join(legends)}")
+
+            if relations.get("moments"):
+                moments = relations["moments"][:2]
+                for m in moments:
+                    parts.append(f"Moment: {m['node']['name']}")
+
+    # Mood calibration
+    if mood:
+        parts.append(f"\n## Current Mood")
+        parts.append(f"{mood['current_mood']} (intensity: {mood['mood_intensity']})")
+        parts.append(f"Reason: {mood['mood_reason']}")
+
+    return "\n".join(parts)
+```
+
+### Step 7: Enhanced AI Response
+
+```python
+KG_RAG_PROMPT = """You are a passionate {club} fan with deep knowledge.
+
+{fused_context}
+
+RELATIONSHIP AWARENESS:
+- When discussing rivals, adjust tone based on rivalry intensity
+- Reference related legends/moments naturally
+- Use current mood to calibrate emotional expression
+
+Respond as a true fan would - with passion and knowledge."""
+
+def generate_response_kg_rag(query: str, club: str = "default") -> Dict:
+    """Generate response using KG-RAG hybrid."""
+
+    # Security check
+    is_injection, pattern = detect_injection(query)
+    if is_injection:
+        return {"response": get_snap_back_response(club), ...}
+
+    # Hybrid retrieval
+    fused_context, sources, kg_meta = retrieve_hybrid(query)
+
+    # Generate
+    prompt = KG_RAG_PROMPT.format(
+        club=club,
+        fused_context=fused_context
+    )
+
+    response = call_haiku(prompt, query)
+
+    return {
+        "response": response,
+        "sources": sources,
+        "kg_context": kg_meta
+    }
+```
+
+---
+
+## Entity Counts
+
+| Entity | Count | Source |
+|--------|-------|--------|
+| Teams | 3 | teams table |
+| Legends | 9 | club_legends |
+| Moments | 12 | club_moments |
+| Rivalries | 9 | club_rivalries (edges) |
+| **Total Nodes** | ~24 | |
+| **Total Edges** | ~40 | (estimated) |
+
+---
+
+## Demo Queries
+
+1. **Multi-hop**: "Tell me about Arsenal's best derby moment"
+   - Traverses: Arsenal → rivalries → moments (filter: derby)
+
+2. **Relationship**: "Who are the legendary defenders?"
+   - Traverses: team → legends (filter: position=defender)
+
+3. **Comparison**: "Compare Henry to Drogba"
+   - Traverses both paths, finds rivalry connection
+
+4. **Mood-aware**: "How are we feeling about Spurs?"
+   - Uses rivalry intensity + current mood
+
+5. **Discovery**: "Any connection to Nottingham Forest?"
+   - Traverses for hidden links
+
+---
+
+## Implementation Order
+
+| Step | Time | File |
+|------|------|------|
+| 1. Schema | 15min | database.py |
+| 2. Populate | 30min | database.py |
+| 3. Traversal | 30min | kg_engine.py (new) |
+| 4. Hybrid retrieval | 30min | rag.py |
+| 5. Context fusion | 20min | rag.py |
+| 6. AI response | 15min | ai_response.py |
+| 7. Test | 30min | - |
+| **Total** | ~3hr | |
+
+---
+
+## Success Metrics
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Context sources | 1-2 | 5-10 |
+| Relationship awareness | None | Full |
+| Emotional calibration | Static | Dynamic |
+| Multi-hop queries | Fail | Pass |
+
+---
+
+*Production patterns from synthesis-rules applied to domain-specific KG-RAG*
