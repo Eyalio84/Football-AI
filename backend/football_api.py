@@ -39,10 +39,17 @@ class FootballDataAPI:
         self._cache_ttl = 300  # 5 minutes
 
     def _load_token(self) -> str:
-        """Load token from config file."""
+        """Load token from env var or config file."""
+        import os
+        env_token = os.environ.get("FOOTBALL_DATA_API_KEY")
+        if env_token:
+            return env_token.strip()
         config_path = Path(__file__).parent.parent / ".football_api_token"
         if config_path.exists():
             return config_path.read_text().strip()
+        config_path2 = Path(__file__).parent / ".football_api_token"
+        if config_path2.exists():
+            return config_path2.read_text().strip()
         raise ValueError("API token not provided and .football_api_token not found")
 
     def _request(self, endpoint: str) -> Dict:
