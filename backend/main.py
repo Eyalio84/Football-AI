@@ -66,7 +66,10 @@ if _extra_origins:
 _cors_origins.extend([
     "https://www.verbalogix.com",
     "https://verbalogix.com",
+    "https://football.verbalogix.com",
+    "https://www.football.verbalogix.com",
     "https://football-ai.vercel.app",
+    "https://footballai-beta.vercel.app",
 ])
 
 app.add_middleware(
