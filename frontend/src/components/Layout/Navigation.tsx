@@ -11,7 +11,7 @@ const navItems = [
   { to: '/predictions', label: 'PREDICT', icon: Target, mobile: true },
   { to: '/companion', label: 'LIVE', icon: Radio, mobile: true },
   { to: '/mood-timeline', label: 'MOOD', icon: TrendingUp, mobile: true },
-  { to: '/trivia', label: 'TRIVIA', icon: HelpCircle, mobile: false },
+  { to: '/trivia', label: 'TRIVIA', icon: HelpCircle, mobile: true },
   { to: '/debate', label: 'DEBATE', icon: Swords, mobile: false },
   { to: '/teams', label: 'CLUBS', icon: Users, mobile: false },
 ]
