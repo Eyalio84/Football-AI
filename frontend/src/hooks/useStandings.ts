@@ -18,7 +18,7 @@ interface Standing {
 }
 
 interface UseStandingsOptions {
-  league?: string
+  competition?: string  // Football-data.org competition code: "PL", "PD", etc.
 }
 
 interface UseStandingsResult {
@@ -29,7 +29,7 @@ interface UseStandingsResult {
 }
 
 export function useStandings(options: UseStandingsOptions = {}): UseStandingsResult {
-  const { league = 'Premier League' } = options
+  const { competition = 'PL' } = options
 
   const [standings, setStandings] = useState<Standing[]>([])
   const [loading, setLoading] = useState(true)
@@ -40,7 +40,7 @@ export function useStandings(options: UseStandingsOptions = {}): UseStandingsRes
       setLoading(true)
       setError(null)
 
-      const data = await getStandings(league)
+      const data = await getStandings(competition)
       setStandings(data)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch standings'
@@ -53,7 +53,7 @@ export function useStandings(options: UseStandingsOptions = {}): UseStandingsRes
 
   useEffect(() => {
     fetchStandings()
-  }, [league])
+  }, [competition])
 
   return {
     standings,

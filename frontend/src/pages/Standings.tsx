@@ -3,9 +3,13 @@ import { StandingsTable } from '@/components/Standings/StandingsTable'
 import { StandingsLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { theme } from '@/config/theme'
+import { useLeague } from '@/config/LeagueProvider'
 
 export function Standings() {
-  const { standings, loading, error, refetch } = useStandings()
+  const { competition, currentLeague } = useLeague()
+  const { standings, loading, error, refetch } = useStandings({ competition })
+
+  const leagueTitle = currentLeague?.display_name ?? 'Premier League'
 
   return (
     <div>
@@ -14,7 +18,7 @@ export function Standings() {
           className="text-3xl font-bold"
           style={{ color: theme.colors.text.primary }}
         >
-          Premier League Standings
+          {leagueTitle} Standings
         </h1>
         {!loading && !error && (
           <p

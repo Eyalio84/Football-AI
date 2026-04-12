@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { theme } from '@/config/theme'
 import { API_URL } from '@/config/api'
 import { getClubs } from '@/services/api'
-import { CLUB_PALETTES, ANALYST_PALETTE, type ClubPalette } from '@/config/clubThemes'
+import { CLUB_PALETTES, ANALYST_PALETTE, DEFAULT_PALETTE, type ClubPalette } from '@/config/clubThemes'
 import { BarChart3 } from 'lucide-react'
+import { useLeague } from '@/config/LeagueProvider'
 
 interface Club {
   id: string
@@ -21,6 +22,7 @@ interface ClubSelectionProps {
 }
 
 const CLUB_STADIUMS: Record<string, string> = {
+  // Premier League
   arsenal: 'Emirates Stadium',
   chelsea: 'Stamford Bridge',
   liverpool: 'Anfield',
@@ -44,6 +46,27 @@ const CLUB_STADIUMS: Record<string, string> = {
   ipswich: 'Portman Road',
   southampton: "St Mary's Stadium",
   leicester: 'King Power Stadium',
+  // La Liga
+  real_madrid: 'Santiago Bernabéu',
+  barcelona: 'Spotify Camp Nou',
+  atletico_madrid: 'Cívitas Metropolitano',
+  sevilla: 'Ramón Sánchez-Pizjuán',
+  athletic_bilbao: 'San Mamés',
+  valencia: 'Mestalla',
+  real_betis: 'Benito Villamarín',
+  real_sociedad: 'Reale Arena',
+  villarreal: 'Estadio de la Cerámica',
+  osasuna: 'El Sadar',
+  celta_vigo: 'Estadio de Balaídos',
+  getafe: 'Coliseum Alfonso Pérez',
+  cadiz: 'Estadio Nuevo Mirandilla',
+  almeria: 'Power Horse Stadium',
+  rayo_vallecano: 'Campo de Fútbol de Vallecas',
+  mallorca: 'Visit Mallorca Estadi',
+  granada: 'Estadio Nuevo Los Cármenes',
+  girona: 'Estadio Municipal de Montilivi',
+  las_palmas: 'Estadio Gran Canaria',
+  leganes: 'Estadio Municipal de Butarque',
 }
 
 const MOOD_EMOJI: Record<string, string> = {
@@ -56,19 +79,34 @@ const MOOD_EMOJI: Record<string, string> = {
   neutral: '\u2192',
 }
 
-/** Big 6 clubs shown slightly larger */
-const BIG_6 = new Set(['arsenal', 'chelsea', 'liverpool', 'manchester_united', 'manchester_city', 'tottenham'])
+/** Featured clubs per league shown slightly larger */
+const FEATURED_CLUBS: Record<string, Set<string>> = {
+  PL: new Set(['arsenal', 'chelsea', 'liverpool', 'manchester_united', 'manchester_city', 'tottenham']),
+  PD: new Set(['real_madrid', 'barcelona', 'atletico_madrid']),
+}
 
 export function ClubSelection({ onSelectClub }: ClubSelectionProps) {
+  const { competition, clubsForLeague } = useLeague()
   const [clubs, setClubs] = useState<Club[]>([])
   const [moods, setMoods] = useState<Record<string, MoodData>>({})
   const [hoveredClub, setHoveredClub] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Re-fetch whenever the league changes
   useEffect(() => {
+    setLoading(true)
+    setMoods({})
+
     const fetchData = async () => {
       try {
-        const data = await getClubs()
+        let data: Club[]
+        if (clubsForLeague.length > 0) {
+          // Use clubs from the league context (loaded via /api/v1/leagues)
+          data = clubsForLeague.map(c => ({ id: c.id, name: c.display_name }))
+        } else {
+          // Fallback: fetch PL clubs from legacy endpoint
+          data = await getClubs()
+        }
         setClubs(data)
 
         // Fetch moods in parallel for all clubs
@@ -95,7 +133,7 @@ export function ClubSelection({ onSelectClub }: ClubSelectionProps) {
       }
     }
     fetchData()
-  }, [])
+  }, [competition, clubsForLeague])
 
   if (loading) {
     return (
@@ -113,10 +151,12 @@ export function ClubSelection({ onSelectClub }: ClubSelectionProps) {
     )
   }
 
-  // Sort: Big 6 first, then alphabetical
+  const featuredSet = FEATURED_CLUBS[competition] ?? FEATURED_CLUBS['PL']
+
+  // Sort: featured clubs first, then alphabetical
   const sorted = [...clubs].sort((a, b) => {
-    const aIsBig = BIG_6.has(a.id) ? 0 : 1
-    const bIsBig = BIG_6.has(b.id) ? 0 : 1
+    const aIsBig = featuredSet.has(a.id) ? 0 : 1
+    const bIsBig = featuredSet.has(b.id) ? 0 : 1
     if (aIsBig !== bIsBig) return aIsBig - bIsBig
     return a.name.localeCompare(b.name)
   })
@@ -146,10 +186,10 @@ export function ClubSelection({ onSelectClub }: ClubSelectionProps) {
       <div className="w-full max-w-6xl">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {sorted.map((club, index) => {
-            const palette: ClubPalette = CLUB_PALETTES[club.id] || { primary: '#666', secondary: '#999', accent: '#fff', gradient: '#666', glowColor: 'transparent', textOnPrimary: '#fff' }
+            const palette: ClubPalette = CLUB_PALETTES[club.id] || DEFAULT_PALETTE
             const mood = moods[club.id]
             const isHovered = hoveredClub === club.id
-            const isBig6 = BIG_6.has(club.id)
+            const isBig6 = featuredSet.has(club.id)
             const stadium = CLUB_STADIUMS[club.id]
 
             return (

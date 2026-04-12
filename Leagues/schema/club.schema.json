@@ -1,0 +1,301 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://soccer-ai/schemas/club.schema.json",
+  "title": "Club Knowledge File",
+  "description": "Schema for Soccer-AI individual club knowledge files used to drive fan personas",
+  "type": "object",
+  "required": [
+    "id",
+    "display_name",
+    "sport",
+    "league_id",
+    "voice_description",
+    "dialect",
+    "legends",
+    "iconic_moments",
+    "biggest_tragedies",
+    "rivalries",
+    "coaches",
+    "stadium"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique machine-readable club identifier (must match league_config club id)",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "examples": ["arsenal", "liverpool", "manchester_united"]
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Human-readable club name",
+      "examples": ["Arsenal", "Liverpool", "Manchester United"]
+    },
+    "sport": {
+      "type": "string",
+      "description": "The sport this club competes in",
+      "examples": ["football", "basketball"]
+    },
+    "league_id": {
+      "type": "string",
+      "description": "ID of the league this club currently belongs to",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "examples": ["premier_league", "la_liga"]
+    },
+    "voice_description": {
+      "type": "string",
+      "description": "Personality and voice summary used as context in the AI system prompt. Should capture the emotional character, values, and tone of a typical passionate fan of this club.",
+      "minLength": 20,
+      "examples": [
+        "A Gunner through and through — passionate, technical, forever haunted by the invincibles. Believes beautiful football is a birthright, not a bonus."
+      ]
+    },
+    "dialect": {
+      "type": "object",
+      "description": "Dialect configuration for AI text generation — injects regional linguistic character",
+      "required": ["replacements", "phrases", "vocab_inject"],
+      "additionalProperties": false,
+      "properties": {
+        "replacements": {
+          "type": "object",
+          "description": "Word-level substitutions. Keys are standard words, values are regional alternatives.",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "examples": [
+            { "amazing": "boss", "friend": "la", "very": "well" }
+          ]
+        },
+        "phrases": {
+          "type": "array",
+          "description": "Regional expressions or exclamations to inject naturally into responses",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            ["You'll Never Walk Alone", "The Kop will be rocking", "Boss that"]
+          ]
+        },
+        "vocab_inject": {
+          "type": "string",
+          "description": "A short prose instruction telling the AI how to flavour its language for this club's region. Used directly in system prompts.",
+          "minLength": 10,
+          "examples": [
+            "Speak with a Scouse lilt — warm, passionate, and fiercely proud. Use 'boss', 'la', 'the Kop', and 'You'll Never Walk Alone' naturally."
+          ]
+        }
+      }
+    },
+    "legends": {
+      "type": "array",
+      "description": "Club legends whose names and stories the AI can reference",
+      "items": {
+        "$ref": "#/definitions/legend"
+      }
+    },
+    "iconic_moments": {
+      "type": "array",
+      "description": "Glorious or defining positive moments in the club's history",
+      "items": {
+        "$ref": "#/definitions/historical_moment"
+      }
+    },
+    "biggest_tragedies": {
+      "type": "array",
+      "description": "Heartbreaking or traumatic moments in the club's history — losses, near-misses, disasters",
+      "items": {
+        "$ref": "#/definitions/historical_moment"
+      }
+    },
+    "rivalries": {
+      "type": "object",
+      "description": "Rivalry definitions keyed by the rival club's ID",
+      "additionalProperties": {
+        "$ref": "#/definitions/rivalry"
+      }
+    },
+    "coaches": {
+      "type": "array",
+      "description": "Notable managers/coaches in the club's history",
+      "items": {
+        "$ref": "#/definitions/coach"
+      }
+    },
+    "stadium": {
+      "$ref": "#/definitions/stadium_info"
+    }
+  },
+  "definitions": {
+    "legend": {
+      "type": "object",
+      "description": "A club legend — player or figure of iconic status",
+      "required": ["name", "era", "story", "achievements", "fan_nickname"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name of the legend",
+          "examples": ["Thierry Henry", "Steven Gerrard", "Eric Cantona"]
+        },
+        "era": {
+          "type": "string",
+          "description": "Years or decade(s) active at the club",
+          "examples": ["1999-2007", "1998-2015", "1990s"]
+        },
+        "story": {
+          "type": "string",
+          "description": "A short evocative narrative about what made this person legendary at the club",
+          "minLength": 20
+        },
+        "achievements": {
+          "type": "array",
+          "description": "Key honours or records achieved at the club",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "examples": [
+            ["Premier League top scorer", "FA Cup winner", "PFA Players' Player of the Year"]
+          ]
+        },
+        "fan_nickname": {
+          "type": "string",
+          "description": "What fans call this legend informally",
+          "examples": ["The King", "Stevie G", "God"]
+        }
+      }
+    },
+    "historical_moment": {
+      "type": "object",
+      "description": "A significant historical match or event",
+      "required": ["title", "date", "opponent", "score", "emotion", "significance"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Short evocative name for this moment",
+          "examples": ["The Miracle of Istanbul", "Agüero 93:20", "Keegan's Breakdown"]
+        },
+        "date": {
+          "type": "string",
+          "description": "Date of the event (ISO 8601 or approximate)",
+          "examples": ["2005-05-25", "2012-05-13", "1996-04"]
+        },
+        "opponent": {
+          "type": "string",
+          "description": "Opposition team name",
+          "examples": ["AC Milan", "Queens Park Rangers", "Manchester United"]
+        },
+        "score": {
+          "type": "string",
+          "description": "Final score or result",
+          "examples": ["3-3 (3-2 pens)", "3-2", "4-3"]
+        },
+        "emotion": {
+          "type": "string",
+          "description": "Primary emotional label for this moment from a fan's perspective",
+          "enum": [
+            "euphoric",
+            "legendary",
+            "heartbreak",
+            "devastation",
+            "relief",
+            "pride",
+            "disbelief",
+            "anger",
+            "grief",
+            "nostalgia"
+          ]
+        },
+        "significance": {
+          "type": "string",
+          "description": "Why this moment matters — context and lasting impact",
+          "minLength": 20
+        }
+      }
+    },
+    "rivalry": {
+      "type": "object",
+      "description": "Rivalry details with a specific opponent",
+      "required": ["intensity", "name", "banter"],
+      "additionalProperties": false,
+      "properties": {
+        "intensity": {
+          "type": "number",
+          "description": "Rivalry intensity from 0 (mild) to 1.0 (blood feud). Drives how heated the AI persona becomes when the rival is mentioned.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "name": {
+          "type": "string",
+          "description": "Common name for this derby or rivalry",
+          "examples": ["North London Derby", "El Clásico", "Merseyside Derby"]
+        },
+        "banter": {
+          "type": "array",
+          "description": "Short, punchy banter lines the AI can deploy — fan-authentic, never generic",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "examples": [
+            ["We've got 26 leagues, how many have you got?", "The Spuds haven't won a league since 1961"]
+          ]
+        }
+      }
+    },
+    "coach": {
+      "type": "object",
+      "description": "A notable manager or coach",
+      "required": ["name", "era", "achievements"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name of the manager",
+          "examples": ["Arsène Wenger", "Bill Shankly", "Sir Alex Ferguson"]
+        },
+        "era": {
+          "type": "string",
+          "description": "Years in charge",
+          "examples": ["1996-2018", "1959-1974"]
+        },
+        "achievements": {
+          "type": "array",
+          "description": "Notable honours or achievements during tenure",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "stadium_info": {
+      "type": "object",
+      "description": "The club's home stadium details",
+      "required": ["name", "capacity", "atmosphere_note"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Stadium name",
+          "examples": ["Emirates Stadium", "Anfield", "Old Trafford"]
+        },
+        "capacity": {
+          "type": "integer",
+          "description": "Total seated capacity",
+          "minimum": 1000,
+          "examples": [60704, 53394, 74310]
+        },
+        "atmosphere_note": {
+          "type": "string",
+          "description": "Evocative description of what makes this ground special on matchday",
+          "minLength": 10,
+          "examples": [
+            "When the Kop sings You'll Never Walk Alone before kickoff, there is no louder stadium in England."
+          ]
+        }
+      }
+    }
+  }
+}

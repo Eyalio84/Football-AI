@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { Home, Trophy, Users, MessageCircle, HelpCircle, Swords, Radio, TrendingUp, Target } from 'lucide-react'
 import { theme } from '@/config/theme'
 import { useClubTheme } from '@/config/ClubThemeProvider'
+import { useLeague } from '@/config/LeagueProvider'
 
 // Mobile bottom bar shows items with mobile: true (max 6), desktop shows all
 const navItems = [
@@ -44,6 +45,43 @@ function NavItem({ to, label, icon: Icon, clubId, palette }: {
   )
 }
 
+/** Compact league switcher pill — shown in desktop nav */
+function LeagueSwitcher() {
+  const { competition, setCompetition, leagues } = useLeague()
+
+  if (leagues.length <= 1) return null
+
+  return (
+    <div
+      className="flex items-center rounded-full border overflow-hidden text-[10px] font-display font-bold tracking-widest"
+      style={{ borderColor: theme.colors.border.default }}
+    >
+      {leagues.map(league => {
+        const active = league.competition_code === competition
+        // Short label: "PL", "LA LIGA", "SERIE A"
+        const shortLabel = league.competition_code === 'PL' ? 'PL'
+          : league.competition_code === 'PD' ? 'LA LIGA'
+          : league.competition_code === 'SA' ? 'SERIE A'
+          : league.display_name.toUpperCase()
+
+        return (
+          <button
+            key={league.competition_code}
+            onClick={() => setCompetition(league.competition_code)}
+            className="px-3 py-1 transition-all duration-200"
+            style={{
+              backgroundColor: active ? theme.colors.text.primary : 'transparent',
+              color: active ? theme.colors.background.default : theme.colors.text.muted,
+            }}
+          >
+            {shortLabel}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 export function Navigation() {
   const { clubId, palette } = useClubTheme()
 
@@ -81,11 +119,14 @@ export function Navigation() {
               )}
             </NavLink>
 
-            {/* Desktop nav links */}
-            <div className="flex items-center space-x-1">
-              {navItems.map((item) => (
-                <NavItem key={item.to} {...item} clubId={clubId} palette={palette} />
-              ))}
+            {/* Desktop nav links + league switcher */}
+            <div className="flex items-center space-x-3">
+              <LeagueSwitcher />
+              <div className="flex items-center space-x-1">
+                {navItems.map((item) => (
+                  <NavItem key={item.to} {...item} clubId={clubId} palette={palette} />
+                ))}
+              </div>
             </div>
           </div>
         </div>

@@ -3,6 +3,10 @@ Soccer-AI 4D Persona Configuration
 
 This module centralizes configuration for the 4D Persona Architecture integration.
 Set USE_4D_PERSONA = False to use legacy fan_enhancements behavior.
+
+Club registry (CLUB_DISPLAY_NAMES, CLUB_API_NAMES, DIALECT_REGIONS, CLUB_TO_REGION)
+is now loaded dynamically from Leagues/*/league_config.json via league_loader.
+Adding a new league requires only dropping a league_config.json file — no code changes.
 """
 
 from pathlib import Path
@@ -26,91 +30,28 @@ PERSONA_4D_CONFIG = {
 
 
 # =============================================================================
-# REGIONAL DIALECT GROUPINGS (User Requirement Q2: Option B)
+# DYNAMIC CLUB REGISTRY  (loaded from Leagues/ directory)
 # =============================================================================
-# Instead of per-club dialects, clubs are grouped into regional dialects
 
-DIALECT_REGIONS = {
-    "north": [
-        "liverpool", "everton",
-        "manchester_united", "manchester_city",
-        "newcastle"
-    ],
-    "midlands": [
-        "aston_villa", "wolves",
-        "nottingham_forest", "leicester"
-    ],
-    "london": [
-        "arsenal", "chelsea", "tottenham",
-        "west_ham", "crystal_palace",
-        "fulham", "brentford"
-    ],
-    "south": [
-        "brighton", "bournemouth", "southampton"
-    ],
-    "east": [
-        "ipswich"
-    ]
-}
+from league_loader import (
+    CLUB_DISPLAY_NAMES,
+    CLUB_API_NAMES,
+    CLUB_TO_REGION,
+    DIALECT_REGIONS,
+    ALL_LEAGUES,
+)
 
-# Reverse mapping: club -> region
-CLUB_TO_REGION = {}
-for region, clubs in DIALECT_REGIONS.items():
-    for club in clubs:
-        CLUB_TO_REGION[club] = region
-
-
-# =============================================================================
-# CLUB NORMALIZATION
-# =============================================================================
-# Map internal club_id to display names and API names
-
-CLUB_DISPLAY_NAMES = {
-    "arsenal": "Arsenal",
-    "aston_villa": "Aston Villa",
-    "bournemouth": "Bournemouth",
-    "brentford": "Brentford",
-    "brighton": "Brighton & Hove Albion",
-    "chelsea": "Chelsea",
-    "crystal_palace": "Crystal Palace",
-    "everton": "Everton",
-    "fulham": "Fulham",
-    "ipswich": "Ipswich Town",
-    "leicester": "Leicester City",
-    "liverpool": "Liverpool",
-    "manchester_city": "Manchester City",
-    "manchester_united": "Manchester United",
-    "newcastle": "Newcastle United",
-    "nottingham_forest": "Nottingham Forest",
-    "southampton": "Southampton",
-    "tottenham": "Tottenham Hotspur",
-    "west_ham": "West Ham United",
-    "wolves": "Wolverhampton Wanderers"
-}
-
-# API team names (football-data.org format)
-CLUB_API_NAMES = {
-    "arsenal": "Arsenal FC",
-    "aston_villa": "Aston Villa FC",
-    "bournemouth": "AFC Bournemouth",
-    "brentford": "Brentford FC",
-    "brighton": "Brighton & Hove Albion FC",
-    "chelsea": "Chelsea FC",
-    "crystal_palace": "Crystal Palace FC",
-    "everton": "Everton FC",
-    "fulham": "Fulham FC",
-    "ipswich": "Ipswich Town FC",
-    "leicester": "Leicester City FC",
-    "liverpool": "Liverpool FC",
-    "manchester_city": "Manchester City FC",
-    "manchester_united": "Manchester United FC",
-    "newcastle": "Newcastle United FC",
-    "nottingham_forest": "Nottingham Forest FC",
-    "southampton": "Southampton FC",
-    "tottenham": "Tottenham Hotspur FC",
-    "west_ham": "West Ham United FC",
-    "wolves": "Wolverhampton Wanderers FC"
-}
+# Re-export for backward compatibility with code that imports from config
+__all__ = [
+    "USE_4D_PERSONA",
+    "PERSONA_4D_CONFIG",
+    "CLUB_DISPLAY_NAMES",
+    "CLUB_API_NAMES",
+    "CLUB_TO_REGION",
+    "DIALECT_REGIONS",
+    "ALL_LEAGUES",
+    "ARIEL_FRAMEWORK_PATH",
+]
 
 
 # =============================================================================

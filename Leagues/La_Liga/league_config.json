@@ -1,0 +1,41 @@
+{
+  "sport": "football",
+  "league_id": "la_liga",
+  "display_name": "La Liga",
+  "country": "Spain",
+  "competition_code": "PD",
+  "division_code": "SP1",
+  "season_format": "2024-25",
+  "clubs": [
+    { "id": "real_madrid", "display_name": "Real Madrid", "api_name": "Real Madrid CF", "api_id": 86, "aliases": ["los_blancos", "merengues", "hala_madrid"], "csv_name": "Real Madrid", "dialect_region": "castilian", "stadium": "Santiago Bernabéu", "founded": 1902 },
+    { "id": "barcelona", "display_name": "FC Barcelona", "api_name": "FC Barcelona", "api_id": 81, "aliases": ["barca", "barça", "blaugrana", "fcb"], "csv_name": "Barcelona", "dialect_region": "catalan", "stadium": "Spotify Camp Nou", "founded": 1899 },
+    { "id": "atletico_madrid", "display_name": "Atlético de Madrid", "api_name": "Club Atlético de Madrid", "api_id": 78, "aliases": ["atletico", "atleti", "rojiblancos", "colchoneros"], "csv_name": "Ath Madrid", "dialect_region": "castilian", "stadium": "Cívitas Metropolitano", "founded": 1903 },
+    { "id": "sevilla", "display_name": "Sevilla FC", "api_name": "Sevilla FC", "api_id": 559, "aliases": ["sevilla_fc", "nervionenses"], "csv_name": "Sevilla", "dialect_region": "andalusian", "stadium": "Estadio Ramón Sánchez-Pizjuán", "founded": 1890 },
+    { "id": "athletic_bilbao", "display_name": "Athletic Club", "api_name": "Athletic Club", "api_id": 77, "aliases": ["athletic", "los_leones", "the_lions"], "csv_name": "Ath Bilbao", "dialect_region": "basque", "stadium": "San Mamés", "founded": 1898 },
+    { "id": "valencia", "display_name": "Valencia CF", "api_name": "Valencia CF", "api_id": 95, "aliases": ["los_ches", "che", "valencianistes"], "csv_name": "Valencia", "dialect_region": "valencian", "stadium": "Mestalla", "founded": 1919 },
+    { "id": "real_betis", "display_name": "Real Betis", "api_name": "Real Betis Balompié", "api_id": 90, "aliases": ["betis", "beticos", "verdiblancos"], "csv_name": "Betis", "dialect_region": "andalusian", "stadium": "Estadio Benito Villamarín", "founded": 1907 },
+    { "id": "real_sociedad", "display_name": "Real Sociedad", "api_name": "Real Sociedad de Fútbol", "api_id": 92, "aliases": ["la_real", "txuri-urdin"], "csv_name": "Sociedad", "dialect_region": "basque", "stadium": "Reale Arena", "founded": 1909 },
+    { "id": "villarreal", "display_name": "Villarreal CF", "api_name": "Villarreal CF", "api_id": 94, "aliases": ["yellow_submarine", "submarino_amarillo"], "csv_name": "Villarreal", "dialect_region": "valencian", "stadium": "Estadio de la Cerámica", "founded": 1923 },
+    { "id": "getafe", "display_name": "Getafe CF", "api_name": "Getafe CF", "api_id": 7026, "aliases": [], "csv_name": "Getafe", "dialect_region": "castilian", "stadium": "Coliseum Alfonso Pérez", "founded": 1946 },
+    { "id": "celta_vigo", "display_name": "RC Celta de Vigo", "api_name": "RC Celta de Vigo", "api_id": 558, "aliases": ["celta"], "csv_name": "Celta", "dialect_region": "galician", "stadium": "Abanca-Balaídos", "founded": 1923 },
+    { "id": "osasuna", "display_name": "CA Osasuna", "api_name": "CA Osasuna", "api_id": 79, "aliases": ["los_rojillos"], "csv_name": "Osasuna", "dialect_region": "basque", "stadium": "Estadio El Sadar", "founded": 1920 },
+    { "id": "rayo_vallecano", "display_name": "Rayo Vallecano", "api_name": "Rayo Vallecano de Madrid", "api_id": 87, "aliases": ["rayo"], "csv_name": "Vallecano", "dialect_region": "castilian", "stadium": "Estadio de Vallecas", "founded": 1924 },
+    { "id": "mallorca", "display_name": "RCD Mallorca", "api_name": "RCD Mallorca", "api_id": 89, "aliases": ["los_bermellones"], "csv_name": "Mallorca", "dialect_region": "balearic", "stadium": "Visit Mallorca Estadi", "founded": 1916 },
+    { "id": "girona", "display_name": "Girona FC", "api_name": "Girona FC", "api_id": 298, "aliases": [], "csv_name": "Girona", "dialect_region": "catalan", "stadium": "Montilivi", "founded": 1930 },
+    { "id": "espanyol", "display_name": "RCD Espanyol", "api_name": "RCD Espanyol de Barcelona", "api_id": 80, "aliases": ["periquitos", "blanquiazules"], "csv_name": "Espanol", "dialect_region": "catalan", "stadium": "Stage Front Stadium", "founded": 1900 },
+    { "id": "deportivo_alaves", "display_name": "Deportivo Alavés", "api_name": "Deportivo Alavés", "api_id": 263, "aliases": ["alaves", "babazorros"], "csv_name": "Alaves", "dialect_region": "basque", "stadium": "Estadio de Mendizorrotza", "founded": 1921 },
+    { "id": "leganes", "display_name": "CD Leganés", "api_name": "CD Leganés", "api_id": 745, "aliases": ["los_pepineros"], "csv_name": "Leganes", "dialect_region": "castilian", "stadium": "Estadio Municipal de Butarque", "founded": 1928 },
+    { "id": "valladolid", "display_name": "Real Valladolid", "api_name": "Real Valladolid CF", "api_id": 250, "aliases": ["pucela"], "csv_name": "Valladolid", "dialect_region": "castilian", "stadium": "Estadio José Zorrilla", "founded": 1928 },
+    { "id": "las_palmas", "display_name": "UD Las Palmas", "api_name": "UD Las Palmas", "api_id": 275, "aliases": ["amarillos", "la_ud"], "csv_name": "Las Palmas", "dialect_region": "canarian", "stadium": "Estadio Gran Canaria", "founded": 1949 }
+  ],
+  "dialect_regions": {
+    "catalan": { "clubs": ["barcelona", "espanyol", "girona"], "lang_flavor": "Catalan" },
+    "basque": { "clubs": ["athletic_bilbao", "real_sociedad", "osasuna", "deportivo_alaves"], "lang_flavor": "Basque" },
+    "castilian": { "clubs": ["real_madrid", "atletico_madrid", "getafe", "rayo_vallecano", "leganes", "valladolid"], "lang_flavor": "Castilian Spanish" },
+    "andalusian": { "clubs": ["sevilla", "real_betis"], "lang_flavor": "Andalusian Spanish" },
+    "valencian": { "clubs": ["valencia", "villarreal"], "lang_flavor": "Valencian" },
+    "galician": { "clubs": ["celta_vigo"], "lang_flavor": "Galician" },
+    "balearic": { "clubs": ["mallorca"], "lang_flavor": "Balearic" },
+    "canarian": { "clubs": ["las_palmas"], "lang_flavor": "Canarian Spanish" }
+  }
+}

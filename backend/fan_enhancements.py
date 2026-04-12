@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 # ============================================
 
 import os
+from league_loader import RIVALRIES, DIALECTS, CLUB_TO_DB_NAME as _LOADER_CLUB_TO_DB_NAME
 
 def _find_database():
     """Find the KG database file."""
@@ -41,40 +42,22 @@ DB_PATH = _find_database()
 
 
 # ============================================
-# TEAM NAME NORMALIZATION
+# TEAM NAME NORMALIZATION  (dynamic from league JSON files)
 # ============================================
 
-CLUB_TO_DB_NAME = {
-    "arsenal": "Arsenal",
-    "chelsea": "Chelsea",
-    "manchester_united": "Man United",
-    "manchester_city": "Man City",
-    "liverpool": "Liverpool",
-    "tottenham": "Tottenham",
-    "newcastle": "Newcastle",
-    "west_ham": "West Ham",
-    "everton": "Everton",
-    "brighton": "Brighton",
-    "aston_villa": "Aston Villa",
-    "wolves": "Wolves",
-    "crystal_palace": "Crystal Palace",
-    "fulham": "Fulham",
-    "nottingham_forest": "Nott'm Forest",
-    "brentford": "Brentford",
-    "bournemouth": "Bournemouth",
-    "leicester": "Leicester",
-    "ipswich": "Ipswich",
-    "southampton": "Southampton",
-}
-
+CLUB_TO_DB_NAME = _LOADER_CLUB_TO_DB_NAME
 DB_NAME_TO_CLUB = {v: k for k, v in CLUB_TO_DB_NAME.items()}
 
 
 # ============================================
-# RIVALRY MAP
+# RIVALRY MAP  (loaded dynamically from Leagues/*/clubs/*.json)
 # ============================================
 
-RIVALRIES = {
+# RIVALRIES is imported from league_loader above.
+# Kept here as a comment anchor for grep/tooling compatibility.
+# To add rivalries for a new club: edit its club JSON file.
+
+_RIVALRIES_ANCHOR = {
     "arsenal": {
         "tottenham": {"intensity": 1.0, "name": "North London Derby", "banter": [
             "Spurs? Don't get me started on that lot!",
@@ -248,6 +231,7 @@ RIVALRIES = {
         ]}
     }
 }
+# End of _RIVALRIES_ANCHOR (reference only — actual data loaded from JSON)
 
 
 # ============================================
@@ -458,10 +442,13 @@ def detect_rivalry(club: str, message: str) -> Optional[Dict]:
 
 
 # ============================================
-# LOCAL DIALECT
+# LOCAL DIALECT  (loaded dynamically from Leagues/*/clubs/*.json)
 # ============================================
 
-DIALECTS = {
+# DIALECTS is imported from league_loader above.
+# Kept here as a comment anchor for grep/tooling compatibility.
+
+_DIALECTS_ANCHOR = {
     "liverpool": {
         "replacements": {
             "friend": "la",
@@ -621,6 +608,7 @@ DIALECTS = {
         "vocab_inject": "Speak with North London accent. Reference Jewish heritage with pride, mention the Lane (old stadium) with nostalgia. Hopeful despite 'the wait'."
     }
 }
+# End of _DIALECTS_ANCHOR (reference only — actual data loaded from JSON)
 
 
 def get_dialect_config(club: str) -> Optional[Dict]:

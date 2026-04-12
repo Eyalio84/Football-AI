@@ -172,12 +172,14 @@ class FootballDataAPI:
         return matches
 
     def get_upcoming_fixtures(self, team_name: str = None,
-                              days_ahead: int = 14) -> List[Dict]:
+                              days_ahead: int = 14,
+                              competition: str = "PL") -> List[Dict]:
         """Get upcoming fixtures, optionally filtered by team."""
         today = datetime.now().strftime("%Y-%m-%d")
         future = (datetime.now() + timedelta(days=days_ahead)).strftime("%Y-%m-%d")
 
         matches = self.get_matches(
+            competition=competition,
             status="SCHEDULED",
             date_from=today,
             date_to=future
@@ -192,12 +194,14 @@ class FootballDataAPI:
         return matches
 
     def get_recent_results(self, team_name: str = None,
-                           days_back: int = 14) -> List[Dict]:
+                           days_back: int = 14,
+                           competition: str = "PL") -> List[Dict]:
         """Get recent match results, optionally filtered by team."""
         today = datetime.now().strftime("%Y-%m-%d")
         past = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
 
         matches = self.get_matches(
+            competition=competition,
             status="FINISHED",
             date_from=past,
             date_to=today

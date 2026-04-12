@@ -951,37 +951,61 @@ async def get_standings(league: str, season: str = "2024-25"):
 # ============================================
 
 @app.get("/api/v1/live/standings")
-async def get_live_standings():
-    """Get live Premier League standings from football-data.org."""
+async def get_live_standings(competition: str = "PL"):
+    """Get live standings from football-data.org. Use competition=PD for La Liga."""
     try:
         from football_api import get_football_api
         api = get_football_api()
-        standings = api.get_standings("PL")
+        standings = api.get_standings(competition)
         return ApiResponse(data=standings)
     except Exception as e:
         return ApiResponse(data=[], error=str(e))
 
 
 @app.get("/api/v1/live/fixtures")
-async def get_live_fixtures(days: int = 7):
+async def get_live_fixtures(days: int = 7, competition: str = "PL"):
     """Get upcoming fixtures from football-data.org."""
     try:
         from football_api import get_football_api
         api = get_football_api()
-        fixtures = api.get_upcoming_fixtures(days_ahead=days)
+        fixtures = api.get_upcoming_fixtures(days_ahead=days, competition=competition)
         return ApiResponse(data=fixtures)
     except Exception as e:
         return ApiResponse(data=[], error=str(e))
 
 
 @app.get("/api/v1/live/results")
-async def get_live_results(days: int = 7):
+async def get_live_results(days: int = 7, competition: str = "PL"):
     """Get recent results from football-data.org."""
     try:
         from football_api import get_football_api
         api = get_football_api()
-        results = api.get_recent_results(days_back=days)
+        results = api.get_recent_results(days_back=days, competition=competition)
         return ApiResponse(data=results)
+    except Exception as e:
+        return ApiResponse(data=[], error=str(e))
+
+
+@app.get("/api/v1/leagues")
+async def get_registered_leagues():
+    """List all registered leagues and their clubs."""
+    try:
+        from league_loader import ALL_LEAGUES
+        leagues = []
+        for league_id, config in ALL_LEAGUES.items():
+            leagues.append({
+                "league_id": league_id,
+                "display_name": config.get("display_name"),
+                "country": config.get("country"),
+                "sport": config.get("sport", "football"),
+                "competition_code": config.get("competition_code"),
+                "club_count": len(config.get("clubs", [])),
+                "clubs": [
+                    {"id": c["id"], "display_name": c["display_name"]}
+                    for c in config.get("clubs", [])
+                ],
+            })
+        return ApiResponse(data=leagues)
     except Exception as e:
         return ApiResponse(data=[], error=str(e))
 
@@ -1641,22 +1665,24 @@ def get_tri_lens_predictor():
 
 
 # Dixon-Coles + Bookmaker Ensemble (upgraded predictor)
-_dixon_coles_model = None
+# Keyed by division code (e.g. "E0", "SP1") for multi-league support
+_dixon_coles_models: dict = {}
 
-def get_dixon_coles_model():
-    """Lazy initialization of Dixon-Coles model. Fits on 3 seasons of PL data."""
-    global _dixon_coles_model
-    if _dixon_coles_model is None:
+def get_dixon_coles_model(division: str = "E0"):
+    """Lazy initialization of Dixon-Coles model per division. Defaults to PL (E0)."""
+    global _dixon_coles_models
+    if division not in _dixon_coles_models:
         try:
             from predictor.dixon_coles import fit_model
-            _dixon_coles_model = fit_model(division="E0", seasons_back=3)
-            print(f"Dixon-Coles fitted: {_dixon_coles_model.n_matches} matches, "
-                  f"rho={_dixon_coles_model.rho:.4f}, "
-                  f"{len(_dixon_coles_model.teams)} teams")
+            model = fit_model(division=division, seasons_back=3)
+            _dixon_coles_models[division] = model
+            print(f"Dixon-Coles fitted [{division}]: {model.n_matches} matches, "
+                  f"rho={model.rho:.4f}, "
+                  f"{len(model.teams)} teams")
         except Exception as e:
-            print(f"Error fitting Dixon-Coles: {e}")
-            _dixon_coles_model = None
-    return _dixon_coles_model
+            print(f"Error fitting Dixon-Coles [{division}]: {e}")
+            _dixon_coles_models[division] = None
+    return _dixon_coles_models.get(division)
 
 
 from pydantic import BaseModel
@@ -2141,22 +2167,30 @@ async def get_match_context(home_team: str, away_team: str):
 # BRIDGE ENDPOINTS (Fan <-> Predictor)
 # ============================================
 
-# Name mapping for cross-system queries
-TEAM_NAME_MAP = {
-    "wolves": "wolverhampton",
-    "wolverhampton": "wolves",
-    "spurs": "tottenham",
-    "man_united": "manchester_united",
-    "man_utd": "manchester_united",
-    "united": "manchester_united",
-    "man_city": "manchester_city",
-    "city": "manchester_city",
-    "villa": "aston_villa",
-    "palace": "crystal_palace",
-    "forest": "nottingham_forest",
-    "hammers": "west_ham",
-    "toon": "newcastle",
-}
+# Name mapping for cross-system queries — built dynamically from all league JSON aliases
+def _build_team_name_map() -> dict:
+    try:
+        from league_loader import CLUB_ALIASES
+        return {alias: club_id for alias, club_id in CLUB_ALIASES.items()}
+    except Exception:
+        # Hardcoded fallback
+        return {
+            "wolves": "wolverhampton",
+            "wolverhampton": "wolves",
+            "spurs": "tottenham",
+            "man_united": "manchester_united",
+            "man_utd": "manchester_united",
+            "united": "manchester_united",
+            "man_city": "manchester_city",
+            "city": "manchester_city",
+            "villa": "aston_villa",
+            "palace": "crystal_palace",
+            "forest": "nottingham_forest",
+            "hammers": "west_ham",
+            "toon": "newcastle",
+        }
+
+TEAM_NAME_MAP = _build_team_name_map()
 
 
 def normalize_team_name(name: str, for_system: str = "fan") -> str:

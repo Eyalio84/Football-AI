@@ -217,33 +217,9 @@ class SoccerAIRelationalComputer(FootballRelationalComputer):
         self.kg_db_path = kg_db_path
         super().__init__()
 
-    # Club aliases for natural language detection
-    CLUB_ALIASES = {
-        # Common nicknames and abbreviations
-        "man utd": "Manchester United",
-        "man united": "Manchester United",
-        "united": "Manchester United",
-        "man city": "Manchester City",
-        "city": "Manchester City",
-        "spurs": "Tottenham",
-        "the toffees": "Everton",
-        "the gunners": "Arsenal",
-        "the hammers": "West Ham",
-        "the villans": "Aston Villa",
-        "villa": "Aston Villa",
-        "forest": "Nottingham Forest",
-        "the foxes": "Leicester",
-        "brighton & hove": "Brighton",
-        "seagulls": "Brighton",
-        "the saints": "Southampton",
-        "the cherries": "Bournemouth",
-        "the bees": "Brentford",
-        "palace": "Crystal Palace",
-        "eagles": "Crystal Palace",
-        "toon": "Newcastle",
-        "magpies": "Newcastle",
-        "geordies": "Newcastle",
-    }
+    # Club aliases for natural language detection — built dynamically from league JSON files.
+    # Populated at class definition time by _load_club_aliases() below.
+    CLUB_ALIASES: Dict[str, str] = {}
 
     def _extract_club_from_entity_id(self, entity_id: str) -> str:
         """
@@ -694,6 +670,21 @@ def reset_persona_bridge():
     """Reset the PersonaBridge singleton (for testing)."""
     global _bridge_instance
     _bridge_instance = None
+
+
+# Populate SoccerAIRelationalComputer.CLUB_ALIASES dynamically from league JSON files.
+# Done at module level (after class definition) so it's available immediately.
+def _populate_club_aliases():
+    try:
+        from league_loader import CLUB_ALIASES as _raw, CLUB_DISPLAY_NAMES as _names
+        SoccerAIRelationalComputer.CLUB_ALIASES = {
+            alias: _names.get(club_id, club_id.replace("_", " ").title())
+            for alias, club_id in _raw.items()
+        }
+    except Exception:
+        pass  # Keep empty dict fallback
+
+_populate_club_aliases()
 
 
 # =============================================================================

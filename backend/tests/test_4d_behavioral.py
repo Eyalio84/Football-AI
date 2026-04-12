@@ -229,9 +229,15 @@ class TestTeamSwitching:
         assert man_utd_state.z.dialect == man_city_state.z.dialect == "mancunian"
 
     def test_region_mapping_complete(self):
-        """Every club in CLUB_TO_REGION should have a region."""
+        """Every club in CLUB_TO_REGION should have a non-empty region."""
+        # Premier League regions (original)
+        PL_REGIONS = {"north", "midlands", "london", "south", "east"}
+        # La Liga regions (added with UFLE-B)
+        LA_LIGA_REGIONS = {"castilian", "catalan", "basque", "andalusian", "valencian",
+                           "galician", "balearic", "canarian"}
+        VALID_REGIONS = PL_REGIONS | LA_LIGA_REGIONS
         for club, region in CLUB_TO_REGION.items():
-            assert region in ["north", "midlands", "london", "south", "east"], \
+            assert region in VALID_REGIONS, \
                 f"Club {club} has invalid region: {region}"
 
 

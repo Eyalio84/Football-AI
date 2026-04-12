@@ -1,0 +1,168 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://soccer-ai/schemas/league_config.schema.json",
+  "title": "League Configuration",
+  "description": "Schema for Soccer-AI universal league configuration files",
+  "type": "object",
+  "required": [
+    "sport",
+    "league_id",
+    "display_name",
+    "country",
+    "competition_code",
+    "division_code",
+    "season_format",
+    "clubs",
+    "dialect_regions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "sport": {
+      "type": "string",
+      "description": "The sport this league belongs to",
+      "examples": ["football", "basketball", "baseball"]
+    },
+    "league_id": {
+      "type": "string",
+      "description": "Unique machine-readable identifier for the league",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "examples": ["premier_league", "la_liga", "serie_a"]
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Human-readable league name for display",
+      "examples": ["Premier League", "La Liga", "Serie A"]
+    },
+    "country": {
+      "type": "string",
+      "description": "Country where the league operates",
+      "examples": ["England", "Spain", "Italy", "Germany", "France"]
+    },
+    "competition_code": {
+      "type": "string",
+      "description": "football-data.org competition code for live API data",
+      "examples": ["PL", "PD", "SA", "BL1", "FL1"]
+    },
+    "division_code": {
+      "type": "string",
+      "description": "CSV data division code used in historical match CSV files",
+      "examples": ["E0", "SP1", "I1", "D1", "F1"]
+    },
+    "season_format": {
+      "type": "string",
+      "description": "Current or default season identifier format",
+      "pattern": "^[0-9]{4}(-[0-9]{2})?$",
+      "examples": ["2024-25", "2024"]
+    },
+    "clubs": {
+      "type": "array",
+      "description": "Array of all clubs in this league",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/club_entry"
+      }
+    },
+    "dialect_regions": {
+      "type": "object",
+      "description": "Linguistic/cultural region groupings for AI persona dialect flavoring",
+      "additionalProperties": {
+        "$ref": "#/definitions/dialect_region"
+      }
+    }
+  },
+  "definitions": {
+    "club_entry": {
+      "type": "object",
+      "description": "A club as it appears in the league configuration",
+      "required": [
+        "id",
+        "display_name",
+        "api_name",
+        "api_id",
+        "aliases",
+        "csv_name",
+        "dialect_region",
+        "stadium",
+        "founded"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique machine-readable club identifier (snake_case)",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "examples": ["arsenal", "manchester_united", "aston_villa"]
+        },
+        "display_name": {
+          "type": "string",
+          "description": "Human-readable club name",
+          "examples": ["Arsenal", "Manchester United", "Aston Villa"]
+        },
+        "api_name": {
+          "type": "string",
+          "description": "Club name as returned by football-data.org API",
+          "examples": ["Arsenal FC", "Manchester United FC"]
+        },
+        "api_id": {
+          "type": "integer",
+          "description": "football-data.org numeric team ID",
+          "minimum": 1,
+          "examples": [57, 66, 58]
+        },
+        "aliases": {
+          "type": "array",
+          "description": "Common alternate names and nicknames accepted as input aliases",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "examples": [["man_utd", "united", "red_devils"], ["spurs"]]
+        },
+        "csv_name": {
+          "type": "string",
+          "description": "Club name as it appears in historical CSV match data files",
+          "examples": ["Arsenal", "Man United", "Nott'm Forest"]
+        },
+        "dialect_region": {
+          "type": "string",
+          "description": "Key referencing an entry in the league's dialect_regions map",
+          "examples": ["london", "north", "midlands", "south"]
+        },
+        "stadium": {
+          "type": "string",
+          "description": "Primary stadium name",
+          "examples": ["Emirates Stadium", "Old Trafford", "Villa Park"]
+        },
+        "founded": {
+          "type": "integer",
+          "description": "Year the club was founded",
+          "minimum": 1800,
+          "maximum": 2100,
+          "examples": [1886, 1878, 1874]
+        }
+      }
+    },
+    "dialect_region": {
+      "type": "object",
+      "description": "A linguistic/cultural region grouping for AI dialect flavoring",
+      "required": ["clubs", "lang_flavor"],
+      "additionalProperties": false,
+      "properties": {
+        "clubs": {
+          "type": "array",
+          "description": "List of club IDs belonging to this dialect region",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "minItems": 1
+        },
+        "lang_flavor": {
+          "type": "string",
+          "description": "Human-readable description of the linguistic flavor for this region",
+          "examples": ["Northern English", "London English", "Midlands English"]
+        }
+      }
+    }
+  }
+}

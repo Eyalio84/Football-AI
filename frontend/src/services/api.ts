@@ -311,8 +311,8 @@ export async function searchAll(query: string): Promise<any> {
 /**
  * Get league standings — live from football-data.org
  */
-export async function getStandings(_league: string = 'Premier League'): Promise<any[]> {
-  const response = await fetchAPI<{ data: { standings: any[] } }>(`/live/standings`)
+export async function getStandings(competition: string = 'PL'): Promise<any[]> {
+  const response = await fetchAPI<{ data: { standings: any[] } }>(`/live/standings?competition=${competition}`)
   const raw = response.data?.standings ?? []
   // Normalise field names to match the frontend Standing interface
   return raw.map((s: any) => ({
@@ -329,6 +329,14 @@ export async function getStandings(_league: string = 'Premier League'): Promise<
     points: s.points,
     form: s.form,
   }))
+}
+
+/**
+ * Get all registered leagues
+ */
+export async function getLeagues(): Promise<Array<{ league_id: string; display_name: string; competition_code: string; clubs: any[] }>> {
+  const response = await fetchAPI<{ data: any[] }>('/leagues')
+  return response.data ?? []
 }
 
 /**

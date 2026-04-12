@@ -1,0 +1,253 @@
+{
+  "sport": "football",
+  "league_id": "premier_league",
+  "display_name": "Premier League",
+  "country": "England",
+  "competition_code": "PL",
+  "division_code": "E0",
+  "season_format": "2024-25",
+  "clubs": [
+    {
+      "id": "arsenal",
+      "display_name": "Arsenal",
+      "api_name": "Arsenal FC",
+      "api_id": 57,
+      "aliases": [],
+      "csv_name": "Arsenal",
+      "dialect_region": "london",
+      "stadium": "Emirates Stadium",
+      "founded": 1886
+    },
+    {
+      "id": "aston_villa",
+      "display_name": "Aston Villa",
+      "api_name": "Aston Villa FC",
+      "api_id": 58,
+      "aliases": ["villa"],
+      "csv_name": "Aston Villa",
+      "dialect_region": "midlands",
+      "stadium": "Villa Park",
+      "founded": 1874
+    },
+    {
+      "id": "bournemouth",
+      "display_name": "Bournemouth",
+      "api_name": "AFC Bournemouth",
+      "api_id": 1044,
+      "aliases": [],
+      "csv_name": "Bournemouth",
+      "dialect_region": "south",
+      "stadium": "Vitality Stadium",
+      "founded": 1899
+    },
+    {
+      "id": "brentford",
+      "display_name": "Brentford",
+      "api_name": "Brentford FC",
+      "api_id": 402,
+      "aliases": [],
+      "csv_name": "Brentford",
+      "dialect_region": "london",
+      "stadium": "Gtech Community Stadium",
+      "founded": 1889
+    },
+    {
+      "id": "brighton",
+      "display_name": "Brighton & Hove Albion",
+      "api_name": "Brighton & Hove Albion FC",
+      "api_id": 397,
+      "aliases": [],
+      "csv_name": "Brighton",
+      "dialect_region": "south",
+      "stadium": "Amex Stadium",
+      "founded": 1901
+    },
+    {
+      "id": "chelsea",
+      "display_name": "Chelsea",
+      "api_name": "Chelsea FC",
+      "api_id": 61,
+      "aliases": [],
+      "csv_name": "Chelsea",
+      "dialect_region": "london",
+      "stadium": "Stamford Bridge",
+      "founded": 1905
+    },
+    {
+      "id": "crystal_palace",
+      "display_name": "Crystal Palace",
+      "api_name": "Crystal Palace FC",
+      "api_id": 354,
+      "aliases": ["palace", "eagles"],
+      "csv_name": "Crystal Palace",
+      "dialect_region": "london",
+      "stadium": "Selhurst Park",
+      "founded": 1905
+    },
+    {
+      "id": "everton",
+      "display_name": "Everton",
+      "api_name": "Everton FC",
+      "api_id": 62,
+      "aliases": [],
+      "csv_name": "Everton",
+      "dialect_region": "north",
+      "stadium": "Goodison Park",
+      "founded": 1878
+    },
+    {
+      "id": "fulham",
+      "display_name": "Fulham",
+      "api_name": "Fulham FC",
+      "api_id": 63,
+      "aliases": [],
+      "csv_name": "Fulham",
+      "dialect_region": "london",
+      "stadium": "Craven Cottage",
+      "founded": 1879
+    },
+    {
+      "id": "ipswich",
+      "display_name": "Ipswich Town",
+      "api_name": "Ipswich Town FC",
+      "api_id": 349,
+      "aliases": [],
+      "csv_name": "Ipswich",
+      "dialect_region": "east",
+      "stadium": "Portman Road",
+      "founded": 1878
+    },
+    {
+      "id": "leicester",
+      "display_name": "Leicester City",
+      "api_name": "Leicester City FC",
+      "api_id": 338,
+      "aliases": [],
+      "csv_name": "Leicester",
+      "dialect_region": "midlands",
+      "stadium": "King Power Stadium",
+      "founded": 1884
+    },
+    {
+      "id": "liverpool",
+      "display_name": "Liverpool",
+      "api_name": "Liverpool FC",
+      "api_id": 64,
+      "aliases": [],
+      "csv_name": "Liverpool",
+      "dialect_region": "north",
+      "stadium": "Anfield",
+      "founded": 1892
+    },
+    {
+      "id": "manchester_city",
+      "display_name": "Manchester City",
+      "api_name": "Manchester City FC",
+      "api_id": 65,
+      "aliases": ["man_city", "city", "citizens"],
+      "csv_name": "Man City",
+      "dialect_region": "north",
+      "stadium": "Etihad Stadium",
+      "founded": 1880
+    },
+    {
+      "id": "manchester_united",
+      "display_name": "Manchester United",
+      "api_name": "Manchester United FC",
+      "api_id": 66,
+      "aliases": ["man_united", "man_utd", "united", "red_devils"],
+      "csv_name": "Man United",
+      "dialect_region": "north",
+      "stadium": "Old Trafford",
+      "founded": 1878
+    },
+    {
+      "id": "newcastle",
+      "display_name": "Newcastle United",
+      "api_name": "Newcastle United FC",
+      "api_id": 67,
+      "aliases": ["toon", "magpies"],
+      "csv_name": "Newcastle",
+      "dialect_region": "north",
+      "stadium": "St. James' Park",
+      "founded": 1892
+    },
+    {
+      "id": "nottingham_forest",
+      "display_name": "Nottingham Forest",
+      "api_name": "Nottingham Forest FC",
+      "api_id": 351,
+      "aliases": ["forest"],
+      "csv_name": "Nott'm Forest",
+      "dialect_region": "midlands",
+      "stadium": "City Ground",
+      "founded": 1865
+    },
+    {
+      "id": "southampton",
+      "display_name": "Southampton",
+      "api_name": "Southampton FC",
+      "api_id": 340,
+      "aliases": [],
+      "csv_name": "Southampton",
+      "dialect_region": "south",
+      "stadium": "St Mary's Stadium",
+      "founded": 1885
+    },
+    {
+      "id": "tottenham",
+      "display_name": "Tottenham Hotspur",
+      "api_name": "Tottenham Hotspur FC",
+      "api_id": 73,
+      "aliases": ["spurs", "the_lilywhites"],
+      "csv_name": "Tottenham",
+      "dialect_region": "london",
+      "stadium": "Tottenham Hotspur Stadium",
+      "founded": 1882
+    },
+    {
+      "id": "west_ham",
+      "display_name": "West Ham United",
+      "api_name": "West Ham United FC",
+      "api_id": 563,
+      "aliases": ["hammers", "irons"],
+      "csv_name": "West Ham",
+      "dialect_region": "london",
+      "stadium": "London Stadium",
+      "founded": 1895
+    },
+    {
+      "id": "wolves",
+      "display_name": "Wolverhampton Wanderers",
+      "api_name": "Wolverhampton Wanderers FC",
+      "api_id": 76,
+      "aliases": ["wolverhampton"],
+      "csv_name": "Wolves",
+      "dialect_region": "midlands",
+      "stadium": "Molineux Stadium",
+      "founded": 1877
+    }
+  ],
+  "dialect_regions": {
+    "north": {
+      "clubs": ["liverpool", "everton", "manchester_united", "manchester_city", "newcastle"],
+      "lang_flavor": "Northern English"
+    },
+    "midlands": {
+      "clubs": ["aston_villa", "wolves", "nottingham_forest", "leicester"],
+      "lang_flavor": "Midlands English"
+    },
+    "london": {
+      "clubs": ["arsenal", "chelsea", "tottenham", "west_ham", "crystal_palace", "fulham", "brentford"],
+      "lang_flavor": "London English"
+    },
+    "south": {
+      "clubs": ["brighton", "bournemouth", "southampton"],
+      "lang_flavor": "Southern English"
+    },
+    "east": {
+      "clubs": ["ipswich"],
+      "lang_flavor": "East Anglian English"
+    }
+  }
+}

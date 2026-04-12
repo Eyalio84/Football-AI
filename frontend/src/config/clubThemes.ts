@@ -209,6 +209,56 @@ export const CLUB_PALETTES: Record<string, ClubPalette> = {
     glowColor: 'rgba(0, 48, 144, 0.12)',
     textOnPrimary: '#FFFFFF',
   },
+
+  // ── La Liga ──────────────────────────────────────────────
+  real_madrid: {
+    primary: '#FEBE10',
+    secondary: '#00529F',
+    accent: '#FFFFFF',
+    gradient: 'linear-gradient(135deg, #FEBE10 0%, #00529F 100%)',
+    glowColor: 'rgba(254, 190, 16, 0.12)',
+    textOnPrimary: '#00529F',
+  },
+  barcelona: {
+    primary: '#A50044',
+    secondary: '#004D98',
+    accent: '#EDBB00',
+    gradient: 'linear-gradient(135deg, #A50044 0%, #004D98 100%)',
+    glowColor: 'rgba(165, 0, 68, 0.12)',
+    textOnPrimary: '#FFFFFF',
+  },
+  atletico_madrid: {
+    primary: '#CE3524',
+    secondary: '#272E61',
+    accent: '#FFFFFF',
+    gradient: 'linear-gradient(135deg, #CE3524 0%, #272E61 100%)',
+    glowColor: 'rgba(206, 53, 36, 0.12)',
+    textOnPrimary: '#FFFFFF',
+  },
+  sevilla: {
+    primary: '#D4001A',
+    secondary: '#1A1A1A',
+    accent: '#FFFFFF',
+    gradient: 'linear-gradient(135deg, #D4001A 0%, #8B0000 100%)',
+    glowColor: 'rgba(212, 0, 26, 0.12)',
+    textOnPrimary: '#FFFFFF',
+  },
+  athletic_bilbao: {
+    primary: '#EE2523',
+    secondary: '#1A1A1A',
+    accent: '#FFFFFF',
+    gradient: 'linear-gradient(135deg, #EE2523 0%, #1A1A1A 100%)',
+    glowColor: 'rgba(238, 37, 35, 0.12)',
+    textOnPrimary: '#FFFFFF',
+  },
+  valencia: {
+    primary: '#F5A800',
+    secondary: '#1A1A1A',
+    accent: '#FFFFFF',
+    gradient: 'linear-gradient(135deg, #F5A800 0%, #1A1A1A 100%)',
+    glowColor: 'rgba(245, 168, 0, 0.12)',
+    textOnPrimary: '#1A1A1A',
+  },
 }
 
 /** Neutral analyst palette — editorial monochrome */
