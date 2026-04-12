@@ -1,0 +1,11 @@
+1) read /storage/emulated/0/Download/synthesis-rules/soccer-AI/Leagues/multi-league-upgrade.md, inorder to understand my vision.
+
+2) generate a report explaining your understanding of my vision for my analysis, which i will refine or approve that you are correct.
+
+when approved:
+3) you will task explore Agents to analyze the codebase.
+
+4) you will enter interactive planning mode [/storage/emulated/0/Download/synthesis-rules/soccer-AI/Leagues/INTERACTIVE-PLANNING-PATTERN.md], inorder to plan the universal-football-league-extractor-builder  with la-liga as first test-subject/proof-of-concept.
+I am open for suggestions for enhancements/upgrades/gap-fills/upgrades you might have or find during planning.
+
+as you can see I made /storage/emulated/0/Download/synthesis-rules/soccer-AI/Leagues, for the Leagues and /storage/emulated/0/Download/synthesis-rules/soccer-AI/Leagues/La_Liga for la-liga.

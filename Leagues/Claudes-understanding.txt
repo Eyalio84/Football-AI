@@ -1,0 +1,117 @@
+3 Vision Report — Multi-League Expansion & Universal Extractor      System                                                                                                                              Here is my understanding. Please refine or approve before I       proceed to codebase exploration.                                
+  ---
+  What You're Building
+
+  A Universal League Extractor-Builder — a reusable, automated
+  pipeline that can onboard any football league into Soccer-AI
+  with the same depth as the existing Premier League integration.
+  La Liga is the first proof-of-concept. Serie A and the Israeli
+  Premier League follow. The long-term prototype extends to other
+  sports (NBA, NFL, UFC, Wrestling).
+
+  ---
+  What "Full League Depth" Means (per league)
+
+  For every club in the league, the system must produce:
+
+  ┌───────────────┬───────────────────────────────────────────┐
+  │  Data Layer   │                 Examples                  │
+  ├───────────────┼───────────────────────────────────────────┤
+  │ Fan persona   │ Voice, dialect/regional identity,         │
+  │               │ emotional baseline                        │     ├───────────────┼───────────────────────────────────────────┤     │ Legends       │ Greatest all-time players + coaches       │
+  ├───────────────┼───────────────────────────────────────────┤     │ Moments       │ Greatest victories, biggest tragedies,    │     │               │ iconic matches                            │
+  ├───────────────┼───────────────────────────────────────────┤
+  │ Rivalries     │ Derby intensity weights (El Clásico =     │
+  │               │ 1.0)                                      │
+  ├───────────────┼───────────────────────────────────────────┤
+  │ Mood          │ Live — computed from actual results       │
+  ├───────────────┼───────────────────────────────────────────┤
+  │ Stadiums      │ Name, capacity, atmosphere facts          │
+  ├───────────────┼───────────────────────────────────────────┤     │ Current squad │ Active players, positions, nationalities  │
+  ├───────────────┼───────────────────────────────────────────┤
+  │ KG            │ Same schema as the existing 773-node PL   │
+  │ nodes/edges   │ graph                                     │
+  ├───────────────┼───────────────────────────────────────────┤     │ API hooks     │ Registered endpoints for the new league   │
+  └───────────────┴───────────────────────────────────────────┘
+
+  ---
+  What the System Must Do (Architecture Intent)
+
+  The extractor-builder has two outputs:
+  1. Data pipeline — scouts, structures, and populates the KG for
+  new clubs
+  2. Integration scaffolding — generates the correct API
+  endpoints, competition codes, club aliases, and fan persona
+  configs so the new league slots into the existing backend with
+  minimal manual work
+
+  It should be config-driven: pass in a league definition
+  (competition code, list of clubs, regional dialect map) and the
+  system does the rest.
+
+  ---
+  Your Available Data Sources                                                                                                         Source: football-data.org
+  What It Gives You: Live standings, fixtures, results, club IDs,     competition codes                                               ────────────────────────────────────────
+  Source: Web search
+  What It Gives You: Any fact discoverable via search
+  ────────────────────────────────────────
+  Source: Wikipedia
+  What It Gives You: Club history, legend bios, stadium pages,
+    iconic match descriptions
+  ────────────────────────────────────────
+  Source: Local CSV
+    (Club-Football-Match-Data-2000-2025-main/data/Matches.csv +
+    EloRatings.csv)
+  What It Gives You: 25 years of historical match results + ELO
+    ratings for La Liga and Serie A
+
+  ---
+  What I Think You're Missing (Suggested Additions)               
+  Gap: Structured legend / player facts
+  Suggested Source: Wikidata API                                    Why: Machine-readable football facts (birthdate, clubs, caps,
+    goals) — far cleaner than scraping Wikipedia text               ────────────────────────────────────────                          Gap: Current squad rosters
+  Suggested Source: Transfermarkt (scrape/API) or API-Football
+    (paid, but cheap)
+  Why: football-data.org free tier has limited squad depth
+  ────────────────────────────────────────
+  Gap: Deep match stats (xG, possession, shots)
+  Suggested Source: FBref.com
+  Why: Needed for Dixon-Coles calibration on new leagues
+  ────────────────────────────────────────                          Gap: Israeli league data
+  Suggested Source: IFA / Maccabi club sites + Hebrew Wikipedia
+  Why: English sources are thin; needs multilingual pipeline        ────────────────────────────────────────                          Gap: Club crest/badge images
+  Suggested Source: football-data.org (already in API, crest
+  field)
+  Why: Frontend uses initials fallbacks now; real crests would
+    improve TABLE/STANDINGS UI
+  ────────────────────────────────────────
+  Gap: Stadium images / coordinates
+  Suggested Source: Wikipedia infoboxes / Wikidata                  Why: For future stadium view
+
+  ---
+  The Reusability Vision (My Understanding)
+
+  The system is not a one-off La Liga script. It's a factory:
+                                                                    League Config (JSON)                                                  → Data Scout (API + Web + Wikipedia + CSV)
+      → Knowledge Graph Builder (same node/edge schema as PL)
+      → Fan Persona Generator (20 clubs × personality profile)
+      → API Endpoint Registrar (competition code → live endpoints)
+      → Validation Suite (schema check before integration)
+
+  The same factory runs for Serie A with a different config. Then
+  Israeli Premier League. Then, with a schema adapter, NBA or NFL.
+  ---
+  La Liga Specific Considerations I'd Surface Now
+
+  - El Clásico (Real Madrid vs Barcelona) is arguably the world's
+  most famous rivalry — rivalry intensity = 1.0, needs richer
+  treatment than a typical derby
+  - Regional identity matters deeply: Catalan (Barcelona,
+  Espanyol), Basque (Athletic Bilbao, Real Sociedad), Galician
+  (Deportivo), Castilian (Real Madrid, Atletico) — this maps to
+  the Z-dimension (Linguistic) in the 4D persona architecture
+  - La Liga uses PD as its football-data.org competition code (not
+   PL)
+  - The local CSV data already has La Liga matches — this is a
+  significant head-start for Dixon-Coles calibration on Spanish
+  fixtures
