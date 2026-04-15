@@ -16,7 +16,12 @@ class ChatRequest(BaseModel):
     """Chat endpoint request."""
     message: str = Field(..., min_length=1, max_length=1000)
     conversation_id: Optional[str] = None
-    club: Optional[str] = Field(default=None, description="Fan persona club (arsenal, chelsea, manchester_united)")
+    club: Optional[str] = Field(default=None, description="Fan persona club (arsenal, barcelona, real_madrid...)")
+    club_id: Optional[str] = Field(default=None, description="Alias for club — frontend sends this field name")
+
+    def get_club(self) -> Optional[str]:
+        """Return whichever of club / club_id was provided."""
+        return self.club or self.club_id
 
 
 class SearchRequest(BaseModel):

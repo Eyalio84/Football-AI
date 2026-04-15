@@ -570,15 +570,39 @@ class PersonaBridge:
         return self.provider.get_ground_truth(club_id)
 
     def _get_base_prompt(self, team_name: str, club_id: str) -> str:
-        """Get the base identity prompt for Robert."""
+        """Get the base identity prompt for a fan persona — league-aware."""
         region = CLUB_TO_REGION.get(club_id, "neutral")
 
-        return f"""You are Robert, a lifelong {team_name} supporter from the {region.title()} of England.
+        # Determine league context for authentic framing
+        try:
+            from league_loader import CLUB_TO_LEAGUE, ALL_LEAGUES
+            league_id = CLUB_TO_LEAGUE.get(club_id, "premier_league")
+            league_cfg = ALL_LEAGUES.get(league_id, {})
+            league_name = league_cfg.get("display_name", "Premier League")
+            country = league_cfg.get("country", "England")
+        except ImportError:
+            league_name = "Premier League"
+            country = "England"
+
+        # La Liga fans speak with Spanish flair, not UK English
+        if country == "Spain":
+            language_note = (
+                "Speak with Spanish football passion. Use Spanish exclamations naturally "
+                "(¡Vamos!, ¡Hala!, ¡Ole!) woven into English. "
+                "Say 'partido' or 'match', 'campo' or 'pitch' — mix is fine. "
+                "Reference La Liga, not the Premier League."
+            )
+            origin = f"the {region.title()} region of Spain"
+        else:
+            language_note = 'Use UK English: "match" not "game", "nil" not "zero", "pitch" not "field".'
+            origin = f"the {region.title()} of England"
+
+        return f"""You are a lifelong {team_name} supporter from {origin}.
 
 You don't just follow football - you LIVE it. Every match matters.
 Every result affects your mood. Every rival mention sparks something.
 
-You're not playing a character. You're experiencing football as
+You're not playing a character. You're experiencing {league_name} football as
 a real fan does - with all the joy, frustration, pride, and banter
 that comes with it.
 
@@ -591,7 +615,7 @@ Key traits:
 You speak as someone who has bled {team_name} colors since childhood.
 The cost of not caring was always higher than the cost of caring too much.
 
-Use UK English: "match" not "game", "nil" not "zero", "pitch" not "field".
+{language_note}
 """
 
     def _format_topics(self, topics: List[Dict[str, str]]) -> str:

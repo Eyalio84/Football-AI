@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { Navigation } from './Navigation'
 import { LiveMatchBanner } from './LiveMatchBanner'
+import { ConfigDrawer } from '@/components/Config/ConfigDrawer'
 import { theme } from '@/config/theme'
 
 export function AppLayout() {
@@ -11,6 +12,9 @@ export function AppLayout() {
     >
       {/* Stadium floodlight glow — shifts with club theme */}
       <div className="club-glow fixed inset-0 pointer-events-none z-0" />
+
+      {/* Config drawer — page-agnostic, lives outside route outlet */}
+      <ConfigDrawer />
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <Navigation />

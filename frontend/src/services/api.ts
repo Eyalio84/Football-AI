@@ -15,7 +15,9 @@ import type {
 // Configuration
 // ============================================================================
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+import { runtimeConfig } from '@/config/runtimeConfig'
+// API base URL — reads from runtimeConfig so the ConfigDrawer can override it at runtime
+const getApiBase = () => runtimeConfig.apiUrl
 const API_PREFIX = '/api/v1'
 
 // ============================================================================
@@ -29,7 +31,7 @@ async function fetchAPI<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
-  const url = `${API_BASE_URL}${API_PREFIX}${endpoint}`
+  const url = `${getApiBase()}${API_PREFIX}${endpoint}`
 
   try {
     const response = await fetch(url, {
@@ -103,7 +105,7 @@ export async function sendChatMessageStream(
   onDone: (conversationId: string) => void,
   onError: (error: string) => void
 ): Promise<void> {
-  const url = `${API_BASE_URL}${API_PREFIX}/chat/stream`
+  const url = `${getApiBase()}${API_PREFIX}/chat/stream`
 
   const request: ChatRequest = {
     message,
@@ -343,7 +345,7 @@ export async function getLeagues(): Promise<Array<{ league_id: string; display_n
  * Health check
  */
 export async function checkHealth(): Promise<{ status: string }> {
-  const url = `${API_BASE_URL}/health`
+  const url = `${getApiBase()}/health`
   const response = await fetch(url)
   return response.json()
 }
@@ -433,7 +435,7 @@ export async function getTeamKGGraph(teamId: number, depth: number = 2): Promise
  * Get KG Viewer URL
  */
 export function getKGViewerUrl(): string {
-  return `${API_BASE_URL}/kg-viewer`
+  return `${getApiBase()}/kg-viewer`
 }
 
 // ============================================================================

@@ -5,6 +5,7 @@ import { Standings } from '@/pages/Standings'
 import { Teams } from '@/pages/Teams'
 import { TeamDetail } from '@/pages/TeamDetail'
 import { Chat } from '@/pages/Chat'
+import { LaLigaChat } from '@/pages/LaLigaChat'
 import { Trivia } from '@/pages/Trivia'
 import { Debate } from '@/pages/Debate'
 import { Companion } from '@/pages/Companion'
@@ -22,6 +23,7 @@ export function AppRoutes() {
         <Route path="teams" element={<Teams />} />
         <Route path="teams/:id" element={<TeamDetail />} />
         <Route path="chat" element={<Chat />} />
+        <Route path="la-liga-chat" element={<LaLigaChat />} />
         <Route path="trivia" element={<Trivia />} />
         <Route path="debate" element={<Debate />} />
         <Route path="companion" element={<Companion />} />

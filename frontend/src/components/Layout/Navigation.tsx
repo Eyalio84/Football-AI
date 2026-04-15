@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Trophy, Users, MessageCircle, HelpCircle, Swords, Radio, TrendingUp, Target } from 'lucide-react'
+import { Home, Trophy, Users, MessageCircle, HelpCircle, Swords, Radio, TrendingUp, Target, Globe } from 'lucide-react'
 import { theme } from '@/config/theme'
 import { useClubTheme } from '@/config/ClubThemeProvider'
 import { useLeague } from '@/config/LeagueProvider'
@@ -13,6 +13,7 @@ const navItems = [
   { to: '/companion', label: 'LIVE', icon: Radio, mobile: true },
   { to: '/mood-timeline', label: 'MOOD', icon: TrendingUp, mobile: true },
   { to: '/trivia', label: 'TRIVIA', icon: HelpCircle, mobile: true },
+  { to: '/la-liga-chat', label: 'LA LIGA', icon: Globe, mobile: false },
   { to: '/debate', label: 'DEBATE', icon: Swords, mobile: false },
   { to: '/teams', label: 'CLUBS', icon: Users, mobile: false },
 ]
@@ -49,14 +50,18 @@ function NavItem({ to, label, icon: Icon, clubId, palette }: {
 function LeagueSwitcher() {
   const { competition, setCompetition, leagues } = useLeague()
 
-  if (leagues.length <= 1) return null
+  // Always render while loading so layout doesn't jump; hide if only 1 league
+  const tabs = leagues.length > 0 ? leagues : [
+    { competition_code: 'PL', display_name: 'Premier League', league_id: 'premier_league', country: 'England', sport: 'football', club_count: 20, clubs: [] }
+  ]
+  if (tabs.length <= 1 && leagues.length > 0) return null
 
   return (
     <div
       className="flex items-center rounded-full border overflow-hidden text-[10px] font-display font-bold tracking-widest"
       style={{ borderColor: theme.colors.border.default }}
     >
-      {leagues.map(league => {
+      {tabs.map(league => {
         const active = league.competition_code === competition
         // Short label: "PL", "LA LIGA", "SERIE A"
         const shortLabel = league.competition_code === 'PL' ? 'PL'

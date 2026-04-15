@@ -23,6 +23,23 @@ try:
 except ImportError:
     from config import CLUB_DISPLAY_NAMES, CLUB_API_NAMES
 
+try:
+    from backend.league_loader import CLUB_TO_LEAGUE, ALL_LEAGUES
+except ImportError:
+    try:
+        from league_loader import CLUB_TO_LEAGUE, ALL_LEAGUES
+    except ImportError:
+        CLUB_TO_LEAGUE = {}
+        ALL_LEAGUES = {}
+
+
+def _get_competition_code(club_id: str) -> str:
+    """Return the football-data.org competition code for a club (default PL)."""
+    league_id = CLUB_TO_LEAGUE.get(club_id)
+    if league_id and league_id in ALL_LEAGUES:
+        return ALL_LEAGUES[league_id].get("competition_code", "PL")
+    return "PL"
+
 
 class LiveFootballProvider:
     """
@@ -103,11 +120,14 @@ class LiveFootballProvider:
             "mood_reason": ""
         }
 
+        # Determine the correct competition for this club
+        competition = _get_competition_code(club_id)
+
         # Fetch from live API if available
         if self.api:
             try:
                 # Recent results (last 5 matches) - PRIMARY for mood
-                results = self.api.get_recent_results(team_name, days_back=60)[:5]
+                results = self.api.get_recent_results(team_name, days_back=60, competition=competition)[:5]
                 ground_truth["recent_results"] = self._transform_results(results, team_name)
 
                 # Compute form string (WWDLL etc)
@@ -116,11 +136,11 @@ class LiveFootballProvider:
                 )
 
                 # League position - for context
-                position = self.api.get_team_position(team_name)
+                position = self.api.get_team_position(team_name, competition=competition)
                 ground_truth["league_position"] = position
 
                 # Upcoming fixtures - for anticipation and topics
-                upcoming = self.api.get_upcoming_fixtures(team_name, days_ahead=14)[:3]
+                upcoming = self.api.get_upcoming_fixtures(team_name, days_ahead=14, competition=competition)[:3]
                 ground_truth["upcoming_fixtures"] = self._transform_fixtures(upcoming, team_name)
 
                 # Compute mood reason

@@ -42,7 +42,7 @@ const LeagueContext = createContext<LeagueContextValue>({
   clubsForLeague: [],
 })
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+import { runtimeConfig } from './runtimeConfig'
 
 export function LeagueProvider({ children }: { children: ReactNode }) {
   const [competition, setCompetitionState] = useState<string>(() => {
@@ -55,7 +55,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
   const [leagues, setLeagues] = useState<League[]>([])
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/v1/leagues`, {
+    fetch(`${runtimeConfig.apiUrl}/api/v1/leagues`, {
       headers: { 'ngrok-skip-browser-warning': 'true' },
     })
       .then(r => r.json())

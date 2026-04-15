@@ -83,16 +83,21 @@ app.add_middleware(
 # In-memory conversation storage (use Redis in production)
 conversations = {}
 
-# Valid club names for fan personas (validated against database)
+# Valid club names for fan personas — built dynamically from all registered leagues
 # "analyst" is a special case - neutral predictor persona (The Analyst)
-VALID_CLUBS = {
-    "arsenal", "chelsea", "manchester_united", "liverpool",
-    "manchester_city", "tottenham", "newcastle", "west_ham", "everton",
-    "brighton", "aston_villa", "wolves", "crystal_palace", "fulham",
-    "nottingham_forest", "brentford", "bournemouth", "leicester",
-    "ipswich", "southampton",
-    "analyst"  # Special neutral predictor persona
-}
+try:
+    from league_loader import CLUB_DISPLAY_NAMES as _all_clubs
+    VALID_CLUBS = set(_all_clubs.keys()) | {"analyst"}
+except Exception:
+    # Fallback: PL only
+    VALID_CLUBS = {
+        "arsenal", "chelsea", "manchester_united", "liverpool",
+        "manchester_city", "tottenham", "newcastle", "west_ham", "everton",
+        "brighton", "aston_villa", "wolves", "crystal_palace", "fulham",
+        "nottingham_forest", "brentford", "bournemouth", "leicester",
+        "ipswich", "southampton",
+        "analyst"
+    }
 
 # Club name to team ID mapping (for persona data loading)
 CLUB_TO_TEAM_ID = {
@@ -226,9 +231,9 @@ async def chat(request: ChatRequest, req: Request = None):
 
         # Normalize and validate club name (security: prevent injection via club field)
         club = None
-        if request.club:
+        if request.get_club():
             # Normalize: lowercase, replace spaces/hyphens with underscores
-            normalized_club = request.club.lower().strip().replace(" ", "_").replace("-", "_")
+            normalized_club = request.get_club().lower().strip().replace(" ", "_").replace("-", "_")
             # Resolve common aliases (man_united -> manchester_united, etc.)
             normalized_club = TEAM_NAME_MAP.get(normalized_club, normalized_club)
             # Only accept known valid clubs
@@ -451,8 +456,9 @@ async def chat_stream(request: ChatRequest):
 
         # Normalize and validate club name
         club = None
-        if request.club:
-            normalized_club = request.club.lower().strip().replace(" ", "_").replace("-", "_")
+        _raw_club = request.get_club()
+        if _raw_club:
+            normalized_club = _raw_club.lower().strip().replace(" ", "_").replace("-", "_")
             if normalized_club in VALID_CLUBS:
                 club = normalized_club
 

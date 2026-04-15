@@ -79,6 +79,39 @@ const MOOD_EMOJI: Record<string, string> = {
   neutral: '\u2192',
 }
 
+/** League tab bar — prominent selector above the club grid */
+function LeagueTabBar() {
+  const { competition, setCompetition, leagues } = useLeague()
+
+  // Always show at least a PL placeholder while leagues are loading
+  const tabs = leagues.length > 0 ? leagues : [
+    { competition_code: 'PL', display_name: 'Premier League', country: 'England' }
+  ]
+
+  return (
+    <div className="flex gap-2 mb-8 animate-fade-up" style={{ animationDelay: '150ms' }}>
+      {tabs.map(league => {
+        const active = league.competition_code === competition
+        return (
+          <button
+            key={league.competition_code}
+            onClick={() => setCompetition(league.competition_code)}
+            className="px-5 py-2 rounded-full border transition-all duration-200 font-display text-xs font-bold tracking-widest uppercase"
+            style={{
+              backgroundColor: active ? theme.colors.text.primary : 'transparent',
+              borderColor: active ? theme.colors.text.primary : theme.colors.border.default,
+              color: active ? theme.colors.background.default : theme.colors.text.secondary,
+              transform: active ? 'scale(1.05)' : 'scale(1)',
+            }}
+          >
+            {league.display_name}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 /** Featured clubs per league shown slightly larger */
 const FEATURED_CLUBS: Record<string, Set<string>> = {
   PL: new Set(['arsenal', 'chelsea', 'liverpool', 'manchester_united', 'manchester_city', 'tottenham']),
@@ -167,7 +200,7 @@ export function ClubSelection({ onSelectClub }: ClubSelectionProps) {
       style={{ backgroundColor: theme.colors.background.default }}
     >
       {/* Header */}
-      <div className="max-w-4xl w-full text-center mb-10">
+      <div className="max-w-4xl w-full text-center mb-6">
         <h1
           className="font-display text-5xl sm:text-6xl font-extrabold tracking-tight uppercase mb-3 animate-fade-up"
           style={{ color: theme.colors.text.primary }}
@@ -181,6 +214,11 @@ export function ClubSelection({ onSelectClub }: ClubSelectionProps) {
           "The young lad on the tip of his toes, holding his breath..."
         </p>
       </div>
+
+      {/* League Selector */}
+      <LeagueTabBar />
+
+
 
       {/* Club Grid */}
       <div className="w-full max-w-6xl">
